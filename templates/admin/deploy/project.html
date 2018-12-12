@@ -1,0 +1,63 @@
+{% extends 'base_admin.html' %}
+
+{% block content-header %}
+      <h1>
+        项目
+        <small></small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="/admin"><i class="fa fa-home"></i>首页</a></li>
+        <li><a href="/admin/deploy/project">项目</a></li>
+        <li class="active">添加</li>
+      </ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">列表</h3>
+
+              <div class="box-tools">
+                  <a href="/admin/deploy/project/add">
+                    <button type="button" class="btn btn-default btn-sm"><i class="fa fa-plus"></i>添加</button>
+                  </a>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+              <table class="table table-hover">
+                <tbody><tr>
+                  <th>ID</th>
+                  <th>名称</th>
+                  <th>仓库类型</th>
+                  <th>仓库地址</th>
+                  <th>部署模式</th>
+                  <th>状态</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+                {% for item in projects %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.get_vcs_type_display }}</td>
+                    <td>{{ item.repository_url }}</td>
+                    <td>{{ item.get_deploy_mode_display }}</td>
+                    <td>{{ item.get_status_display }}</td>
+                    <td>{{ item.updated_at }}</td>
+                    <td>
+                        <a href="/admin/deploy/project/edit/{{ item.id }}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button></a>
+                        <button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i>删除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+              </tbody></table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+      </div>
+{% endblock %}

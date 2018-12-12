@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "==1.11"
+mysql-connector-python = "*"
+environ = "*"
+gunicorn = "*"
+requests = "*"
+celery = "==4.2.1"
+django-celery-results = "*"
+gitpython = "==2.1.11"
+svn = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"

@@ -1,0 +1,8 @@
+.env
+*.pyc
+*.log
+.env.local
+.env.prod
+node_modules/
+test_*.py
+test.py

@@ -1,0 +1,34 @@
+{
+  "name": "opendeploy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.7.*",
+    "gulp-concat": "^2.6.1",
+    "gulp-notify": "^3.2.0",
+    "html5shiv": "^3.7.3",
+    "icheck": "^1.0.2",
+    "ionicons": "^4.4.*",
+    "jquery": "^3.3.*",
+    "respond": "^0.9.0",
+    "select2": "^4.0.5"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ninjacn/open-deploy.git"
+  },
+  "author": "x@ninjacn.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ninjacn/open-deploy/issues"
+  },
+  "homepage": "https://github.com/ninjacn/open-deploy#readme"
+}

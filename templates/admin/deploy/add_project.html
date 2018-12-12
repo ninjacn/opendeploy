@@ -1,0 +1,133 @@
+{% extends 'base_admin.html' %}
+
+{% block content-header %}
+      <h1>
+        添加项目
+        <small></small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="/admin"><i class="fa fa-home"></i>首页</a></li>
+        <li><a href="/admin/deploy/project">项目</a></li>
+        <li class="active">添加</li>
+      </ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+        <form role="form" method="post" action="">
+            {% csrf_token %}
+        <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">常规配置</h3>
+            </div>
+            <!-- /.box-header -->
+            <!-- form start -->
+                <div class="box-body">
+                    <div class="form-group {% if form.name.errors %} has-error {% endif %}">
+                        <label for="name">名称</label>
+                        <input type="text" name="name" class="form-control" placeholder="" value="{% if form.name.value %}{{ form.name.value }}{% endif %}" >
+                        <span class="help-block">{{ form.ipaddr.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.vcs_type.errors %} has-error {% endif %}">
+                        <label for="vcs_type">仓库类型</label>
+                        <select class="form-control" name="vcs_type">
+                            {% for item in type_choices %}
+                            <option value="{{ item.0 }}">{{ item.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block">{{ form.vcs_type.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.repository_url.errors %} has-error {% endif %}">
+                        <label for="repository_url">仓库地址</label>
+                        <input type="text" name="repository_url" class="form-control" placeholder="" value="{% if form.repository_url.value %}{{ form.repository_url.value }}{% endif %}">
+                        <span class="help-block">{{ form.repository_url.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.credential.errors %} has-error {% endif %}">
+                        <label for="credential">认证凭据</label>
+                        <select class="form-control" name="credential">
+                            {% for credential in credentials %}
+                            <option value="{{ credential.id }}" {% if credential.id == project.credentials.id %} selected {% endif %} >{{ credential.get_type_display }} | {{ credential.username }} | {{ credential.comment }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block">{{ form.credential.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.dest_rootpath.errors %} has-error {% endif %}">
+                        <label for="dest_rootpath">部署根目录</label>
+                        <input type="text" name="dest_rootpath" class="form-control" placeholder="" value="{% if form.dest_rootpath.value %}{{ form.dest_rootpath.value }}{% endif %}">
+                        <span class="help-block">{{ form.dest_rootpath.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.deploy_mode.errors %} has-error {% endif %}">
+                        <label for="deploy_mode">部署模式</label>
+                        <select class="form-control" name="deploy_mode">
+                            {% for item in deploy_mode_choices %}
+                            <option value="{{ item.0 }}">{{ item.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block">{{ form.deploy_mode.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.comment.errors %} has-error {% endif %}">
+                        <label for="comment">备注</label>
+                        <input type="text" name="comment" class="form-control" placeholder="" value="{% if form.comment.value %}{{ form.comment.value }}{% endif %}">
+                        <span class="help-block">{{ form.comment.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.status.errors %} has-error {% endif %}">
+                        <label for="status">状态</label>
+                        <select class="form-control" name="status">
+                            {% for item in status_choices %}
+                            <option value="{{ item.0 }}">{{ item.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block">{{ form.status.errors }}</span>
+                    </div>
+
+              </div>
+              <!-- /.box-body -->
+
+            {% for env in envlist %}
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title">{{ env.name }}环境</h3>
+                </div>
+
+                <div class="box-body">
+                    <input type="hidden" name="env" value="{{ env.id }}" >
+                    <div class="form-group">
+                        <label for="host_group_{{ env.id }}">绑定主机组</label>
+                        <select class="form-control" name="host_group_{{ env.id }}">
+                            <option value="">选择主机组</option>
+                            {% for group in host_group %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="branch_{{ env.id }}">{{ env.name }}环境对应的分支名</label>
+                        <input type="text" name="branch_{{ env.id }}" class="form-control" placeholder="master" value="master">
+                        <span class="help-block">默认为<code>master</code></span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="box box-primary">
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </div>
+
+          </div>
+
+        </form>
+        </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base_front.html' %}
+
+{% block content-header %}
+<h1>
+    发布
+    <small></small>
+</h1>
+<ol class="breadcrumb">
+    <li><a href="/"><i class="fa fa-home"></i>首页</a></li>
+    <li class="active">发布</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="box box-default">
+    <div class="box-header with-border">
+        <h3 class="box-title">表单信息</h3>
+    </div>
+    <form role="form">
+              <div class="box-body">
+                <div class="form-group">
+                    <label>选择项目</label>
+                    <select class="form-control select2" style="width: 100%;">
+                        {% for project in projects %}
+                        <option>{{ project }} - {{ project.repository_url }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>选择环境</label>
+                    <div class="radio">
+                        {% for env in envs %}
+                        <label style="margin-right: 20px;">
+                            <input type="radio" name="env" value="{{ env.id }}">{{ env }}
+                        </label>
+                        {% endfor %}
+                  </div>
+                </div>
+                
+                <hr>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="1" name="isByFileList" id="isByFileList"> 启用按文件
+                  </label>
+                </div>
+
+            <div id="filelist-block" class="collapse" >
+                <div class="form-group">
+                  <label>文件路径列表</label>
+                  <textarea class="form-control" rows="5" placeholder="一行一个, 文件路径相对于仓库根路径"></textarea>
+                  <p class="help-block"></p>
+                </div>
+            </div>
+
+                <div class="form-group">
+                  <label>备注</label>
+                  <textarea class="form-control" rows="3" placeholder="说明发布原因"></textarea>
+                  <p class="help-block"></p>
+                </div>
+
+              </div>
+              <!-- /.box-body -->
+
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">发布</button>
+              </div>
+            </form>
+</div>
+<!-- /.box -->
+{% endblock %}
+
+{% block script %}
+<script>
+    function initFileList() {
+        var isFile = $("input[name=isByFileList]:checked").val();
+        if(isFile == '1') {
+            $("#filelist-block").collapse('show');
+        } else {
+            $("#filelist-block").collapse('hide');
+        }
+    }
+
+    $(function () {
+        $('.select2').select2()
+        initFileList();
+    })
+
+    $("input[name=isByFileList]").change(function() {
+        initFileList();
+    })
+
+</script>
+{% endblock %}
