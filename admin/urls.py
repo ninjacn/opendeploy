@@ -24,4 +24,8 @@ urlpatterns = [
     url(r'^cmdb/hostgroup$', cmdb.hostgroup),
     url(r'^cmdb/hostgroup/add$', cmdb.add_hostgroup),
     url(r'^cmdb/hostgroup/edit/(?P<gid>\d+)$', cmdb.edit_hostgroup),
+
+    # setting
+    url(r'^deploy/setting$', deploy.setting),
+    url(r'^deploy/setting/mail$', deploy.setting_mail),
 ]
