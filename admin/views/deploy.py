@@ -6,7 +6,8 @@ from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from admin.forms import AddEnvForm, SettingForm, SettingMailForm
+from admin.forms import AddEnvForm, SettingForm, SettingMailForm, \
+        AddProjectForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials, SettingMail, Setting
 from cmdb.models import HostGroup
@@ -16,12 +17,12 @@ from deploy.services import SettingService
 
 @login_required
 def index(request):
-    return TemplateResponse(request, 'base_admin.html')
+    return render(request, 'base_admin.html')
 
 @login_required
 def project(request):
     projects = Project.objects.all()
-    return TemplateResponse(request, 'admin/deploy/project.html', {
+    return render(request, 'admin/deploy/project.html', {
         "projects": projects,
     })
 
@@ -58,7 +59,7 @@ def project_add(request):
                 return redirect('/admin/deploy/project')
     else:
         f = AddProjectForm()
-    return TemplateResponse(request, 'admin/deploy/add_project.html', {
+    return render(request, 'admin/deploy/add_project.html', {
         "form": f,
         "status_choices": Project.STATUS_CHOICES,
         "type_choices": Project.TYPE_CHOICES,
@@ -100,7 +101,7 @@ def project_edit(request, gid):
                 return redirect('/admin/deploy/project')
     else:
         f = AddProjectForm()
-    return TemplateResponse(request, 'admin/deploy/edit_project.html', {
+    return render(request, 'admin/deploy/edit_project.html', {
         "form": f,
         "project": project,
         "projectEnvConfig": projectEnvConfig,
@@ -115,7 +116,7 @@ def project_edit(request, gid):
 @login_required
 def env(request):
     envs = Env.objects.all()
-    return TemplateResponse(request, 'admin/deploy/env.html', {
+    return render(request, 'admin/deploy/env.html', {
         "envs": envs
     })
 
@@ -135,14 +136,14 @@ def env_add(request):
                 return redirect('/admin/deploy/env')
     else:
         f = AddEnvForm()
-    return TemplateResponse(request, 'admin/deploy/env_add.html', {
+    return render(request, 'admin/deploy/env_add.html', {
         "form": f,
         })
 
 @login_required
 def credential(request):
     credentials = Credentials.objects.all()
-    return TemplateResponse(request, 'admin/deploy/credential.html', {
+    return render(request, 'admin/deploy/credential.html', {
         "credentials": credentials,
     })
 
@@ -172,7 +173,7 @@ def credential_add(request):
                 return redirect('/admin/deploy/credential')
     else:
         f = AddCredentialForPasswordForm()
-    return TemplateResponse(request, 'admin/deploy/add_credential.html', {
+    return render(request, 'admin/deploy/add_credential.html', {
         "form": f,
         "type_choices": Credentials.TYPE_CHOICES,
         })
@@ -198,7 +199,7 @@ def credential_edit(request, gid):
             f = AddCredentialForPasswordForm()
         else:
             f = AddCredentialForPrivateForm()
-    return TemplateResponse(request, 'admin/deploy/edit_credential.html', {
+    return render(request, 'admin/deploy/edit_credential.html', {
         "form": f,
         "credential": credential,
         "type_choices": Credentials.TYPE_CHOICES,
@@ -223,7 +224,7 @@ def setting(request):
                 return redirect('admin:setting')
     else:
         f = SettingForm()
-    return TemplateResponse(request, 'admin/deploy/setting.html', {
+    return render(request, 'admin/deploy/setting.html', {
         "form": f,
         })
 
@@ -253,7 +254,7 @@ def setting_mail(request):
         f = SettingMailForm()
         settingService = SettingService()
         mail_info = settingService.get_mail_info()
-    return TemplateResponse(request, 'admin/deploy/setting_mail.html', {
+    return render(request, 'admin/deploy/setting_mail.html', {
         "form": f,
         "mail_info": mail_info,
         })

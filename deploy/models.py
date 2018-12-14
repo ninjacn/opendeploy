@@ -123,7 +123,7 @@ class Task(models.Model):
 
 # 通用
 class Setting(models.Model):
-    enable_register = models.BooleanField('开启注册', default=True)
+    enable_register = models.BooleanField('开启用户注册', default=True)
 
     def __str__(self):
         return 'setting_general'
@@ -136,7 +136,7 @@ class Setting(models.Model):
 class SettingMail(models.Model):
     from_email = models.CharField('发送人', max_length=255, default='', help_text='例: opendeploy@ninjacn.com或Opendeploy<opendeploy@ninjacn.com>')
     host = models.CharField('SMTP主机', max_length=255, default='', help_text='例: smtp.exmail.qq.com')
-    port = models.CharField('端口', max_length=255, default='25')
+    port = models.CharField('端口', max_length=255, default='25', help_text='25')
     username = models.CharField('发送人账号', max_length=255, default='')
     password = models.CharField('发送人密码', max_length=255, default='', blank=True)
     use_tls = models.BooleanField('TLS', default=False)

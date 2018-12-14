@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import (render, redirect)
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
@@ -7,14 +7,14 @@ from django.contrib.auth.decorators import login_required
 
 from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm
 from deploy.models import Env
-from cmdb.models import (Host, HostGroup)
+from cmdb.models import Host, HostGroup
 
 # Create your views here.
 
 @login_required
 def host(request):
     hosts = Host.objects.all()
-    return TemplateResponse(request, 'admin/cmdb/host.html', {
+    return render(request, 'admin/cmdb/host.html', {
         "hosts": hosts,
     })
 
@@ -36,7 +36,7 @@ def host_add(request):
                 return redirect('/admin/cmdb/host')
     else:
         f = AddHostForm()
-    return TemplateResponse(request, 'admin/cmdb/add_host.html', {
+    return render(request, 'admin/cmdb/add_host.html', {
         "form": f,
         "status_choices": Host.STATUS_CHOICES,
     })
@@ -59,7 +59,7 @@ def host_edit(request, id):
                 return redirect('/admin/cmdb/host')
     else:
         f = AddHostForm()
-    return TemplateResponse(request, 'admin/cmdb/edit_host.html', {
+    return render(request, 'admin/cmdb/edit_host.html', {
         "form": f,
         "host": host,
         "status_choices": Host.STATUS_CHOICES,
@@ -77,8 +77,7 @@ def hostgroup(request):
         data['created_at'] = item.created_at
         data['updated_at'] = item.updated_at
         data['host'] = item.host.all()
-    print(data)
-    return TemplateResponse(request, 'admin/cmdb/hostgroup.html', {
+    return render(request, 'admin/cmdb/hostgroup.html', {
         "data": data,
         "hostGroup": hostGroup,
     })
@@ -105,7 +104,7 @@ def hostgroup_add(request):
                 return redirect('/admin/cmdb/hostgroup')
     else:
         f = AddHostGroupForm()
-    return TemplateResponse(request, 'admin/cmdb/add_hostgroup.html', {
+    return render(request, 'admin/cmdb/add_hostgroup.html', {
         "form": f,
         "hosts": Host.objects.filter(status=Host.STATUS_ENABLED),
         "status_choices": HostGroup.STATUS_CHOICES,
@@ -134,7 +133,7 @@ def hostgroup_edit(request, gid):
                 return redirect('/admin/cmdb/hostgroup')
     else:
         f = EditHostGroupForm()
-    return TemplateResponse(request, 'admin/cmdb/edit_hostgroup.html', {
+    return render(request, 'admin/cmdb/edit_hostgroup.html', {
         "form": f,
         "hostgroup": hostgroup,
         "hosts": Host.objects.filter(status=Host.STATUS_ENABLED),

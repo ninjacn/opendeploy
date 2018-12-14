@@ -5,7 +5,7 @@ from admin.views import deploy, cmdb
 
 app_name = 'admin'
 urlpatterns = [
-    url(r'^$', deploy.index, name='index'),
+    url(r'^$', deploy.project, name='homepage'),
     # project
     url(r'^deploy/project$', deploy.project, name='deploy.project'),
     url(r'^deploy/project/add$', deploy.project_add, name='deploy.project_add'),
