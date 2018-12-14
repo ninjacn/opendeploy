@@ -207,8 +207,8 @@
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="/admin/deploy/project"><i class="fa fa-circle-o"></i>列表</a></li>
-            <li><a href="/admin/deploy/project/add"><i class="fa fa-circle-o"></i>添加</a></li>
+              <li><a href="{% url 'admin:deploy.project' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+            <li><a href="{% url 'admin:deploy.project_add' %}"><i class="fa fa-circle-o"></i>添加</a></li>
           </ul>
         </li>
 
@@ -219,10 +219,10 @@
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="/admin/cmdb/host"><i class="fa fa-circle-o"></i>主机列表</a></li>
-            <li><a href="/admin/cmdb/host/add"><i class="fa fa-circle-o"></i>添加主机</a></li>
-            <li><a href="/admin/cmdb/hostgroup"><i class="fa fa-circle-o"></i>主机组列表</a></li>
-            <li><a href="/admin/cmdb/hostgroup/add"><i class="fa fa-circle-o"></i>添加主机组</a></li>
+              <li><a href="{% url 'admin:cmdb.host' %}"><i class="fa fa-circle-o"></i>主机列表</a></li>
+            <li><a href="{% url 'admin:cmdb.host_add' %}"><i class="fa fa-circle-o"></i>添加主机</a></li>
+            <li><a href="{% url 'admin:cmdb.hostgroup' %}"><i class="fa fa-circle-o"></i>主机组列表</a></li>
+            <li><a href="{% url 'admin:cmdb.hostgroup_add' %}"><i class="fa fa-circle-o"></i>添加主机组</a></li>
           </ul>
         </li>
 
@@ -233,8 +233,8 @@
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="/admin/deploy/env"><i class="fa fa-circle-o"></i>列表</a></li>
-            <li><a href="/admin/deploy/env/add"><i class="fa fa-circle-o"></i>添加</a></li>
+            <li><a href="{% url 'admin:deploy.env' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+            <li><a href="{% url 'admin:deploy.env_add' %}"><i class="fa fa-circle-o"></i>添加</a></li>
           </ul>
         </li>
 
@@ -245,8 +245,8 @@
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="/admin/deploy/credential"><i class="fa fa-circle-o"></i>列表</a></li>
-            <li><a href="/admin/deploy/credential/add"><i class="fa fa-circle-o"></i>添加</a></li>
+            <li><a href="{% url 'admin:deploy.credential' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+            <li><a href="{% url 'admin:deploy.credential_add' %}"><i class="fa fa-circle-o"></i>添加</a></li>
           </ul>
         </li>
 
@@ -257,8 +257,8 @@
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="/admin/deploy/setting"><i class="fa fa-circle-o"></i>通用</a></li>
-            <li><a href="/admin/deploy/setting/mail"><i class="fa fa-circle-o"></i>邮件通知</a></li>
+              <li><a href="{% url 'admin:setting'%}"><i class="fa fa-circle-o"></i>通用</a></li>
+            <li><a href="{% url 'admin:setting_mail'%}"><i class="fa fa-circle-o"></i>邮件通知</a></li>
           </ul>
         </li>
 
