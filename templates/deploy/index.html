@@ -16,7 +16,8 @@
     <div class="box-header with-border">
         <h3 class="box-title">表单信息</h3>
     </div>
-    <form role="form">
+            <form role="form" method="post" action="">
+                {% csrf_token %}
               <div class="box-body">
                 <div class="form-group">
                     <label>选择项目</label>

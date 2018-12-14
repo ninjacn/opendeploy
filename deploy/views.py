@@ -4,9 +4,12 @@ import logging
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
+from django.contrib.auth.decorators import login_required
+
 from deploy.models import Project
 from opendeploy import settings
-from .services import GitService, SvnService, DeployService, ProjectService, EnvService
+from .services import GitService, SvnService, DeployService, \
+        ProjectService, EnvService, SettingService, MailService
 
 # Create your views here.
 logging.basicConfig(
@@ -15,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger('app')
 
-
+@login_required
 def index(request):
     envService = EnvService()
     envs = envService.get_all()
@@ -28,7 +31,6 @@ def index(request):
 
 def test(request):
     # d = DeployService(9, 4)
-    logger.info('info')
-    logger.error('error')
-    logger.debug('debug')
+    mailService = MailService()
+    mailService.send_mail()
     return HttpResponse('hello world')

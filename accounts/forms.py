@@ -2,6 +2,7 @@
 from django import forms
 import re
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.db.models import Q
 
 class RegisterForm(forms.Form):
@@ -39,13 +40,17 @@ class RegisterForm(forms.Form):
             self.add_error('password2', '密码两次不匹配')
 
 class LoginForm(forms.Form):
-    username = forms.EmailField(min_length=3, max_length=32, help_text='登录用户名')
-    password = forms.CharField(min_length=1, max_length=16, help_text='密码')
+    username = forms.CharField(min_length=3, max_length=32, help_text='登录用户名')
+    password = forms.CharField(min_length=6, max_length=16, help_text='密码')
 
 class ChangePasswordForm(forms.Form):
-    old_password = forms.CharField(min_length=6, max_length=16)
-    new_password1 = forms.CharField(min_length=6, max_length=16)
-    new_password2 = forms.CharField()
+    old_password = forms.CharField(min_length=6, max_length=16, help_text='当前密码')
+    new_password1 = forms.CharField(min_length=6, max_length=16, help_text='新密码')
+    new_password2 = forms.CharField(help_text='新密码确认',)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super(ChangePasswordForm, self).clean()
@@ -59,6 +64,10 @@ class ChangePasswordForm(forms.Form):
         if new_password1 != new_password2:
             self.add_error('new_password2', '新密码两次不匹配')
 
+        old_password = cleaned_data.get('old_password')
+        user = authenticate(username=self.user.username, password=old_password)
+        if user is None:
+            self.add_error('old_password', '当前密码错误')
 
 class ForgetPasswordSendMailForm(forms.Form):
     email = forms.EmailField()
@@ -94,3 +103,4 @@ class ChangeProfileForm(forms.Form):
     email = forms.EmailField()
     mobile = forms.CharField(required=False, min_length=11, max_length=11)
     dingding = forms.CharField(required=False)
+

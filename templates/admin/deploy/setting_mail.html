@@ -1,0 +1,74 @@
+{% extends 'base_admin.html' %}
+
+{% block content-header %}
+      <h1>
+        设置
+        <small></small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="/admin"><i class="fa fa-home"></i>首页</a></li>
+        <li class="active">设置 - 邮箱</li>
+      </ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">设置表单</h3>
+            </div>
+            <!-- /.box-header -->
+            <!-- form start -->
+            <form role="form" method="post" action="">
+                {% csrf_token %}
+                <div class="box-body">
+
+                    <div class="form-group {% if form.from_email.errors %} has-error {% endif %}">
+                        <label for="from_email">{{ form.from_email.label }}</label>
+                        <input type="text" name="from_email" class="form-control" placeholder="{{ form.from_email.help_text }}" value="{% if mail_info.from_email %}{{ mail_info.from_email }}{% else %}{% if form.from_email.value %}{{ form.from_email.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.from_email.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.host.errors %} has-error {% endif %}">
+                        <label for="host">{{ form.host.label }}</label>
+                        <input type="text" name="host" class="form-control" placeholder="{{ form.host.help_text }}" value="{% if mail_info.from_email %}{{ mail_info.host }}{% else %}{% if form.host.value %}{{ form.host.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.host.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.port.errors %} has-error {% endif %}">
+                        <label for="port">{{ form.port.label }}</label>
+                        <input type="text" name="port" class="form-control" placeholder="{{ form.port.help_text }}" value="{% if mail_info.port %}{{ mail_info.port }}{% else %}{% if form.port.value %}{{ form.port.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.port.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.username.errors %} has-error {% endif %}">
+                        <label for="username">{{ form.username.label }}</label>
+                        <input type="text" name="username" class="form-control" placeholder="{{ form.username.help_text }}" value="{% if mail_info.username %}{{ mail_info.username }}{% else %}{% if form.username.value %}{{ form.username.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.username.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.password.errors %} has-error {% endif %}">
+                        <label for="password">{{ form.password.label }}</label>
+                        <input type="text" name="password" class="form-control" placeholder="{{ form.password.help_text }}" value="{% if mail_info.password %}{{ mail_info.password }}{% else %}{% if form.password.value %}{{ form.password.value }}{% endif %}{% endif %}">
+                        <span class="help-block">{{ form.password.errors }}</span>
+                    </div>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="1" {% if form.use_tls.value %}checked{% endif %}> {{ form.use_tls.label }}
+                        </label>
+                    </div>
+
+
+              </div>
+              <!-- /.box-body -->
+
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">提交</button>
+              </div>
+            </form>
+          </div>
+        </div>
+</div>
+{% endblock %}

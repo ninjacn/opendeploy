@@ -14,6 +14,14 @@
 
 </head>
 <body class="hold-transition">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}info{% endif %}">
+                <p>{{ message }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 
