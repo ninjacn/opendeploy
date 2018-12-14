@@ -9,11 +9,18 @@ from django.contrib import messages
 
 from opendeploy import settings
 from .forms import RegisterForm, LoginForm, ChangePasswordForm
+from deploy.services import SettingService
 
 # Create your views here.
 
 @transaction.atomic
 def login(request):
+    settingService = SettingService()
+    if settingService.is_enable_register() is not True:
+        is_enable_register = False
+    else:
+        is_enable_register = True
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -27,10 +34,17 @@ def login(request):
                 form.add_error('username', '认证失败，用户名或密码错误!')
     else:
         form = LoginForm()
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'accounts/login.html', {
+        'form': form, 
+        'is_enable_register': is_enable_register,
+        })
 
 @transaction.atomic
 def register(request):
+    settingService = SettingService()
+    if settingService.is_enable_register() is not True:
+        return redirect('login')
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():

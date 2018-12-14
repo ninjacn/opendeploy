@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 from cmdb.models import Host
-from deploy.models import SettingMail
+from deploy.models import SettingMail, Setting
 import re
 
 
@@ -47,6 +47,12 @@ class AddCredentialForPrivateForm(forms.Form):
     username = forms.CharField()
     private_key = forms.CharField()
     comment = forms.CharField(required=False)
+
+class SettingForm(forms.ModelForm):
+
+    class Meta:
+        model = Setting
+        fields = ['enable_register',]
 
 class SettingMailForm(forms.ModelForm):
     class Meta:

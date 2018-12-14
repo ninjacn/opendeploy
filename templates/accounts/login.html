@@ -31,8 +31,10 @@
       </div>
     </form>
 
-    <a href="#">忘记密码</a><br>
+    <a href="#" class="hide">忘记密码</a><br>
+    {% if is_enable_register %}
     <a href="{% url 'register' %}" class="text-center">注册</a>
+    {% endif %}
 
   </div>
   <!-- /.login-box-body -->

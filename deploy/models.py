@@ -26,7 +26,7 @@ class Credentials(models.Model):
         (TYPE_USER_PWD, '用户名和密码'),
         (TYPE_USER_PRIVATE_KEY, '用户名和私钥'),
     )
-    type = models.IntegerField(max_length=2, default=TYPE_USER_PWD, choices=TYPE_CHOICES)
+    type = models.IntegerField(default=TYPE_USER_PWD, choices=TYPE_CHOICES)
     username = models.CharField('用户名', max_length=255, default='')
     password = models.CharField('密码', max_length=255, default='')
     private_key = models.TextField('私钥', default='', help_text='')
@@ -120,6 +120,18 @@ class Task(models.Model):
         db_table = 'deploy_task'
         verbose_name_plural = '任务'
         verbose_name = '任务'
+
+# 通用
+class Setting(models.Model):
+    enable_register = models.BooleanField('开启注册', default=True)
+
+    def __str__(self):
+        return 'setting_general'
+
+    class Meta:
+        db_table = 'deploy_setting_general'
+        verbose_name_plural = '设置 - 通用'
+        verbose_name = '设置 - 通用'
 
 class SettingMail(models.Model):
     from_email = models.CharField('发送人', max_length=255, default='', help_text='例: opendeploy@ninjacn.com或Opendeploy<opendeploy@ninjacn.com>')

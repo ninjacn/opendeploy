@@ -3,20 +3,24 @@ from django.shortcuts import (render, redirect)
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
-from admin.forms import *
-from deploy.models import (Env,)
+from django.contrib.auth.decorators import login_required
+
+from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm
+from deploy.models import Env
 from cmdb.models import (Host, HostGroup)
 
 # Create your views here.
 
+@login_required
 def host(request):
     hosts = Host.objects.all()
     return TemplateResponse(request, 'admin/cmdb/host.html', {
         "hosts": hosts,
     })
 
+@login_required
 @transaction.atomic
-def add_host(request):
+def host_add(request):
     if request.method== 'POST':
         f = AddHostForm(request.POST)
         if f.is_valid():
@@ -37,8 +41,9 @@ def add_host(request):
         "status_choices": Host.STATUS_CHOICES,
     })
 
+@login_required
 @transaction.atomic
-def edit_host(request, id):
+def host_edit(request, id):
     host = Host.objects.get(id=id)
     if request.method== 'POST':
         f = AddHostForm(request.POST)
@@ -60,6 +65,7 @@ def edit_host(request, id):
         "status_choices": Host.STATUS_CHOICES,
     })
 
+@login_required
 @transaction.atomic
 def hostgroup(request):
     data = {}
@@ -77,8 +83,9 @@ def hostgroup(request):
         "hostGroup": hostGroup,
     })
 
+@login_required
 @transaction.atomic
-def add_hostgroup(request):
+def hostgroup_add(request):
     if request.method== 'POST':
         f = AddHostGroupForm(request.POST)
         if f.is_valid():
@@ -104,8 +111,9 @@ def add_hostgroup(request):
         "status_choices": HostGroup.STATUS_CHOICES,
     })
 
+@login_required
 @transaction.atomic
-def edit_hostgroup(request, gid):
+def hostgroup_edit(request, gid):
     hostgroup = HostGroup.objects.get(id=gid)
     if request.method== 'POST':
         f = EditHostGroupForm(request.POST)

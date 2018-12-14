@@ -56,7 +56,7 @@
 
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" value="1" {% if form.use_tls.value %}checked{% endif %}> {{ form.use_tls.label }}
+                            <input type="checkbox" name="{{ form.use_tls.name }}" value="1" {% if mail_info.use_tls%} checked {% else %} {% if form.use_tls.value %}checked{% endif %}{% endif %}> {{ form.use_tls.label }} 
                         </label>
                     </div>
 

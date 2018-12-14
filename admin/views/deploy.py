@@ -3,24 +3,31 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
-from admin.forms import *
-from deploy.models import Env, Project, ProjectEnvConfig, Credentials, SettingMail
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+from admin.forms import AddEnvForm, SettingForm, SettingMailForm
+from deploy.models import Env, Project, ProjectEnvConfig,  \
+        Credentials, SettingMail, Setting
 from cmdb.models import HostGroup
 from deploy.services import SettingService
 
 # Create your views here.
 
+@login_required
 def index(request):
     return TemplateResponse(request, 'base_admin.html')
 
+@login_required
 def project(request):
     projects = Project.objects.all()
     return TemplateResponse(request, 'admin/deploy/project.html', {
         "projects": projects,
     })
 
+@login_required
 @transaction.atomic
-def add_project(request):
+def project_add(request):
     if request.method== 'POST':
         f = AddProjectForm(request.POST)
         if f.is_valid():
@@ -61,8 +68,9 @@ def add_project(request):
         "host_group": HostGroup.objects.all(),
     })
 
+@login_required
 @transaction.atomic
-def edit_project(request, gid):
+def project_edit(request, gid):
     project = Project.objects.get(pk=gid)
     projectEnvConfig = ProjectEnvConfig.objects.filter(project=project)
     if request.method== 'POST':
@@ -104,12 +112,14 @@ def edit_project(request, gid):
         "credentials": Credentials.objects.all(),
     })
 
+@login_required
 def env(request):
     envs = Env.objects.all()
     return TemplateResponse(request, 'admin/deploy/env.html', {
         "envs": envs
     })
 
+@login_required
 @transaction.atomic
 def env_add(request):
     if request.method== 'POST':
@@ -129,14 +139,16 @@ def env_add(request):
         "form": f,
         })
 
+@login_required
 def credential(request):
     credentials = Credentials.objects.all()
     return TemplateResponse(request, 'admin/deploy/credential.html', {
         "credentials": credentials,
     })
 
+@login_required
 @transaction.atomic
-def add_credential(request):
+def credential_add(request):
     if request.method== 'POST':
         auth_type = int(request.POST.get('type'))
         if auth_type == Credentials.TYPE_USER_PWD:
@@ -165,8 +177,9 @@ def add_credential(request):
         "type_choices": Credentials.TYPE_CHOICES,
         })
 
+@login_required
 @transaction.atomic
-def edit_credential(request, gid):
+def credential_edit(request, gid):
     credential = Credentials.objects.get(pk=gid)
     auth_type = credential.type
     if request.method== 'POST':
@@ -194,8 +207,27 @@ def edit_credential(request, gid):
 
 @transaction.atomic
 def setting(request):
-    pass
+    if request.method== 'POST':
+        f = SettingForm(request.POST)
+        if f.is_valid():
+            try:
+                cleaned_data = f.cleaned_data
+                Setting.objects.all().delete()
+                setting = Setting()
+                setting.enable_register = cleaned_data['enable_register']
+                setting.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:setting')
+    else:
+        f = SettingForm()
+    return TemplateResponse(request, 'admin/deploy/setting.html', {
+        "form": f,
+        })
 
+@login_required
 @transaction.atomic
 def setting_mail(request):
     if request.method== 'POST':
@@ -210,13 +242,13 @@ def setting_mail(request):
                 settingMail.port = cleaned_data['port']
                 settingMail.username = cleaned_data['username']
                 settingMail.password = cleaned_data['password']
-                if cleaned_data['use_tls']:
-                    settingMail.use_tls = 1
-                else:
-                    settingMail.use_tls = 0
+                settingMail.use_tls = cleaned_data['use_tls']
                 settingMail.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
             finally:
-                return redirect('/admin/deploy/setting/mail')
+                return redirect('admin:setting_mail')
     else:
         f = SettingMailForm()
         settingService = SettingService()

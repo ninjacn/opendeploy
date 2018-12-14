@@ -17,7 +17,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from deploy.models import Project, ProjectEnvConfig, Env, Credentials, \
-SettingMail, SettingLdap
+        SettingMail, SettingLdap, Setting
 from cmdb.models import Host
 from opendeploy import settings
 
@@ -268,6 +268,11 @@ class SettingService():
         if allinfo:
             for info in allinfo:
                 return info
+    def is_enable_register(self):
+        allinfo = Setting.objects.all()
+        if allinfo:
+            for info in allinfo:
+                return info.enable_register
 
 class MailService():
     def __init__(self):
