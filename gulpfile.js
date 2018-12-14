@@ -15,7 +15,8 @@ gulp.task('concatStyle', function() {
           'node_modules/font-awesome/css/font-awesome.min.css',
           'node_modules/ionicons/dist/css/ionicons.min.css',
           'node_modules/select2/dist/css/select2.min.css',
-          'static/css/AdminLTE.min.css'
+          'static/css/AdminLTE.min.css',
+          'static/plugins/iCheck/square/blue.css',
     ])
     .pipe(concat('common.css'))
     .pipe(gulp.dest('static/css/'))
@@ -27,7 +28,7 @@ gulp.task('concatScripts', function() {
           'node_modules/jquery/dist/jquery.min.js',
           'node_modules/bootstrap/dist/js/bootstrap.min.js',
           'node_modules/select2/dist/js/select2.min.js',
-          'static/js/adminlte.min.js'
+          'static/plugins/iCheck/icheck.min.js',
     ])
     .pipe(concat('common.js'))
     .pipe(gulp.dest('static/js/'))

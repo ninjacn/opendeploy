@@ -4,8 +4,9 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
 from admin.forms import *
-from deploy.models import Env, Project, ProjectEnvConfig, Credentials
+from deploy.models import Env, Project, ProjectEnvConfig, Credentials, SettingMail
 from cmdb.models import HostGroup
+from deploy.services import SettingService
 
 # Create your views here.
 
@@ -190,3 +191,37 @@ def edit_credential(request, gid):
         "type_choices": Credentials.TYPE_CHOICES,
         "auth_type": auth_type,
     })
+
+@transaction.atomic
+def setting(request):
+    pass
+
+@transaction.atomic
+def setting_mail(request):
+    if request.method== 'POST':
+        f = SettingMailForm(request.POST)
+        if f.is_valid():
+            cleaned_data = f.cleaned_data
+            try:
+                SettingMail.objects.all().delete()
+                settingMail = SettingMail()
+                settingMail.from_email = cleaned_data['from_email']
+                settingMail.host = cleaned_data['host']
+                settingMail.port = cleaned_data['port']
+                settingMail.username = cleaned_data['username']
+                settingMail.password = cleaned_data['password']
+                if cleaned_data['use_tls']:
+                    settingMail.use_tls = 1
+                else:
+                    settingMail.use_tls = 0
+                settingMail.save()
+            finally:
+                return redirect('/admin/deploy/setting/mail')
+    else:
+        f = SettingMailForm()
+        settingService = SettingService()
+        mail_info = settingService.get_mail_info()
+    return TemplateResponse(request, 'admin/deploy/setting_mail.html', {
+        "form": f,
+        "mail_info": mail_info,
+        })

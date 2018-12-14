@@ -120,3 +120,36 @@ class Task(models.Model):
         db_table = 'deploy_task'
         verbose_name_plural = '任务'
         verbose_name = '任务'
+
+class SettingMail(models.Model):
+    from_email = models.CharField('发送人', max_length=255, default='', help_text='例: opendeploy@ninjacn.com或Opendeploy<opendeploy@ninjacn.com>')
+    host = models.CharField('SMTP主机', max_length=255, default='', help_text='例: smtp.exmail.qq.com')
+    port = models.CharField('端口', max_length=255, default='25')
+    username = models.CharField('发送人账号', max_length=255, default='')
+    password = models.CharField('发送人密码', max_length=255, default='', blank=True)
+    use_tls = models.BooleanField('TLS', default=False)
+
+    def __str__(self):
+        return self.from_email
+
+    class Meta:
+        db_table = 'deploy_setting_mail'
+        verbose_name_plural = '设置 - 邮箱'
+        verbose_name = '设置 - 邮箱'
+
+class SettingLdap(models.Model):
+    host = models.CharField('发送人', max_length=255, default='')
+    port = models.CharField('发送人', max_length=255, default='389')
+    uid = models.CharField('uid', max_length=255, default='uid')
+    base = models.CharField('base', max_length=255, default='uid')
+    bind_dn = models.CharField('bind_dn', max_length=255, default='')
+    password = models.CharField('密码', max_length=255, default='')
+    enable = models.BooleanField('启用', default=False)
+
+    def __str__(self):
+        return self.from_email
+
+    class Meta:
+        db_table = 'deploy_setting_ldap'
+        verbose_name_plural = '设置 - LDAP'
+        verbose_name = '设置 - LDAP'

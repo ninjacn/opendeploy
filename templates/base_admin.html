@@ -250,6 +250,18 @@
           </ul>
         </li>
 
+        <li class="treeview">
+          <a href="#"><i class="fa fa-th-list"></i> <span>设置</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="/admin/deploy/setting"><i class="fa fa-circle-o"></i>通用</a></li>
+            <li><a href="/admin/deploy/setting/mail"><i class="fa fa-circle-o"></i>邮件通知</a></li>
+          </ul>
+        </li>
+
       </ul>
       <!-- /.sidebar-menu -->
     </section>
@@ -369,6 +381,7 @@
     };
 </script>
 <script src="{% static "js/common.js" %}"></script>
+<script src="{% static "js/adminlte.min.js" %}"></script>
 {% block script %}
 {% endblock %}
 </body>

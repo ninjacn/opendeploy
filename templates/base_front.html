@@ -24,7 +24,7 @@
     <nav class="navbar navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <a href="../../index2.html" class="navbar-brand"><b>Admin</b>LTE</a>
+          <a href="/" class="navbar-brand"><b>Admin</b>LTE</a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
             <i class="fa fa-bars"></i>
           </button>
@@ -190,10 +190,10 @@
                 <!-- Menu Footer-->
                 <li class="user-footer">
                   <div class="pull-left">
-                    <a href="#" class="btn btn-default btn-flat">Profile</a>
+                    <a href="{% url 'profile' %}" class="btn btn-default btn-flat">Profile</a>
                   </div>
                   <div class="pull-right">
-                    <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                      <a href="{% url 'logout' %}" class="btn btn-default btn-flat">Sign out</a>
                   </div>
                 </li>
               </ul>
@@ -238,6 +238,7 @@
 <!-- ./wrapper -->
 
 <script src="{% static "js/common.js" %}"></script>
+<script src="{% static "js/adminlte.min.js" %}"></script>
 {% block script %}
 {% endblock %}
 </body>
