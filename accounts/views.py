@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from opendeploy import settings
-from .forms import RegisterForm, LoginForm, ChangePasswordForm
+from .forms import RegisterForm, LoginForm, ChangePasswordForm, \
+        ChangeProfileForm
 from deploy.services import SettingService
 
 # Create your views here.
@@ -63,7 +64,6 @@ def register(request):
             return redirect('/')
     else:
         form = RegisterForm()
-    # return TemplateResponse(request, 'accounts/register.html', {'form': form})
     return render(request, 'accounts/register.html', {'form': form})
 
 @login_required
@@ -87,11 +87,18 @@ def change_password(request):
             messages.error(request, '提交密码验证不通过')
     else:
         form = ChangePasswordForm()
-    return TemplateResponse(request, 'accounts/change_password.html', {
+    return render(request, 'accounts/change_password.html', {
         'form': form
         })
 
 @login_required
 @transaction.atomic
 def profile(request):
-    pass
+    if request.method == 'POST':
+        form = ChangeProfileForm(request.POST)
+        pass
+    else:
+        form = ChangeProfileForm()
+    return render(request, 'accounts/profile.html', {
+        'form': form
+        })

@@ -101,6 +101,6 @@ class ForgetPasswordResetForm(forms.Form):
 
 class ChangeProfileForm(forms.Form):
     email = forms.EmailField()
-    mobile = forms.CharField(required=False, min_length=11, max_length=11)
-    dingding = forms.CharField(required=False)
+    # mobile = forms.CharField(required=False, min_length=11, max_length=11)
+    # dingding = forms.CharField(required=False)
 

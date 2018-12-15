@@ -1,0 +1,56 @@
+{% extends 'base_front.html' %}
+
+{% block content-header %}
+<h1>
+    个人信息
+    <small></small>
+</h1>
+<ol class="breadcrumb">
+    <li><a href="/"><i class="fa fa-home"></i>首页</a></li>
+    <li class="active">个人信息</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="box box-default">
+    <div class="box-header with-border">
+        <h3 class="box-title">表单信息</h3>
+    </div>
+
+    <form action="{% url 'accounts:profile' %}" method="post">
+        {% csrf_token %}
+          <div class="box-body">
+
+                <div class="form-group">
+                    <label>用户名(用于登录)</label>
+                    <input type="text" readonly name="username" class="form-control" placeholder="" value="{{ user.username }}" >
+                    <span class="help-block"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" readonly name="email" class="form-control" placeholder="" value="{{ user.email }}" >
+                    <span class="help-block"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>姓名或昵称</label>
+                    <input type="text" readonly name="first_name" class="form-control" placeholder="" value="{{ user.first_name }}" >
+                    <span class="help-block"></span>
+                </div>
+
+          </div>
+          <!-- /.box-body -->
+
+          <div class="box-footer">
+            <button type="button" class="btn btn-primary disabled">确认</button>
+          </div>
+    </form>
+</div>
+<!-- /.box -->
+{% endblock %}
+
+{% block script %}
+<script>
+</script>
+{% endblock %}
