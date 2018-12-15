@@ -4,7 +4,7 @@ from django.template.response import TemplateResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import login as auth_login, logout, authenticate
 from django.db import transaction
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 
 from opendeploy import settings
@@ -22,22 +22,33 @@ def login(request):
     else:
         is_enable_register = True
 
+    redirect_to = request.GET.get('next', '')
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=raw_password)
-            if user is not None:
-                auth_login(request, user)
-                return redirect('/')
-            else:
-                form.add_error('username', '认证失败，用户名或密码错误!')
+            try:
+                user = User.objects.get(username=username, is_active=1)
+                user = authenticate(username=username, password=raw_password)
+                if user is not None:
+                    auth_login(request, user)
+                    redirect_to = request.POST.get('next')
+                    if redirect_to:
+                        return redirect(redirect_to)
+                    else:
+                        return redirect('/')
+                else:
+                    form.add_error('username', '认证失败，用户名或密码错误!')
+            except:
+                form.add_error('username', '认证失败，该用户没有激活!')
+
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {
         'form': form, 
         'is_enable_register': is_enable_register,
+        'redirect_to': redirect_to,
         })
 
 @transaction.atomic
