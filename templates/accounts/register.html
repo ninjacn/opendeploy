@@ -3,13 +3,13 @@
 {% block content %}
 <div class="register-box">
   <div class="register-logo">
-    <a href="#"><b>Admin</b>LTE</a>
+    <a href="#"><b>Opendeploy</b></a>
   </div>
 
   <div class="register-box-body">
     <p class="login-box-msg">注册用户</p>
 
-    <form action="{% url 'register' %}" method="post">
+    <form action="{% url 'accounts:register' %}" method="post">
         {% csrf_token %}
       <div class="form-group has-feedback  {% if form.username.errors %} has-error {% endif %}">
           <input type="username" class="form-control" placeholder="{{ form.username.help_text }}" name="{{ form.username.name }}" value="{% if form.username.value %} {{ form.username.value }} {% endif %}">
@@ -49,7 +49,7 @@
       </div>
     </form>
 
-    <a href="{% url 'login' %}" class="text-center">登录</a>
+    <a href="{% url 'accounts:login' %}" class="text-center">登录</a>
   </div>
   <!-- /.form-box -->
 </div>

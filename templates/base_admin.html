@@ -5,7 +5,7 @@
     {% load startswith %}
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AdminLTE 2 | Starter</title>
+  <title>Opendeploy | 管理中心</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="stylesheet" href="{% static "css/common.css" %}">
@@ -26,9 +26,9 @@
     <!-- Logo -->
     <a href="{% url 'admin:homepage' %}" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>A</b>LT</span>
+      <span class="logo-mini"><b>O</b></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>Admin</b>LTE</span>
+      <span class="logo-lg"><b>Opendeploy</b></span>
     </a>
 
     <!-- Header Navbar -->
@@ -72,7 +72,8 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  <a href=""{% url 'accounts:profile' %}"" class="btn btn-default btn-flat">个人信息</a>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-default btn-flat">个人信息</a>
+                    <a href="{% url 'accounts:change_password' %}" class="btn btn-default btn-flat">更改密码</a>
                 </div>
                 <div class="pull-right">
                     <a href="{% url 'accounts:logout' %}" class="btn btn-default btn-flat">注销</a>
@@ -122,6 +123,20 @@
           </ul>
         </li>
 
+        <li class="treeview {% if request.path|startswith:'/admin/cmdb/' %} active {% endif %}">
+          <a href="#"><i class="fa fa-users"></i> <span>用户</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="{% url 'admin:cmdb.host' %}"><i class="fa fa-circle-o"></i>主机列表</a></li>
+            <li><a href="{% url 'admin:cmdb.host_add' %}"><i class="fa fa-circle-o"></i>添加主机</a></li>
+            <li><a href="{% url 'admin:cmdb.hostgroup' %}"><i class="fa fa-circle-o"></i>主机组列表</a></li>
+            <li><a href="{% url 'admin:cmdb.hostgroup_add' %}"><i class="fa fa-circle-o"></i>添加主机组</a></li>
+          </ul>
+        </li>
+
         <li class="treeview {% if request.path|startswith:'/admin/deploy/env' %} active {% endif %}">
           <a href="#"><i class="fa fa-th-list"></i> <span>环境</span>
             <span class="pull-right-container">
@@ -135,7 +150,7 @@
         </li>
 
         <li class="treeview {% if request.path|startswith:'/admin/deploy/credential' %} active {% endif %}">
-          <a href="#"><i class="fa fa-th-list"></i> <span>账号凭证</span>
+          <a href="#"><i class="fa fa-certificate"></i> <span>账号凭证</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
@@ -147,7 +162,7 @@
         </li>
 
         <li class="treeview {% if request.path|startswith:'/admin/deploy/setting' %} active {% endif %}">
-          <a href="#"><i class="fa fa-th-list"></i> <span>设置</span>
+          <a href="#"><i class="fa fa-cogs"></i> <span>设置</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
@@ -157,6 +172,7 @@
             <li><a href="{% url 'admin:setting_mail'%}"><i class="fa fa-circle-o"></i>邮件通知</a></li>
           </ul>
         </li>
+        <li><a href="/"><i class="fa fa-smile-o"></i> <span>返回站点</span></a></li>
 
       </ul>
       <!-- /.sidebar-menu -->
@@ -191,11 +207,7 @@
 
   <!-- Main Footer -->
   <footer class="main-footer">
-    <!-- To the right -->
-    <div class="pull-right hidden-xs">
-    </div>
-    <!-- Default to the left -->
-    <strong>Copyright &copy; 2018 <a href="https://github.com/ninjacn/opendeploy">opendeploy</a>.</strong> All rights reserved.
+    {% include "base_common_footer.html" %}
   </footer>
 
   <!-- /.control-sidebar -->

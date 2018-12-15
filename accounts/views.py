@@ -90,3 +90,8 @@ def change_password(request):
     return TemplateResponse(request, 'accounts/change_password.html', {
         'form': form
         })
+
+@login_required
+@transaction.atomic
+def profile(request):
+    pass
