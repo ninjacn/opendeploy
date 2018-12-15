@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm
 from deploy.models import Env
@@ -11,14 +11,14 @@ from cmdb.models import Host, HostGroup
 
 # Create your views here.
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def host(request):
     hosts = Host.objects.all()
     return render(request, 'admin/cmdb/host.html', {
         "hosts": hosts,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def host_add(request):
     if request.method== 'POST':
@@ -41,7 +41,7 @@ def host_add(request):
         "status_choices": Host.STATUS_CHOICES,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def host_edit(request, id):
     host = Host.objects.get(id=id)
@@ -65,7 +65,7 @@ def host_edit(request, id):
         "status_choices": Host.STATUS_CHOICES,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def hostgroup(request):
     data = {}
@@ -82,7 +82,7 @@ def hostgroup(request):
         "hostGroup": hostGroup,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def hostgroup_add(request):
     if request.method== 'POST':
@@ -110,7 +110,7 @@ def hostgroup_add(request):
         "status_choices": HostGroup.STATUS_CHOICES,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def hostgroup_edit(request, gid):
     hostgroup = HostGroup.objects.get(id=gid)

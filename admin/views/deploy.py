@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from admin.forms import AddEnvForm, SettingForm, SettingMailForm, \
         AddProjectForm
@@ -15,18 +15,18 @@ from deploy.services import SettingService
 
 # Create your views here.
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def index(request):
     return render(request, 'base_admin.html')
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def project(request):
     projects = Project.objects.all()
     return render(request, 'admin/deploy/project.html', {
         "projects": projects,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def project_add(request):
     if request.method== 'POST':
@@ -69,7 +69,7 @@ def project_add(request):
         "host_group": HostGroup.objects.all(),
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def project_edit(request, gid):
     project = Project.objects.get(pk=gid)
@@ -113,14 +113,14 @@ def project_edit(request, gid):
         "credentials": Credentials.objects.all(),
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def env(request):
     envs = Env.objects.all()
     return render(request, 'admin/deploy/env.html', {
         "envs": envs
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def env_add(request):
     if request.method== 'POST':
@@ -140,14 +140,14 @@ def env_add(request):
         "form": f,
         })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def credential(request):
     credentials = Credentials.objects.all()
     return render(request, 'admin/deploy/credential.html', {
         "credentials": credentials,
     })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def credential_add(request):
     if request.method== 'POST':
@@ -178,7 +178,7 @@ def credential_add(request):
         "type_choices": Credentials.TYPE_CHOICES,
         })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def credential_edit(request, gid):
     credential = Credentials.objects.get(pk=gid)
@@ -206,6 +206,7 @@ def credential_edit(request, gid):
         "auth_type": auth_type,
     })
 
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def setting(request):
     if request.method== 'POST':
@@ -228,7 +229,7 @@ def setting(request):
         "form": f,
         })
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def setting_mail(request):
     if request.method== 'POST':

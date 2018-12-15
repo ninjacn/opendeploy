@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from admin.views import deploy, cmdb
+from admin.views import deploy, cmdb, accounts
 
 app_name = 'admin'
 urlpatterns = [
     url(r'^$', deploy.project, name='homepage'),
+    # accounts
+    url(r'^accounts/all_users$', accounts.all_users, name='accounts.all_users'),
+    url(r'^accounts/user/add$', accounts.user_add, name='accounts.user_add'),
+    url(r'^accounts/user/edit/(?P<uid>\d+)$', accounts.user_edit, name='accounts.user_edit'),
+    url(r'^accounts/user/del/(?P<uid>\d+)$', accounts.user_del, name='accounts.user_del'),
+
     # project
     url(r'^deploy/project$', deploy.project, name='deploy.project'),
     url(r'^deploy/project/add$', deploy.project_add, name='deploy.project_add'),

@@ -123,17 +123,15 @@
           </ul>
         </li>
 
-        <li class="treeview {% if request.path|startswith:'/admin/cmdb/' %} active {% endif %}">
+        <li class="treeview {% if request.path|startswith:'/admin/accounts' %} active {% endif %}">
           <a href="#"><i class="fa fa-users"></i> <span>用户</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="{% url 'admin:cmdb.host' %}"><i class="fa fa-circle-o"></i>主机列表</a></li>
-            <li><a href="{% url 'admin:cmdb.host_add' %}"><i class="fa fa-circle-o"></i>添加主机</a></li>
-            <li><a href="{% url 'admin:cmdb.hostgroup' %}"><i class="fa fa-circle-o"></i>主机组列表</a></li>
-            <li><a href="{% url 'admin:cmdb.hostgroup_add' %}"><i class="fa fa-circle-o"></i>添加主机组</a></li>
+            <li><a href="{% url 'admin:accounts.all_users' %}"><i class="fa fa-circle-o"></i>用户列表</a></li>
+            <li><a href="{% url 'admin:accounts.user_add' %}"><i class="fa fa-circle-o"></i>添加用户</a></li>
           </ul>
         </li>
 
