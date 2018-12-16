@@ -1,0 +1,94 @@
+# -*- coding: utf-8 -*-
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.template.response import TemplateResponse
+from django.db import transaction
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+from admin.forms import  SettingGeneralForm, SettingMailForm, SettingPublicCloudForm
+from setting.models import SettingMail, SettingGeneral, SettingPublicCloud
+from setting.services import SettingService
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def general(request):
+    if request.method== 'POST':
+        f = SettingGeneralForm(request.POST)
+        if f.is_valid():
+            try:
+                cleaned_data = f.cleaned_data
+                SettingGeneral.objects.all().delete()
+                setting = SettingGeneral()
+                setting.enable_register = cleaned_data['enable_register']
+                setting.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:setting.general')
+    else:
+        f = SettingGeneralForm()
+    return render(request, 'admin/setting/general.html', {
+        "form": f,
+        })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def mail(request):
+    settingService = SettingService()
+    mail_info = settingService.get_mail_info()
+    if request.method== 'POST':
+        f = SettingMailForm(request.POST)
+        if f.is_valid():
+            cleaned_data = f.cleaned_data
+            try:
+                SettingMail.objects.all().delete()
+                settingMail = SettingMail()
+                settingMail.from_email = cleaned_data['from_email']
+                settingMail.host = cleaned_data['host']
+                settingMail.port = cleaned_data['port']
+                settingMail.username = cleaned_data['username']
+                settingMail.password = cleaned_data['password']
+                settingMail.use_tls = cleaned_data['use_tls']
+                settingMail.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:setting.mail')
+    else:
+        f = SettingMailForm()
+    return render(request, 'admin/setting/mail.html', {
+        "form": f,
+        "mail_info": mail_info,
+        })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def public_cloud(request):
+    settingService = SettingService()
+    info = settingService.get_public_cloud_info()
+    if request.method== 'POST':
+        f = SettingPublicCloudForm(request.POST)
+        if f.is_valid():
+            cleaned_data = f.cleaned_data
+            try:
+                SettingPublicCloud.objects.all().delete()
+                settingPublicCloud = SettingPublicCloud()
+                settingPublicCloud.aliyun_access_key_id = cleaned_data['aliyun_access_key_id']
+                settingPublicCloud.aliyun_access_key_secret = cleaned_data['aliyun_access_key_secret']
+                settingPublicCloud.qcloud_secret_id = cleaned_data['qcloud_secret_id']
+                settingPublicCloud.qcloud_secret_key = cleaned_data['qcloud_secret_key']
+                settingPublicCloud.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:setting.public_cloud')
+    else:
+        f = SettingPublicCloudForm()
+    return render(request, 'admin/setting/public_cloud.html', {
+        "form": f,
+        "info": info,
+        })

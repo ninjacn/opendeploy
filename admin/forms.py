@@ -4,7 +4,7 @@ from django.db.models import Q
 from django import forms
 
 from cmdb.models import Host
-from deploy.models import SettingMail, Setting
+from setting.models import SettingMail, SettingGeneral, SettingPublicCloud
 import re
 
 
@@ -51,11 +51,18 @@ class AddCredentialForPrivateForm(forms.Form):
     private_key = forms.CharField()
     comment = forms.CharField(required=False)
 
-class SettingForm(forms.ModelForm):
+class SettingGeneralForm(forms.ModelForm):
 
     class Meta:
-        model = Setting
+        model = SettingGeneral
         fields = ['enable_register',]
+
+class SettingPublicCloudForm(forms.ModelForm):
+
+    class Meta:
+        model = SettingPublicCloud
+        fields = ['aliyun_access_key_id', 'aliyun_access_key_secret', 'qcloud_secret_id', \
+                'qcloud_secret_key',]
 
 class SettingMailForm(forms.ModelForm):
     class Meta:

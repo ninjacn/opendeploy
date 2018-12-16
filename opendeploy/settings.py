@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'cmdb',
     'deploy',
     'admin',
+    'setting',
 ]
 
 MIDDLEWARE = [

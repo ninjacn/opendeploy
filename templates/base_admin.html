@@ -159,18 +159,19 @@
           </ul>
         </li>
 
-        <li class="treeview {% if request.path|startswith:'/admin/deploy/setting' %} active {% endif %}">
+        <li class="treeview {% if request.path|startswith:'/admin/setting/' %} active {% endif %}">
           <a href="#"><i class="fa fa-cogs"></i> <span>设置</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
           </a>
           <ul class="treeview-menu">
-              <li><a href="{% url 'admin:setting'%}"><i class="fa fa-circle-o"></i>通用</a></li>
-            <li><a href="{% url 'admin:setting_mail'%}"><i class="fa fa-circle-o"></i>邮件通知</a></li>
+              <li><a href="{% url 'admin:setting.general' %}"><i class="fa fa-circle-o"></i>通用</a></li>
+            <li><a href="{% url 'admin:setting.mail' %}"><i class="fa fa-circle-o"></i>邮件通知</a></li>
+            <li><a href="{% url 'admin:setting.public_cloud' %}"><i class="fa fa-circle-o"></i>公有云</a></li>
           </ul>
         </li>
-        <li><a href="/"><i class="fa fa-smile-o"></i> <span>返回站点</span></a></li>
+        <li><a href="{% url 'deploy:homepage' %}"><i class="fa fa-smile-o"></i> <span>返回站点</span></a></li>
 
       </ul>
       <!-- /.sidebar-menu -->
@@ -190,7 +191,7 @@
     <section class="content container-fluid">
         {% if messages %}
             {% for message in messages %}
-                <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}info{% endif %}">
+                <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}success{% endif %}">
                     <p>{{ message }}</p>
                 </div>
             {% endfor %}

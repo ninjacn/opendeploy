@@ -6,12 +6,10 @@ from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from admin.forms import AddEnvForm, SettingForm, SettingMailForm, \
-        AddProjectForm
+from admin.forms import AddEnvForm, AddProjectForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
-        Credentials, SettingMail, Setting
+        Credentials
 from cmdb.models import HostGroup
-from deploy.services import SettingService
 
 # Create your views here.
 
@@ -206,56 +204,3 @@ def credential_edit(request, gid):
         "auth_type": auth_type,
     })
 
-@user_passes_test(lambda u: u.is_superuser)
-@transaction.atomic
-def setting(request):
-    if request.method== 'POST':
-        f = SettingForm(request.POST)
-        if f.is_valid():
-            try:
-                cleaned_data = f.cleaned_data
-                Setting.objects.all().delete()
-                setting = Setting()
-                setting.enable_register = cleaned_data['enable_register']
-                setting.save()
-                messages.info(request, '修改成功')
-            except:
-                messages.error(request, '修改失败')
-            finally:
-                return redirect('admin:setting')
-    else:
-        f = SettingForm()
-    return render(request, 'admin/deploy/setting.html', {
-        "form": f,
-        })
-
-@user_passes_test(lambda u: u.is_superuser)
-@transaction.atomic
-def setting_mail(request):
-    if request.method== 'POST':
-        f = SettingMailForm(request.POST)
-        if f.is_valid():
-            cleaned_data = f.cleaned_data
-            try:
-                SettingMail.objects.all().delete()
-                settingMail = SettingMail()
-                settingMail.from_email = cleaned_data['from_email']
-                settingMail.host = cleaned_data['host']
-                settingMail.port = cleaned_data['port']
-                settingMail.username = cleaned_data['username']
-                settingMail.password = cleaned_data['password']
-                settingMail.use_tls = cleaned_data['use_tls']
-                settingMail.save()
-                messages.info(request, '修改成功')
-            except:
-                messages.error(request, '修改失败')
-            finally:
-                return redirect('admin:setting_mail')
-    else:
-        f = SettingMailForm()
-        settingService = SettingService()
-        mail_info = settingService.get_mail_info()
-    return render(request, 'admin/deploy/setting_mail.html', {
-        "form": f,
-        "mail_info": mail_info,
-        })

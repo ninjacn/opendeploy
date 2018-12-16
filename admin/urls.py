@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 
-from admin.views import deploy, cmdb, accounts
+from admin.views import deploy, cmdb, accounts, setting
 
 app_name = 'admin'
 urlpatterns = [
@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^cmdb/hostgroup/edit/(?P<gid>\d+)$', cmdb.hostgroup_edit, name='cmdb.hostgroup_edit'),
 
     # setting
-    url(r'^deploy/setting$', deploy.setting, name='setting'),
-    url(r'^deploy/setting/mail$', deploy.setting_mail, name='setting_mail'),
+    url(r'^setting/general$', setting.general, name='setting.general'),
+    url(r'^setting/mail$', setting.mail, name='setting.mail'),
+    url(r'^setting/public_cloud$', setting.public_cloud, name='setting.public_cloud'),
 ]

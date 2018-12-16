@@ -5,5 +5,5 @@ from . import views
 app_name='deploy'
 
 urlpatterns = [
-    url(r'^$', views.index),
+    url(r'^$', views.index, name='homepage'),
 ]

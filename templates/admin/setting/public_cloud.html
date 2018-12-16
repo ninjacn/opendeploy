@@ -1,0 +1,61 @@
+{% extends 'base_admin.html' %}
+
+{% block content-header %}
+      <h1>
+        设置
+        <small></small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><a href="{% url 'admin:homepage' %}"><i class="fa fa-home"></i>首页</a></li>
+        <li class="active">设置 - 公有云</li>
+      </ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">设置表单</h3>
+            </div>
+            <!-- /.box-header -->
+            <!-- form start -->
+            <form role="form" method="post" action="">
+                {% csrf_token %}
+                <div class="box-body">
+
+                    <div class="form-group {% if form.aliyun_access_key_id.errors %} has-error {% endif %}">
+                        <label for="aliyun_access_key_id">{{ form.aliyun_access_key_id.label }}</label>
+                        <input type="text" name="aliyun_access_key_id" class="form-control" placeholder="{{ form.aliyun_access_key_id.help_text }}" value="{% if info.aliyun_access_key_id %}{{ info.aliyun_access_key_id }}{% else %}{% if form.aliyun_access_key_id.value %}{{ form.aliyun_access_key_id.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.aliyun_access_key_id.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.aliyun_access_key_secret.errors %} has-error {% endif %}">
+                        <label for="aliyun_access_key_secret">{{ form.aliyun_access_key_secret.label }}</label>
+                        <input type="text" name="aliyun_access_key_secret" class="form-control" placeholder="{{ form.aliyun_access_key_secret.help_text }}" value="{% if info.aliyun_access_key_secret %}{{ info.aliyun_access_key_secret }}{% else %}{% if form.aliyun_access_key_secret.value %}{{ form.aliyun_access_key_secret.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.aliyun_access_key_secret.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.qcloud_secret_id.errors %} has-error {% endif %}">
+                        <label for="qcloud_secret_id">{{ form.qcloud_secret_id.label }}</label>
+                        <input type="text" name="qcloud_secret_id" class="form-control" placeholder="{{ form.qcloud_secret_id.help_text }}" value="{% if info.qcloud_secret_id %}{{ info.qcloud_secret_id }}{% else %}{% if form.qcloud_secret_id.value %}{{ form.qcloud_secret_id.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.qcloud_secret_id.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.qcloud_secret_key.errors %} has-error {% endif %}">
+                        <label for="qcloud_secret_key">{{ form.qcloud_secret_key.label }}</label>
+                        <input type="text" name="qcloud_secret_key" class="form-control" placeholder="{{ form.qcloud_secret_key.help_text }}" value="{% if info.qcloud_secret_key %}{{ info.qcloud_secret_key }}{% else %}{% if form.qcloud_secret_key.value %}{{ form.qcloud_secret_key.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.qcloud_secret_key.errors }}</span>
+                    </div>
+
+              </div>
+              <!-- /.box-body -->
+
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">保存</button>
+              </div>
+            </form>
+          </div>
+        </div>
+</div>
+{% endblock %}

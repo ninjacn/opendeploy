@@ -6,7 +6,7 @@
         <small></small>
       </h1>
       <ol class="breadcrumb">
-        <li><a href="/admin"><i class="fa fa-home"></i>首页</a></li>
+        <li><a href="{% url 'admin:homepage' %}"><i class="fa fa-home"></i>首页</a></li>
         <li class="active">设置 - 通用</li>
       </ol>
 {% endblock %}
@@ -35,7 +35,7 @@
               <!-- /.box-body -->
 
               <div class="box-footer">
-                <button type="submit" class="btn btn-primary">提交</button>
+                <button type="submit" class="btn btn-primary">保存</button>
               </div>
             </form>
           </div>

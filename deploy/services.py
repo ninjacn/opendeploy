@@ -16,10 +16,10 @@ from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from deploy.models import Project, ProjectEnvConfig, Env, Credentials, \
-        SettingMail, SettingLdap, Setting
+from deploy.models import Project, ProjectEnvConfig, Env, Credentials
 from cmdb.models import Host
 from opendeploy import settings
+from setting.services import SettingService
 
 
 class VcsServiceBase:
@@ -255,24 +255,6 @@ class EnvService():
 
     def get_all(self):
         return Env.objects.all()
-
-class SettingService():
-    def get_mail_info(self):
-        allinfo = SettingMail.objects.all()
-        if allinfo:
-            for info in allinfo:
-                return info
-
-    def get_ldap_info(self):
-        allinfo = SettingLdap.objects.all()
-        if allinfo:
-            for info in allinfo:
-                return info
-    def is_enable_register(self):
-        allinfo = Setting.objects.all()
-        if allinfo:
-            for info in allinfo:
-                return info.enable_register
 
 class MailService():
     def __init__(self):
