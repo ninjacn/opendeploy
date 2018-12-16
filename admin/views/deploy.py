@@ -6,7 +6,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from admin.forms import AddEnvForm, AddProjectForm
+from admin.forms import AddEnvForm, AddProjectForm, AddCredentialForPasswordForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials
 from cmdb.models import HostGroup

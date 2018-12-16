@@ -3,6 +3,13 @@ from django.db import models
 
 # Create your models here.
 
+ALIYUN = 'aliyun'
+QCLOUD = 'qcloud'
+PUBLIC_CLOUD_CHOICES = (
+    (ALIYUN, '阿里云'),
+    (QCLOUD, '腾讯云'),
+)
+
 class Host(models.Model):
     STATUS_ENABLED = '1'
     STATUS_DISABLED = '0'

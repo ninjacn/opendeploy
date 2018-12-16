@@ -106,3 +106,8 @@ class UserEditForm(forms.Form):
         user = User.objects.filter(~Q(id=self.user.id) & Q(email=email))
         if user:
             self.add_error('email', email + ' - 该邮箱已经存在')
+
+# 从公有云导入
+class ImportFromPublicCloudForm(forms.Form):
+    provider = forms.CharField()
+    region = forms.CharField()

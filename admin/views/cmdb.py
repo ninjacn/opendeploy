@@ -5,9 +5,10 @@ from django.template.response import TemplateResponse
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm
+from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm, \
+        ImportFromPublicCloudForm
 from deploy.models import Env
-from cmdb.models import Host, HostGroup
+from cmdb.models import Host, HostGroup, PUBLIC_CLOUD_CHOICES
 
 # Create your views here.
 
@@ -139,3 +140,20 @@ def hostgroup_edit(request, gid):
         "hosts": Host.objects.filter(status=Host.STATUS_ENABLED),
         "status_choices": HostGroup.STATUS_CHOICES,
     })
+
+@user_passes_test(lambda u: u.is_superuser)
+def import_from_public_cloud(request):
+    if request.method== 'POST':
+        f = ImportFromPublicCloudForm(request.POST)
+        if f.is_valid():
+            cleaned_data = f.cleaned_data
+            try:
+                pass
+            finally:
+                return redirect('admin:cmdb.host')
+    else:
+        f = ImportFromPublicCloudForm()
+    return render(request, 'admin/cmdb/import_from_public_cloud.html', {
+        "form": f,
+        "public_cloud_choices": PUBLIC_CLOUD_CHOICES,
+        })
