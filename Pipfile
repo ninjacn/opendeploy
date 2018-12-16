@@ -14,8 +14,10 @@ django-celery-results = "*"
 gitpython = "==2.1.11"
 svn = "*"
 tencentcloud-sdk-python = "*"
+aliyun-python-sdk-core-v3 = "*"
+aliyun-python-sdk-ecs = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
