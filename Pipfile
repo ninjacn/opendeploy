@@ -13,6 +13,7 @@ celery = "==4.2.1"
 django-celery-results = "*"
 gitpython = "==2.1.11"
 svn = "*"
+tencentcloud-sdk-python = "*"
 
 [dev-packages]
 
