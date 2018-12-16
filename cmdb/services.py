@@ -6,10 +6,7 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentClo
 from tencentcloud.cvm.v20170312 import cvm_client, models 
 
 from aliyunsdkcore.client import AcsClient
-from aliyunsdkcore.acs_exception.exceptions import ClientException
-from aliyunsdkcore.acs_exception.exceptions import ServerException
-from aliyunsdkecs.request.v20140526 import DescribeInstancesRequest
-from aliyunsdkecs.request.v20140526 import StopInstanceRequest
+from aliyunsdkcore.request import CommonRequest
 
 from setting.services import SettingService
 
@@ -19,27 +16,36 @@ class Qcloud():
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
+        self.cred = credential.Credential(self.key, self.secret) 
+        self.httpProfile = HttpProfile()
+        self.httpProfile.endpoint = "cvm.tencentcloudapi.com"
+        self.clientProfile = ClientProfile()
+        self.clientProfile.httpProfile = self.httpProfile
     
     def get_all_region(self):
-        pass
+        try: 
+            client = cvm_client.CvmClient(self.cred, "", self.clientProfile) 
+
+            req = models.DescribeRegionsRequest()
+            params = '{}'
+            req.from_json_string(params)
+
+            resp = client.DescribeRegions(req) 
+            return resp.to_json_string()
+        except TencentCloudSDKException as err: 
+            print(err)
 
     def get_allhost(self, region="ap-beijing"):
         self.region = region
         try: 
-            cred = credential.Credential(self.key, self.secret) 
-            httpProfile = HttpProfile()
-            httpProfile.endpoint = "cvm.tencentcloudapi.com"
-
-            clientProfile = ClientProfile()
-            clientProfile.httpProfile = httpProfile
-            client = cvm_client.CvmClient(cred, self.region, clientProfile) 
+            client = cvm_client.CvmClient(self.cred, self.region, self.clientProfile) 
 
             req = models.DescribeHostsRequest()
             params = '{}'
             req.from_json_string(params)
 
             resp = client.DescribeHosts(req) 
-            print(resp.to_json_string()) 
+            return resp.to_json_string()
 
         except TencentCloudSDKException as err: 
             print(err) 
@@ -49,22 +55,33 @@ class Aliyun():
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
+        self.client = AcsClient(
+                self.key,
+                self.secret,
+                'cn-beijing',
+        )
+        self.request = CommonRequest()
+        self.request.set_accept_format('json')
+        self.request.set_domain('ecs.aliyuncs.com')
+        self.request.set_method('POST')
+        self.request.set_version('2014-05-26')
 
     def get_all_region(self):
-        pass
+        try: 
+            self.request.set_action_name('DescribeRegions')
+
+            return self.client.do_action(self.request)
+            # python2:  print(response) 
+            # print(str(response, encoding = 'utf-8'))
+        except: 
+            pass
     
     def get_allhost(self, region="cn-beijing"):
         self.region = region
-        try: 
-            client = AcsClient(
-                    self.key,
-                    self.secret,
-                    self.region,
-            )
-            request = DescribeInstancesRequest.DescribeInstancesRequest()
-            request.set_PageSize(10)
+        try:
+            self.request.set_action_name('DescribeInstances')
+            self.request.add_query_param('RegionId', self.region)
 
-            response = client.do_action_with_exception(request)
-            print(response)
-        except: 
+            return self.client.do_action(self.request)
+        except:
             pass
