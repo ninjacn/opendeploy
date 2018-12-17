@@ -6,3 +6,4 @@
 node_modules/
 test_*.py
 test.py
+site/

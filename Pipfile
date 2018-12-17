@@ -15,7 +15,8 @@ gitpython = "==2.1.11"
 svn = "*"
 tencentcloud-sdk-python = "*"
 aliyun-python-sdk-core-v3 = "*"
-aliyun-python-sdk-ecs = "*"
+sphinx = "*"
+mkdocs = "*"
 
 [dev-packages]
 
