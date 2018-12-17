@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.response import TemplateResponse

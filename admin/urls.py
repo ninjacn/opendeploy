@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
 from django.conf.urls import url
 
 from admin.views import deploy, cmdb, accounts, setting

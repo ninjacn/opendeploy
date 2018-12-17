@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
 import os
 import logging
 import json

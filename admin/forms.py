@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django import forms
