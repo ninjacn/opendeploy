@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
+import json
+
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.template.response import TemplateResponse
+from django.http import HttpResponse, JsonResponse
+from django.template.response import TemplateResponse 
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm, \
         ImportFromPublicCloudForm
 from deploy.models import Env
-from cmdb.models import Host, HostGroup, PUBLIC_CLOUD_CHOICES
+from cmdb.models import Host, HostGroup, PUBLIC_CLOUD_CHOICES, ALIYUN, QCLOUD
+from setting.services import SettingService
+from cmdb.services import QcloudService, AliyunService
+from cmdb.models import Host, ALIYUN, QCLOUD
 
 # Create your views here.
 
@@ -157,3 +165,117 @@ def import_from_public_cloud(request):
         "form": f,
         "public_cloud_choices": PUBLIC_CLOUD_CHOICES,
         })
+
+@user_passes_test(lambda u: u.is_superuser)
+def get_region_list(request):
+    provider = request.GET.get('provider')
+    settingService = SettingService()
+    auth_info = settingService.get_public_cloud_info()
+    res = []
+    if provider == ALIYUN:
+        aliyun = AliyunService(auth_info.aliyun_access_key_id, auth_info.aliyun_access_key_secret)
+        json_data = json.loads(aliyun.get_all_region())
+        try:
+            regions = json_data['Regions']['Region']
+            if regions:
+                for region in regions:
+                    tmp = {}
+                    tmp['id'] = region['RegionId']
+                    tmp['name'] = region['LocalName']
+                    res.append(tmp)
+        except:
+            pass
+    elif provider == QCLOUD:
+        qcloud = QcloudService(auth_info.qcloud_secret_id, auth_info.qcloud_secret_key)
+        json_data = json.loads(qcloud.get_all_region())
+        try:
+            regions = json_data['RegionSet']
+            if regions:
+                for region in regions:
+                    tmp = {}
+                    tmp['id'] = region['Region']
+                    tmp['name'] = region['RegionName']
+                    res.append(tmp)
+        except:
+            pass
+    else:
+        pass
+    return JsonResponse(res, safe=False)
+
+@user_passes_test(lambda u: u.is_superuser)
+def import_from_public_cloud_as_api(request):
+    provider = request.GET.get('provider')
+    region = request.GET.get('region')
+    settingService = SettingService()
+    auth_info = settingService.get_public_cloud_info()
+    count = 0
+    vps_list = []
+    if provider == ALIYUN:
+        aliyun = AliyunService(auth_info.aliyun_access_key_id, auth_info.aliyun_access_key_secret)
+        json_data = json.loads(aliyun.get_allhost(region))
+        if ('TotalCount' in json_data) and (json_data['TotalCount'] > 0):
+            instances = json_data['Instances']['Instance']
+            for item in instances:
+                try:
+                    ipaddr = item['VpcAttributes']['PrivateIpAddress']['IpAddress'][0]
+                except:
+                    continue
+
+                try:
+                    host = Host.objects.get(ipaddr=ipaddr)
+                    host.hostname = item['HostName']
+                    host.comment = item['Description']
+                    if item['Status'] == 'Running':
+                        host.status = Host.STATUS_ENABLED
+                    else:
+                        host.status = Host.STATUS_DISABLED
+                    host.save()
+                except:
+                    host = Host()
+                    host.provider = ALIYUN
+                    host.ipaddr = ipaddr
+                    host.hostname = item['HostName']
+                    host.instance_id = item['InstanceId']
+                    host.comment = item['Description']
+                    if item['Status'] == 'Running':
+                        host.status = Host.STATUS_ENABLED
+                    else:
+                        host.status = Host.STATUS_DISABLED
+                    host.save()
+                finally:
+                    count += 1
+                    vps_list.append(ipaddr + '-' + item['HostName'])
+
+    elif provider == QCLOUD:
+        qcloud = QcloudService(auth_info.qcloud_secret_id, auth_info.qcloud_secret_key)
+        try:
+            json_data = json.loads(qcloud.get_allhost(region))
+            if ('TotalCount' in json_data) and (json_data['TotalCount'] > 0):
+                instances = json_data['InstanceSet']
+                for item in instances:
+                    try:
+                        ipaddr = item['PrivateIpAddresses'][0]
+                    except:
+                        continue
+
+                    try:
+                        host = Host.objects.get(ipaddr=ipaddr)
+                        host.hostname = item['InstanceName']
+                        host.save()
+                    except:
+                        host = Host()
+                        host.provider = QCLOUD
+                        host.ipaddr = ipaddr
+                        host.hostname = item['InstanceName']
+                        host.instance_id = item['InstanceId']
+                        host.status = Host.STATUS_ENABLED
+                        host.save()
+                    finally:
+                        count += 1
+                        vps_list.append(ipaddr + '-' + item['InstanceName'])
+        except:
+            pass
+    else:
+        pass
+    res = {'count':count, 'vps_list':vps_list}
+    return JsonResponse(res, safe=False)

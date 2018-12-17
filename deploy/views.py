@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -10,6 +11,8 @@ from deploy.models import Project
 from opendeploy import settings
 from .services import GitService, SvnService, DeployService, \
         ProjectService, EnvService, SettingService, MailService
+
+from cmdb.services import QcloudService, AliyunService
 
 # Create your views here.
 logging.basicConfig(
@@ -31,6 +34,4 @@ def index(request):
 
 def test(request):
     # d = DeployService(9, 4)
-    mailService = MailService()
-    mailService.send_mail()
     return HttpResponse('hello world')

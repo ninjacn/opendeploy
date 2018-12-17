@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
 from tencentcloud.common import credential
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
@@ -11,7 +14,7 @@ from aliyunsdkcore.request import CommonRequest
 from setting.services import SettingService
 
 
-class Qcloud():
+class QcloudService():
 
     def __init__(self, key, secret):
         self.key = key
@@ -50,7 +53,7 @@ class Qcloud():
         except TencentCloudSDKException as err: 
             print(err) 
 
-class Aliyun():
+class AliyunService():
 
     def __init__(self, key, secret):
         self.key = key

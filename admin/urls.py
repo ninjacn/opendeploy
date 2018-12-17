@@ -32,6 +32,8 @@ urlpatterns = [
     url(r'^cmdb/hostgroup/add$', cmdb.hostgroup_add, name='cmdb.hostgroup_add'),
     url(r'^cmdb/hostgroup/edit/(?P<gid>\d+)$', cmdb.hostgroup_edit, name='cmdb.hostgroup_edit'),
     url(r'^cmdb/import_from_public_cloud$', cmdb.import_from_public_cloud, name='cmdb.import_from_public_cloud'),
+    url(r'^cmdb/get_region_list$', cmdb.get_region_list, name='cmdb.get_region_list'),
+    url(r'^cmdb/import_from_public_cloud_as_api$', cmdb.import_from_public_cloud_as_api, name='cmdb.import_from_public_cloud_as_api'),
 
     # setting
     url(r'^setting/general$', setting.general, name='setting.general'),

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Author: Pengming Yao<x@ninjacn.com>
+# Date created: 2018-12-16
+
 from .models import SettingMail, SettingLdap, SettingGeneral, SettingPublicCloud
 from cmdb.models import Host
 from opendeploy import settings
