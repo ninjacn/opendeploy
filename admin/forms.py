@@ -2,6 +2,7 @@
 # Author: Pengming Yao<x@ninjacn.com>
 # Date created: 2018-12-16
 
+from django.core.validators import validate_ipv4_address
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django import forms
@@ -16,8 +17,10 @@ class AddEnvForm(forms.Form):
     comment = forms.CharField(required=False)
 
 class AddHostForm(forms.Form):
-    ipaddr = forms.CharField()
+    ipaddr = forms.CharField(validators=[validate_ipv4_address],)
+    provider = forms.CharField()
     hostname = forms.CharField(required=False)
+    root_password = forms.CharField(required=False)
     status = forms.ChoiceField(choices=Host.STATUS_CHOICES)
     comment = forms.CharField(required=False)
 

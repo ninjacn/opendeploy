@@ -4,6 +4,7 @@
 
 import json
 
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse 
@@ -37,10 +38,15 @@ def host_add(request):
             try:
                 host = Host()
                 host.ipaddr = cleaned_data['ipaddr']
+                host.provider = cleaned_data['provider']
+                host.root_password = cleaned_data['root_password']
                 host.hostname = cleaned_data['hostname']
                 host.status = cleaned_data['status']
                 host.comment = cleaned_data['comment']
                 host.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
             finally:
                 return redirect('/admin/cmdb/host')
     else:
@@ -48,6 +54,7 @@ def host_add(request):
     return render(request, 'admin/cmdb/add_host.html', {
         "form": f,
         "status_choices": Host.STATUS_CHOICES,
+        "provider_choices": Host.PROVIDER_CHOICES,
     })
 
 @user_passes_test(lambda u: u.is_superuser)

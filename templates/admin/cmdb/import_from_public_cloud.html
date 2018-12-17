@@ -82,17 +82,18 @@
             var provider = $("#provider").val();
             var region = $("#region").val();
             url = "/admin/cmdb/import_from_public_cloud_as_api?provider=" + provider + '&region=' + region
+            var $select = $("#import_list"); 
             $.ajax({
                 type: "GET",
                 url: url,
                 dataType: "json",
                 beforeSend: function() {
                     $("#importBtn").text('导入中,请稍候...')
+                    $select.find('li').remove(); 
                 }
             }).done(function(data) {
                 $("#import_res").removeClass('hide')
                 $("#import_count").text(data.count)
-                var $select = $("#import_list"); 
                 $.each(data.vps_list, function(key, value) {
                     $select.append('<li>' + value + '</li>');
                 })
