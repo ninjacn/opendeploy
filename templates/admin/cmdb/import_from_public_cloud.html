@@ -26,7 +26,7 @@
 
                     <div class="form-group {% if form.provider.errors %} has-error {% endif %}">
                         <label for="provider">服务商</label>
-                        <select class="form-control" name="provider">
+                        <select class="form-control" name="provider" id="provider">
                             {% for item in public_cloud_choices %}
                             <option value="{{ item.0 }}">{{ item.1 }}</option>
                             {% endfor %}
@@ -36,7 +36,7 @@
 
                     <div class="form-group">
                         <label for="region">选择区域</label>
-                        <select class="form-control" name="region">
+                        <select class="form-control" name="region" id="region">
                         </select>
                         <span class="help-block"></span>
                     </div>
@@ -45,10 +45,72 @@
               <!-- /.box-body -->
 
               <div class="box-footer">
-                <button type="submit" class="btn btn-primary">导入</button>
+                <button type="button" id="importBtn" class="btn btn-primary">导入</button>
+                <div class="hide" id="import_res">
+                    成功导入<span id="import_count"></span>条记录. 
+                    <ul id="import_list"></ul>
+                </div>
               </div>
             </form>
           </div>
         </div>
 </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function get_region_list() {
+            var provider = $("#provider").val();
+            url = "/admin/cmdb/get_region_list?provider=" + provider
+            var $select = $('#region'); 
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType: "json",
+                beforeSend: function() {
+                    $select.find('option').remove(); 
+                }
+            }).done(function(data) {
+                $.each(data, function(key, value) {
+                    $select.append('<option value="' + value.id + '">' + value.name + '</option>');
+                })
+            }).fail(function(data,textStatus, xhr) {
+                alert("获取地区信息出错！");
+            });
+        }
+        function import_from_public_cloud() {
+            var provider = $("#provider").val();
+            var region = $("#region").val();
+            url = "/admin/cmdb/import_from_public_cloud_as_api?provider=" + provider + '&region=' + region
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType: "json",
+                beforeSend: function() {
+                    $("#importBtn").text('导入中,请稍候...')
+                }
+            }).done(function(data) {
+                $("#import_res").removeClass('hide')
+                $("#import_count").text(data.count)
+                var $select = $("#import_list"); 
+                $.each(data.vps_list, function(key, value) {
+                    $select.append('<li>' + value + '</li>');
+                })
+                $("#importBtn").text('导入')
+            }).fail(function(data,textStatus, xhr) {
+                $("#importBtn").text('导入')
+                alert("导入出错！");
+            });
+        }
+        $(function () {
+            get_region_list();
+        })
+
+        $("#provider").change(function() {
+            get_region_list();
+        })
+        $("#importBtn").click(function() {
+            import_from_public_cloud();
+        })
+    </script>
 {% endblock %}
