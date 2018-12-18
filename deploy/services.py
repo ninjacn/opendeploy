@@ -227,6 +227,7 @@ class DeployService():
             self.branch = self.config.branch
 
         self.all_host = self.project_obj.get_all_host(self.env_id)
+        print(self.all_host)
         if not self.all_host:
             raise RuntimeError('主机列表为空')
 
@@ -252,7 +253,7 @@ class DeployService():
 
     def run(self):
         if self.vcs.checkout() is not True:
-            raise RunntimeError(self.vcs.checkout_errmsg)
+            raise RuntimeError(self.vcs.checkout_errmsg)
 
     def release(self):
         pass

@@ -31,6 +31,7 @@ class AddHostForm(forms.Form):
 
 class AddHostGroupForm(forms.Form):
     name = forms.CharField()
+    status = forms.CharField()
     comment = forms.CharField(required=False)
 
 class EditHostGroupForm(forms.Form):
@@ -43,7 +44,7 @@ class AddProjectForm(forms.Form):
     vcs_type = forms.CharField()
     credential = forms.CharField()
     repository_url = forms.CharField()
-    dest_rootpath = forms.CharField()
+    dest_path = forms.CharField()
     deploy_mode = forms.CharField()
     status = forms.CharField()
     comment = forms.CharField(required=False)

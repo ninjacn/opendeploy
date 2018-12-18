@@ -77,7 +77,7 @@ class Project(models.Model):
     name = models.CharField('名称', max_length=255, unique=True, null=True)
     vcs_type = models.CharField('仓库类型', max_length=255, default=TYPE_GIT, choices=TYPE_CHOICES)
     repository_url = models.CharField('仓库地址', max_length=255)
-    dest_path = models.CharField('根路径', max_length=255, default='')
+    dest_path = models.CharField('项目路径', max_length=255, default='')
     credentials = models.ForeignKey(Credentials, on_delete=models.SET_NULL, related_name='credentials', null=True )
     comment = models.CharField('备注', max_length=255, default='')
     deploy_mode = models.CharField('部署模式', max_length=2, default=DEPLOY_MODE_INCREMENT, choices=DEPLOY_MODE_CHOICES)

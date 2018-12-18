@@ -45,7 +45,7 @@ def project_add(request):
                 project.vcs_type = cleaned_data['vcs_type']
                 project.repository_url = cleaned_data['repository_url']
                 project.credentials = Credentials.objects.get(id=cleaned_data['credential'])
-                project.dest_rootpath = cleaned_data['dest_rootpath']
+                project.dest_path = cleaned_data['dest_path']
                 project.comment = cleaned_data['comment']
                 project.deploy_mode = cleaned_data['deploy_mode']
                 project.status = cleaned_data['status']
@@ -56,7 +56,7 @@ def project_add(request):
                 if envs:
                     for env in envs:
                         projectEnvConfig = ProjectEnvConfig()
-                        projectEnvConfig.pid = project.id
+                        projectEnvConfig.project = project
                         projectEnvConfig.env = Env.objects.get(pk=env)
                         projectEnvConfig.branch = request.POST.get('branch_' + env)
                         projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + env))
@@ -80,6 +80,11 @@ def project_add(request):
 def project_edit(request, gid):
     project = Project.objects.get(pk=gid)
     projectEnvConfig = ProjectEnvConfig.objects.filter(project=project)
+    # 该项目环境id列表
+    env_list_by_project = []
+    for v in projectEnvConfig:
+        env_list_by_project.append(v.env.id)
+
     if request.method== 'POST':
         f = AddProjectForm(request.POST)
         if f.is_valid():
@@ -89,7 +94,7 @@ def project_edit(request, gid):
                 project.vcs_type = cleaned_data['vcs_type']
                 project.repository_url = cleaned_data['repository_url']
                 project.credentials = Credentials.objects.get(id=cleaned_data['credential'])
-                project.dest_rootpath = cleaned_data['dest_rootpath']
+                project.dest_path = cleaned_data['dest_path']
                 project.comment = cleaned_data['comment']
                 project.deploy_mode = cleaned_data['deploy_mode']
                 project.status = cleaned_data['status']
@@ -99,10 +104,23 @@ def project_edit(request, gid):
                 envs = request.POST.getlist('projectEnvConfig')
                 if envs:
                     for v in envs:
-                        config = ProjectEnvConfig.objects.get(pk=v)
-                        config.branch = request.POST.get('branch_' + v)
-                        config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
-                        config.save()
+                        # 存在更新
+                        try:
+                            config = ProjectEnvConfig.objects.get(pk=v)
+                            config.branch = request.POST.get('branch_' + v)
+                            config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            config.save()
+                        # 不存在插入
+                        except:
+                            projectEnvConfig = ProjectEnvConfig()
+                            projectEnvConfig.project = project
+                            projectEnvConfig.env = Env.objects.get(pk=v)
+                            if request.POST.get('branch_' + v):
+                                projectEnvConfig.branch = request.POST.get('branch_' + v)
+                            else:
+                                projectEnvConfig.branch = 'master'
+                            projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            projectEnvConfig.save()
             finally:
                 return redirect('/admin/deploy/project')
     else:
@@ -117,6 +135,7 @@ def project_edit(request, gid):
         "envlist": Env.objects.all(),
         "host_group": HostGroup.objects.all(),
         "credentials": Credentials.objects.all(),
+        "env_list_by_project": env_list_by_project,
     })
 
 @user_passes_test(lambda u: u.is_superuser)

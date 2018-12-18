@@ -27,7 +27,7 @@
                     <div class="form-group {% if form.name.errors %} has-error {% endif %}">
                         <label for="name">名称</label>
                         <input type="text" name="name" class="form-control" placeholder="" value="{% if form.name.value %}{{ form.name.value }}{% else %}{{ project.name }}{% endif %}" >
-                        <span class="help-block">{{ form.ipaddr.errors }}</span>
+                        <span class="help-block">{{ form.name.errors }}</span>
                     </div>
 
                     <div class="form-group {% if form.vcs_type.errors %} has-error {% endif %}">
@@ -57,10 +57,10 @@
                     </div>
 
 
-                    <div class="form-group {% if form.dest_rootpath.errors %} has-error {% endif %}">
-                        <label for="dest_rootpath">部署根目录</label>
-                        <input type="text" name="dest_rootpath" class="form-control" placeholder="" value="{% if form.dest_rootpath.value %}{{ form.dest_rootpath.value }}{% else %}{{ project.dest_rootpath }}{% endif %}">
-                        <span class="help-block">{{ form.dest_rootpath.errors }}</span>
+                    <div class="form-group {% if form.dest_path.errors %} has-error {% endif %}">
+                        <label for="dest_path">部署目录</label>
+                        <input type="text" name="dest_path" class="form-control" placeholder="" value="{% if form.dest_path.value %}{{ form.dest_path.value }}{% else %}{{ project.dest_path }}{% endif %}">
+                        <span class="help-block">{{ form.dest_path.errors }}</span>
                     </div>
 
                     <div class="form-group {% if form.deploy_mode.errors %} has-error {% endif %}">
@@ -94,10 +94,13 @@
 
           </div>
 
+            {% for env in envlist %}
+            {% if env.id in env_list_by_project %}
             {% for item in projectEnvConfig %}
+            {% if item.env.id == env.id %}
             <div class="box box-primary">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{ item.env.name }}环境{% if item.env.comment %}({{ item.env.comment }}){% endif %}</h3>
+                    <h3 class="box-title">{{ env.name }}环境{% if env.comment %}({{ env.comment }}){% endif %}</h3>
                 </div>
                 <div class="box-body">
                     <input type="hidden" name="projectEnvConfig" value="{{ item.id }}" >
@@ -119,6 +122,34 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ env.name }}环境{% if env.comment %}({{ env.comment }}){% endif %}</h3>
+                </div>
+                <div class="box-body">
+                    <input type="hidden" name="projectEnvConfig" value="{{ env.id }}" >
+                    <div class="form-group">
+                        <label for="host_group_{{ env.id }}">绑定主机组</label>
+                        <select class="form-control" name="host_group_{{ env.id }}">
+                            <option value="">选择主机组</option>
+                            {% for group in host_group %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="branch_{{ env.id }}">{{ env.name }}环境对应的分支名</label>
+                        <input type="text" name="branch_{{ env.id }}" class="form-control" placeholder="master">
+                        <span class="help-block">默认为<code>master</code></span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
             {% endfor %}
 
             <div class="box box-primary">
