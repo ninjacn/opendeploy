@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-# Author: Pengming Yao<x@ninjacn.com>
-# Date created: 2018-12-16
+#
+# (c) Pengming Yao<x@ninjacn.com>
+#
+# 2018-12-16
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code.
 
 import json
 
