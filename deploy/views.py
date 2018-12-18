@@ -37,5 +37,6 @@ def index(request):
     })
 
 def test(request):
-    # d = DeployService(9, 4)
+    d = DeployService(9, 4)
+    d.run()
     return HttpResponse('hello world')

@@ -179,6 +179,6 @@ STATICFILES_DIRS = [
 CELERY_RESULT_BACKEND = 'django-db'
 
 # WORKSPACE_PATH = os.path.join(BASE_DIR, "storage/workspace")
-WORKSPACE_PATH = "/tmp/opendeploy"
+WORKSPACE_PATH = "~/.opendeploy/workspace"
 
 LOGIN_REDIRECT_URL = '/accounts/login'

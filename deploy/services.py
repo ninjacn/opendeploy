@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-# Author: Pengming Yao<x@ninjacn.com>
-# Date created: 2018-12-16
+#
+# (c) Pengming Yao<x@ninjacn.com>
+#
+# 2018-12-16
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code.
 
 import os
 import sys
@@ -203,13 +208,16 @@ class ProjectService(object):
             raise RuntimeError('项目配置不存在。')
 
 class DeployService():
-    rsync_prefix = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDK '
-    rsync_exclude_parms = ' --exclude=.git/ --exclude=.svn/ '
-
-    ssh_prefix = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
-
-
     def __init__(self, pid, env_id):
+        self.workspace_path = os.path.expanduser(settings.WORKSPACE_PATH)
+        if os.path.exists(self.workspace_path) == False:
+            os.makedirs(self.workspace_path)
+
+        self.rsync_prefix = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDK '
+        self.rsync_exclude_parms = ' --exclude=.git/ --exclude=.svn/ '
+
+        self.ssh_prefix = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
+
         self.pid = pid
         self.env_id = env_id
         self.project_obj = ProjectService(self.pid)
@@ -221,10 +229,6 @@ class DeployService():
         self.all_host = self.project_obj.get_all_host(self.env_id)
         if not self.all_host:
             raise RuntimeError('主机列表为空')
-
-        self.workspace_path = settings.WORKSPACE_PATH 
-        if os.path.exists(self.workspace_path) == False:
-            os.makedirs(self.workspace_path)
 
         if self.project.vcs_type == Project.TYPE_GIT:
             self.working_dir = os.path.join(self.workspace_path, str(self.pid) \
@@ -246,13 +250,12 @@ class DeployService():
                     password=self.project.credentials.password)
 
 
-        def run(self):
-            co = self.vcs.checkout()
-            if co == False:
-                raise RunntimeError(self.vcs.checkout_errmsg)
+    def run(self):
+        if self.vcs.checkout() is not True:
+            raise RunntimeError(self.vcs.checkout_errmsg)
 
-        def release(self):
-            pass
+    def release(self):
+        pass
 
 class EnvService():
 
