@@ -7,14 +7,18 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code.
 
+import os
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from opendeploy import settings
 
-from admin.forms import AddEnvForm, AddProjectForm, AddCredentialForPasswordForm
+from admin.forms import AddEnvForm, AddProjectForm, AddCredentialForPasswordForm, \
+        AddCredentialForPrivateForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials
 from cmdb.models import HostGroup
@@ -192,8 +196,16 @@ def credential_add(request):
                     credential.password = cleaned_data['password']
                 else:
                     credential.private_key = cleaned_data['private_key']
-                    credential.passphrase = cleaned_data['passphrase']
                 credential.save()
+
+                if auth_type != Credentials.TYPE_USER_PWD:
+                    key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + credential.id)
+                    f = open(key_path, 'w+')
+                    f.write(credential.private_key)
+                    f.close()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
             finally:
                 return redirect('/admin/deploy/credential')
     else:
@@ -201,6 +213,7 @@ def credential_add(request):
     return render(request, 'admin/deploy/add_credential.html', {
         "form": f,
         "type_choices": Credentials.TYPE_CHOICES,
+        "type_user_pwd": Credentials.TYPE_USER_PWD,
         })
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -216,7 +229,22 @@ def credential_edit(request, gid):
         if f.is_valid():
             cleaned_data = f.cleaned_data
             try:
-                pass
+                credential.type = auth_type
+                credential.username = cleaned_data['username']
+                credential.comment = cleaned_data['comment']
+                if auth_type == Credentials.TYPE_USER_PWD:
+                    credential.password = cleaned_data['password']
+                else:
+                    credential.private_key = cleaned_data['private_key']
+                credential.save()
+                if auth_type != Credentials.TYPE_USER_PWD:
+                    key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(credential.id))
+                    f = open(key_path, 'w+')
+                    f.write(credential.private_key)
+                    f.close()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
             finally:
                 return redirect('/admin/deploy/credential')
     else:
@@ -229,5 +257,6 @@ def credential_edit(request, gid):
         "credential": credential,
         "type_choices": Credentials.TYPE_CHOICES,
         "auth_type": auth_type,
+        "type_user_pwd": Credentials.TYPE_USER_PWD,
     })
 
