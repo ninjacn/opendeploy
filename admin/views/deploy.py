@@ -112,7 +112,10 @@ def project_edit(request, gid):
                         try:
                             config = ProjectEnvConfig.objects.get(pk=v)
                             config.branch = request.POST.get('branch_' + v)
-                            config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            try:
+                                config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            except:
+                                config.host_group = None
                             config.save()
                         # 不存在插入
                         except:
