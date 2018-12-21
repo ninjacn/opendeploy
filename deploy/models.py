@@ -111,6 +111,9 @@ class ProjectEnvConfig(models.Model):
 
 ''' 发布任务 '''
 class Task(models.Model):
+    ACTION_RELEASE = '0'
+    ACTION_ROLLBACK = '1'
+
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='project', null=True )
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, related_name='env', null=True )
     has_rollback = models.CharField('有无回滚', max_length=255, default='0')
