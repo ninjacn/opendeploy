@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     {% load static %}
+    {% load startswith %}
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Opendeploy</title>
@@ -32,9 +33,10 @@
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
-          <ul class="nav navbar-nav hide">
-            <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-            <li class="dropdown">
+          <ul class="nav navbar-nav">
+              <li class="{% if request.path == '/' %} active {% endif %}"><a href="{% url 'deploy:homepage' %}">发布</a></li>
+              <li class="{% if request.path|startswith:'/tasks/' %} active {% endif %}"><a href="{% url 'deploy:tasks' %}">任务</a></li>
+            <li class="dropdown hide">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
                 <li><a href="#">Action</a></li>
@@ -52,6 +54,9 @@
         <!-- Navbar Right Menu -->
         <div class="navbar-custom-menu">
           <ul class="nav navbar-nav">
+            {% if user.is_superuser %}
+            <li><a class="nav-link" href="{% url 'admin:homepage' %}" >管理后台</a></li>
+            {% endif %}
             <!-- Notifications Menu -->
             <!-- Tasks Menu -->
             <!-- User Account Menu -->
@@ -104,6 +109,7 @@
   </header>
   <!-- Full Width Column -->
   <div class="content-wrapper">
+
     <div class="container">
       <!-- Content Header (Page header) -->
       <section class="content-header">
@@ -113,10 +119,9 @@
 
       <!-- Main content -->
       <section class="content">
-
         {% if messages %}
             {% for message in messages %}
-                <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}info{% endif %}">
+                <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}success{% endif %}">
                     <p>{{ message }}</p>
                 </div>
             {% endfor %}
@@ -138,6 +143,11 @@
 
 <script src="{% static "js/common.js" %}"></script>
 <script src="{% static "js/adminlte.min.js" %}"></script>
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
 {% block script %}
 {% endblock %}
 </body>

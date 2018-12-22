@@ -68,7 +68,13 @@
                     <td>{{ item.get_vcs_type_display }}</td>
                     <td>{{ item.repository_url }}</td>
                     <td>{{ item.get_deploy_mode_display }}</td>
-                    <td>{{ item.get_status_display }}</td>
+                    <td>
+                        {% if item.status == '1' %}
+                            <span class="label label-success">{{ item.get_status_display }}</span>
+                        {% else %}
+                            <span class="label label-danger">{{ item.get_status_display }}</span>
+                        {% endif %}
+                    </td>
                     <td>{{ item.updated_at }}</td>
                     <td>
                         <a href="/admin/deploy/project/edit/{{ item.id }}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button></a>

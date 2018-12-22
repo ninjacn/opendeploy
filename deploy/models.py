@@ -116,12 +116,23 @@ class Task(models.Model):
     ACTION_RELEASE = '0'
     ACTION_ROLLBACK = '1'
 
+    STATUS_RELEASE_WAIT = '0'
+    STATUS_RELEASE_START = '1'
+    STATUS_RELEASE_FINISH = '2'
+    STATUS_RELEASE_FINISH_ERR = '3'
+    STATUS_CHOICES = (
+        (STATUS_RELEASE_WAIT, '待发布'),
+        (STATUS_RELEASE_START, '正在发布'),
+        (STATUS_RELEASE_FINISH, '发布成功'),
+        (STATUS_RELEASE_FINISH_ERR, '发布失败'),
+    )
+
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='project', null=True )
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, related_name='env', null=True )
     has_rollback = models.CharField('有无回滚', max_length=255, default='0')
     release_host_status = models.TextField('发布主机状态', default='', help_text='')
     has_rollback = models.CharField('有无回滚', max_length=255, default='0')
-    status = models.CharField('状态', max_length=255, default='0')
+    status = models.CharField('状态', max_length=16, default=STATUS_RELEASE_WAIT, choices=STATUS_CHOICES)
     comment = models.CharField('备注', max_length=255, default='')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)

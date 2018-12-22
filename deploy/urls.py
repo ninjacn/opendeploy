@@ -15,4 +15,8 @@ app_name='deploy'
 
 urlpatterns = [
     url(r'^$', views.index, name='homepage'),
+    url(r'^release$', views.release, name='release'),
+    url(r'^rollback/(?P<id>\d+)$', views.rollback, name='rollback'),
+    url(r'^tasks/$', views.tasks, name='tasks'),
+    url(r'^detail/(?P<id>\d+)$', views.detail, name='detail'),
 ]
