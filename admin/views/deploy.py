@@ -8,6 +8,8 @@
 # file that was distributed with this source code.
 
 import os
+import io
+import stat
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -22,6 +24,7 @@ from admin.forms import AddEnvForm, AddProjectForm, AddCredentialForPasswordForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials
 from cmdb.models import HostGroup
+from deploy.services import CommandService
 
 # Create your views here.
 
@@ -63,8 +66,32 @@ def project_add(request):
                         projectEnvConfig.project = project
                         projectEnvConfig.env = Env.objects.get(pk=env)
                         projectEnvConfig.branch = request.POST.get('branch_' + env)
+                        projectEnvConfig.before_hook = request.POST.get('before_hook_' + env)
+                        projectEnvConfig.after_hook = request.POST.get('after_hook_' + env)
                         projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + env))
                         projectEnvConfig.save()
+
+                        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
+                        f = open(before_hook_path, 'wb+')
+                        f.write(projectEnvConfig.before_hook)
+                        f.close()
+
+                        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
+                        f = open(after_hook_path, 'wb+')
+                        f.write(projectEnvConfig.after_hook)
+                        f.close()
+
+                        if os.path.exists(before_hook_path):
+                            os.chmod(before_hook_path, stat.S_IRWXU)
+                            command = 'dos2unix ' + before_hook_path
+                            commandService = CommandService(command)
+                            commandService.run_script()
+
+                        if os.path.exists(after_hook_path):
+                            os.chmod(after_hook_path, stat.S_IRWXU)
+                            command = 'dos2unix ' + after_hook_path
+                            commandService = CommandService(command)
+                            commandService.run_script()
             finally:
                 return redirect('/admin/deploy/project')
     else:
@@ -81,8 +108,8 @@ def project_add(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
-def project_edit(request, gid):
-    project = Project.objects.get(pk=gid)
+def project_edit(request, id):
+    project = Project.objects.get(pk=id)
     projectEnvConfig = ProjectEnvConfig.objects.filter(project=project)
     # 该项目环境id列表
     env_list_by_project = []
@@ -112,11 +139,35 @@ def project_edit(request, gid):
                         try:
                             config = ProjectEnvConfig.objects.get(pk=v)
                             config.branch = request.POST.get('branch_' + v)
+                            config.before_hook = request.POST.get('before_hook_' + v)
+                            config.after_hook = request.POST.get('after_hook_' + v)
                             try:
                                 config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
                             except:
                                 config.host_group = None
                             config.save()
+
+                            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
+                            f = open(before_hook_path, 'w')
+                            f.write(config.before_hook)
+                            f.close()
+
+                            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
+                            f = open(after_hook_path, 'w')
+                            f.write(config.after_hook)
+                            f.close()
+
+                            if os.path.exists(before_hook_path):
+                                os.chmod(before_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + before_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
+
+                            if os.path.exists(after_hook_path):
+                                os.chmod(after_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + after_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
                         # 不存在插入
                         except:
                             projectEnvConfig = ProjectEnvConfig()
@@ -127,7 +178,31 @@ def project_edit(request, gid):
                             else:
                                 projectEnvConfig.branch = 'master'
                             projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            projectEnvConfig.before_hook = request.POST.get('before_hook_' + v)
+                            projectEnvConfig.after_hook = request.POST.get('after_hook_' + v)
                             projectEnvConfig.save()
+
+                            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
+                            f = open(before_hook_path, 'w')
+                            f.write(projectEnvConfig.before_hook)
+                            f.close()
+
+                            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
+                            f = open(after_hook_path, 'w')
+                            f.write(projectEnvConfig.after_hook)
+                            f.close()
+
+                            if os.path.exists(before_hook_path):
+                                os.chmod(before_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + before_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
+
+                            if os.path.exists(after_hook_path):
+                                os.chmod(after_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + after_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
             finally:
                 return redirect('/admin/deploy/project')
     else:
@@ -144,6 +219,17 @@ def project_edit(request, gid):
         "credentials": Credentials.objects.all(),
         "env_list_by_project": env_list_by_project,
     })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def project_del(request, id):
+    try:
+        project = Project.objects.get(id=id)
+        project.delete()
+        messages.info(request, '删除成功')
+    except:
+        messages.error(request, '删除失败')
+    return redirect('admin:deploy.project')
 
 @user_passes_test(lambda u: u.is_superuser)
 def env(request):
@@ -171,6 +257,42 @@ def env_add(request):
     return render(request, 'admin/deploy/env_add.html', {
         "form": f,
         })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def env_edit(request, id):
+    env = Env.objects.get(pk=id)
+    if request.method== 'POST':
+        f = AddEnvForm(request.POST)
+        if f.is_valid():
+            cleaned_data = f.cleaned_data
+            try:
+                env.name = cleaned_data['name']
+                env.comment = cleaned_data['comment']
+                env.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:deploy.env')
+    else:
+        f = AddEnvForm()
+    return render(request, 'admin/deploy/edit_env.html', {
+        "form": f,
+        "env": env,
+    })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def env_del(request, id):
+    try:
+        env = Env.objects.get(id=id)
+        env.delete()
+        messages.info(request, '删除成功')
+    except:
+        messages.error(request, '删除失败')
+    return redirect('admin:deploy.env')
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def credential(request):
@@ -221,8 +343,8 @@ def credential_add(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
-def credential_edit(request, gid):
-    credential = Credentials.objects.get(pk=gid)
+def credential_edit(request, id):
+    credential = Credentials.objects.get(pk=id)
     auth_type = credential.type
     if request.method== 'POST':
         if auth_type == Credentials.TYPE_USER_PWD:
@@ -262,4 +384,15 @@ def credential_edit(request, gid):
         "auth_type": auth_type,
         "type_user_pwd": Credentials.TYPE_USER_PWD,
     })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def credential_del(request, id):
+    try:
+        credentials = Credentials.objects.get(id=id)
+        credentials.delete()
+        messages.info(request, '删除成功')
+    except:
+        messages.error(request, '删除失败')
+    return redirect('admin:deploy.credential')
 

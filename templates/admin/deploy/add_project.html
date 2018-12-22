@@ -111,10 +111,23 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="branch_{{ env.id }}">{{ env.name }}环境对应的分支名</label>
+                        <label for="branch_{{ env.id }}">对应分支名</label>
                         <input type="text" name="branch_{{ env.id }}" class="form-control" placeholder="master" value="master">
                         <span class="help-block">默认为<code>master</code></span>
                     </div>
+
+                    <div class="form-group">
+                        <label for="before_hook">发布前钩子</label>
+                        <textarea class="form-control" rows="5" name="before_hook_{{ env.id }}" placeholder="可以是任意脚本语言，只要目标机器支持。比如bash shell, php,python等"></textarea>
+                        <span class="help-block"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="after_hook">发布后钩子</label>
+                        <textarea class="form-control" rows="5" name="after_hook_{{ env.id }}" placeholder="可以是任意脚本语言，只要目标机器支持。比如bash shell, php,python等"></textarea>
+                        <span class="help-block"></span>
+                    </div>
+
                 </div>
             </div>
             {% endfor %}

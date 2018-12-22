@@ -24,11 +24,21 @@ from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from deploy.models import Project, ProjectEnvConfig, Env, Credentials
+from deploy.models import Project, ProjectEnvConfig, Env, Credentials, Task
 from cmdb.models import Host
 from opendeploy import settings
 from setting.services import SettingService
 
+
+class CommandService():
+    def __init__(self, command):
+        self.command = command
+
+    def run_script(self):
+        completed = subprocess.run(self.command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.returncode = completed.returncode
+        self.stdout = completed.stdout
+        self.stderr = completed.stderr
 
 class VcsServiceBase:
     def __init__(self, url, working_dir):
@@ -54,9 +64,17 @@ class GitService(VcsServiceBase):
             self.url = u.scheme + '://' + kwargs['username'] + ':' + kwargs['password'] + '@' \
                     + u.netloc + u.path
 
+        if self.auth_type == Credentials.TYPE_USER_PRIVATE_KEY:
+            self.private_key_path = kwargs['private_key_path']
+            if os.path.exists(self.private_key_path) == False:
+                raise RuntimeError('私钥不存在:' + private_key_path)
+
+
     def checkout(self):
         # git version >= 2.3
-        git_ssh_cmd = 'ssh -i %s' % '/Users/yaopengming/.ssh/id_rsa'
+        git_ssh_cmd = ''
+        if self.auth_type == Credentials.TYPE_USER_PRIVATE_KEY:
+            git_ssh_cmd = 'ssh -i %s' % self.private_key_path
         if os.path.isdir(self.working_dir):
             repo = Repo(self.working_dir)
             with repo.git.custom_environment(GIT_SSH_COMMAND=git_ssh_cmd):
@@ -208,18 +226,20 @@ class ProjectService(object):
             raise RuntimeError('项目配置不存在。')
 
 class DeployService():
-    def __init__(self, pid, env_id):
+    def __init__(self, pid, env_id, mode=Project.DEPLOY_MODE_INCREMENT, action=Task.ACTION_RELEASE):
         self.workspace_path = os.path.expanduser(settings.WORKSPACE_PATH)
         if os.path.exists(self.workspace_path) == False:
             os.makedirs(self.workspace_path)
 
-        self.rsync_prefix = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDK '
+        self.rsync_prefix = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDKv '
         self.rsync_exclude_parms = ' --exclude=.git/ --exclude=.svn/ '
 
         self.ssh_prefix = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
 
         self.pid = pid
         self.env_id = env_id
+        self.mode = mode
+        self.action = action
         self.project_obj = ProjectService(self.pid)
         self.project = self.project_obj.get()
         self.config = self.project_obj.get_config(self.env_id)
@@ -227,7 +247,6 @@ class DeployService():
             self.branch = self.config.branch
 
         self.all_host = self.project_obj.get_all_host(self.env_id)
-        print(self.all_host)
         if not self.all_host:
             raise RuntimeError('主机列表为空')
 
@@ -235,10 +254,11 @@ class DeployService():
             self.working_dir = os.path.join(self.workspace_path, str(self.pid) \
                     + "_" + self.branch)
             if self.project.credentials.type == Credentials.TYPE_USER_PRIVATE_KEY:
+                private_key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(self.project.credentials.id))
                 self.vcs = GitService(self.project.repository_url, self.working_dir, 
                     branch=self.branch,
-                    auth_type=Credentials.TYPE_USER_PRIVATE_KEY, username=self.project.credentials.username, 
-                    private_key=self.project.credentials.private_key)
+                    auth_type=Credentials.TYPE_USER_PRIVATE_KEY, 
+                    private_key_path=private_key_path)
             else:
                 self.vcs = GitService(self.project.repository_url, self.working_dir, 
                     branch=self.branch,
@@ -255,8 +275,42 @@ class DeployService():
         if self.vcs.checkout() is not True:
             raise RuntimeError(self.vcs.checkout_errmsg)
 
+        if self.action == Task.ACTION_RELEASE:
+            # before_release hook, 不同环境对应不同的hook
+            self.release()
+            # after_release
+        # rollback
+        elif self.action == Task.ACTION_ROLLBACK:
+            self.rollback()
+        else:
+            raise RuntimeError('执行动作异常')
+
+
     def release(self):
-        pass
+        task_id = 100
+        for host in self.all_host:
+            if self.mode == Project.DEPLOY_MODE_ALL:
+                command = self.rsync_prefix + self.rsync_exclude_parms + self.working_dir + '/ ' + \
+                        host + ':' + self.project.dest_path + '_' + str(task_id)
+            elif self.mode == Project.DEPLOY_MODE_INCREMENT:
+                command = self.rsync_prefix + self.rsync_exclude_parms + self.working_dir + '/ ' + \
+                        host + ':' + self.project.dest_path
+            else:
+                RuntimeError('模式不可用')
+            print(command)
+            commandService = CommandService(command)
+            commandService.run_script()
+            print(commandService.returncode)
+            print(commandService.stdout)
+            print(commandService.stderr)
+            if commandService.returncode > 0:
+                continue
+            # add link
+            if self.mode == Project.DEPLOY_MODE_ALL:
+                pass
+
+        def rollback(self):
+            pass
 
 class EnvService():
 

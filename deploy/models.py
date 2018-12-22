@@ -99,6 +99,8 @@ class ProjectEnvConfig(models.Model):
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, null=True)
     branch = models.CharField('分支名', max_length=255, default='master', null=True)
     host_group = models.ForeignKey(HostGroup, on_delete=models.SET_NULL, null=True)
+    before_hook = models.TextField('发布前钩子', default='', help_text='')
+    after_hook = models.TextField('发布后钩子', default='', help_text='')
 
     def __str__(self):
         return self.project.name + '_' + self.env.name

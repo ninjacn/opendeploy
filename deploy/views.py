@@ -42,6 +42,8 @@ def index(request):
     })
 
 def test(request):
-    d = DeployService(9, 4)
+    # DEPLOY_MODE_ALL
+    # DEPLOY_MODE_INCREMENT
+    d = DeployService(6, 4, mode=Project.DEPLOY_MODE_ALL)
     d.run()
     return HttpResponse('hello world')

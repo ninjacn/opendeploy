@@ -88,6 +88,17 @@ def host_edit(request, id):
 
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
+def host_del(request, id):
+    try:
+        host = Host.objects.get(id=id)
+        host.delete()
+        messages.info(request, '删除成功')
+    except:
+        messages.error(request, '删除失败')
+    return redirect('admin:cmdb.host')
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
 def hostgroup(request):
     data = {}
     hostGroup = HostGroup.objects.all()
@@ -160,6 +171,16 @@ def hostgroup_edit(request, gid):
         "hosts": Host.objects.filter(status=Host.STATUS_ENABLED),
         "status_choices": HostGroup.STATUS_CHOICES,
     })
+
+@transaction.atomic
+def hostgroup_del(request, id):
+    try:
+        hostGroup = HostGroup.objects.get(id=id)
+        hostGroup.delete()
+        messages.info(request, '删除成功')
+    except:
+        messages.error(request, '删除失败')
+    return redirect('admin:cmdb.hostgroup')
 
 @user_passes_test(lambda u: u.is_superuser)
 def import_from_public_cloud(request):

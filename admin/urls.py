@@ -23,22 +23,31 @@ urlpatterns = [
     # project
     url(r'^deploy/project$', deploy.project, name='deploy.project'),
     url(r'^deploy/project/add$', deploy.project_add, name='deploy.project_add'),
-    url(r'^deploy/project/edit/(?P<gid>\d+)$', deploy.project_edit, name='deploy.project_edit'),
+    url(r'^deploy/project/edit/(?P<id>\d+)$', deploy.project_edit, name='deploy.project_edit'),
+    url(r'^deploy/project/del/(?P<id>\d+)$', deploy.project_del, name='deploy.project_del'),
+
     url(r'^deploy/credential$', deploy.credential, name='deploy.credential'),
     url(r'^deploy/credential/add$', deploy.credential_add, name='deploy.credential_add'),
-    url(r'^deploy/credential/edit/(?P<gid>\d+)$', deploy.credential_edit, name='deploy.credential_edit'),
+    url(r'^deploy/credential/edit/(?P<id>\d+)$', deploy.credential_edit, name='deploy.credential_edit'),
+    url(r'^deploy/credential/del/(?P<id>\d+)$', deploy.credential_del, name='deploy.credential_del'),
 
     # env
     url(r'^deploy/env$', deploy.env, name='deploy.env'),
     url(r'^deploy/env/add$', deploy.env_add, name='deploy.env_add'),
+    url(r'^deploy/env/edit/(?P<id>\d+)$', deploy.env_edit, name='deploy.env_edit'),
+    url(r'^deploy/env/del/(?P<id>\d+)$', deploy.env_del, name='deploy.env_del'),
 
     # cmdb
     url(r'^cmdb/host$', cmdb.host, name='cmdb.host'),
     url(r'^cmdb/host/add$', cmdb.host_add, name='cmdb.host_add'),
     url(r'^cmdb/host/edit/(?P<id>\d+)$', cmdb.host_edit, name='cmdb.host_edit'),
+    url(r'^cmdb/host/del/(?P<id>\d+)$', cmdb.host_del, name='cmdb.host_del'),
+
     url(r'^cmdb/hostgroup$', cmdb.hostgroup, name='cmdb.hostgroup'),
     url(r'^cmdb/hostgroup/add$', cmdb.hostgroup_add, name='cmdb.hostgroup_add'),
     url(r'^cmdb/hostgroup/edit/(?P<gid>\d+)$', cmdb.hostgroup_edit, name='cmdb.hostgroup_edit'),
+    url(r'^cmdb/hostgroup/del/(?P<id>\d+)$', cmdb.hostgroup_del, name='cmdb.hostgroup_del'),
+
     url(r'^cmdb/import_from_public_cloud$', cmdb.import_from_public_cloud, name='cmdb.import_from_public_cloud'),
     url(r'^cmdb/get_region_list$', cmdb.get_region_list, name='cmdb.get_region_list'),
     url(r'^cmdb/import_from_public_cloud_as_api$', cmdb.import_from_public_cloud_as_api, name='cmdb.import_from_public_cloud_as_api'),

@@ -1,6 +1,29 @@
 {% extends 'base_admin.html' %}
 
 {% block content-header %}
+
+        <div class="modal fade" id="modal-default">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">系统提示</h4>
+              </div>
+              <div class="modal-body">
+                <p>确定删除该主机组吗?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                <a class="btn btn-danger btn-ok">删除</a>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
       <h1>
         主机组
         <small></small>
@@ -56,7 +79,7 @@
                     <td>{{ item.updated_at }}</td>
                     <td>
                         <a href="/admin/cmdb/hostgroup/edit/{{ item.id }}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button></a>
-                        <button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i>删除</button>
+                        <button data-href="{% url 'admin:cmdb.hostgroup_del' item.id %}" data-id="{{ item.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i>删除</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -67,4 +90,13 @@
           <!-- /.box -->
         </div>
       </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#modal-default').on('show.bs.modal', function(e) {
+            $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+        });
+    </script>
+
 {% endblock %}
