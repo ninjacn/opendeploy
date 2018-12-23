@@ -13,10 +13,11 @@ import json
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.template.response import TemplateResponse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.models import User
 
 from deploy.models import Project, Task, Env
 from opendeploy import settings
@@ -71,6 +72,7 @@ def release(request):
 
             task.project = project
             task.env = env
+            task.creater = request.user
             task.comment = cleaned_data['comment']
             task.save()
             messages.info(request, '任务提交成功，准备发布...')
@@ -87,7 +89,33 @@ def rollback(request, id):
 @login_required
 def tasks(request):
     tasks = Task.objects.all().order_by('-id')
-    paginator = Paginator(tasks, 2)
+
+    param_status = request.GET.get('status')
+    if param_status:
+        tasks = tasks.filter(status=param_status)
+
+    try:
+        param_project = int(request.GET.get('project'))
+        if param_project:
+            tasks = tasks.filter(project=Project.objects.get(id=param_project))
+    except:
+        param_project = 0
+
+    try:
+        param_env = int(request.GET.get('env'))
+        if param_env:
+            tasks = tasks.filter(env=Env.objects.get(id=param_env))
+    except:
+        param_env = 0
+
+    try:
+        param_creater = int(request.GET.get('creater'))
+        if param_creater:
+            tasks = tasks.filter(creater=User.objects.get(id=param_creater))
+    except:
+        param_creater = 0
+
+    paginator = Paginator(tasks, 10)
     page = request.GET.get('page')
     if not page:
         page = 1
@@ -97,11 +125,35 @@ def tasks(request):
         tasks = paginator.page(1)
     except EmptyPage:
         tasks = paginator.page(paginator.num_pages)
+
+    def rebuild_tasks(task):
+        task.pretreatment = False
+        task.long_comment = task.comment
+        if len(task.comment) > 8:
+            task.comment = task.comment[:8] + '...'
+            task.pretreatment = True
+        return task
+    tasks = map(rebuild_tasks, tasks)
+
     return TemplateResponse(request, 'deploy/tasks.html', {
-        # 'envs': envs,
+        'projects': Project.objects.filter(status=Project.STATUS_ENABLED),
+        'creaters': User.objects.filter(is_active=1),
+        'envs': Env.objects.all(),
+        'status_choices': Task.STATUS_CHOICES,
         'tasks': tasks,
+        'param_status': param_status,
+        'param_project': param_project,
+        'param_env': param_env,
+        'param_creater': param_creater,
     })
 
 @login_required
 def detail(request, id):
-    pass
+    try:
+        task = Task.objects.get(id=id)
+    except:
+        # return HttpResponseNotFound('<h1>Page not found</h1>')
+        return redirect('deploy:tasks')
+    return TemplateResponse(request, 'deploy/detail.html', {
+        'task': task,
+    })

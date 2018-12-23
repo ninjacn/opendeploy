@@ -30,73 +30,114 @@
             </div>
             <!-- /.box-header -->
             <div class="box-body">
-<div id="example1_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"><div class="dataTables_length" id="example1_length"><label>Show <select name="example1_length" aria-controls="example1" class="form-control input-sm"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label></div></div><div class="col-sm-6"><div id="example1_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control input-sm" placeholder="" aria-controls="example1"></label></div></div></div><div class="row"><div class="col-sm-12"><table id="example1" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
-
-              <table class="table table-hover">
-                <thead>
-                    <tr>
-                      <th>状态</th>
-                      <th>ID</th>
-                      <th>项目</th>
-                      <th>环境</th>
-                      <th>创建日期</th>
-                      <th>发布原因</th>
-                      <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for task in tasks %}
-                    <tr>
-                        <td>{{ task.get_status_display }}</td>
-                        <td>{{ task.id }}</td>
-                        <td>{{ task.project }}</td>
-                        <td>{{ task.env }}</td>
-                        <td>{{ task.created_at }}</td>
-                        <td>{{ task.comment }}</td>
-                        <td>
-                            <a href="{% url 'deploy:detail' task.id %} }}">
-                                <button type="button" class="btn btn-primary btn-sm" title="任务详情" data-toggle="tooltip" >
-                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
-                                </button>
+                <div class="dataTables_wrapper form-inline dt-bootstrap">
+                    <form class="form-horizontal" id="form" role="form" method="get" action="">
+                        <div>
+                            <span>条件过滤:</span>
+                            <select title="状态" name="status" class="form-control input-sm">
+                                <option value="">所有状态</option>
+                                {% for status in status_choices %}
+                                <option value="{{ status.0 }}" {% if param_status == status.0 %} selected {% endif %}>{{ status.1 }}</option>
+                                {% endfor %}
+                            </select>
+                            <select title="项目" name="project" class="form-control input-sm">
+                                <option value="">所有项目</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}" {% if param_project == project.id %} selected {% endif %}>{{ project }}</option>
+                                {% endfor %}
+                            </select>
+                            <select title="环境" name="env" class="form-control input-sm">
+                                <option value="">所有环境</option>
+                                {% for env in envs %}
+                                <option value="{{ env.id }}" {% if param_env == env.id %} selected {% endif %}>{{ env }}</option>
+                                {% endfor %}
+                            </select>
+                            <select title="发布人" name="creater" class="form-control input-sm">
+                                <option value="">所有发布人</option>
+                                {% for creater in creaters %}
+                                <option value="{{ creater.id }}" {% if param_creater == creater.id %} selected {% endif %}>{% if creater.first_name %}{{ creater.first_name }}-{{ creater }}{% else %}{{ creater }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                            <a href="{% url 'deploy:tasks' %}">
+                                <button type="button" class="btn btn-outline-primary btn-sm">置空</button>
                             </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-              </tbody>
-              </table>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="dataTables_paginate paging_simple_numbers" id="example1_paginate">
-                            <ul class="pagination">
-                                {% if tasks.has_previous %}
-                                <li class="page-item">
-                                <li class="paginate_button previous">
-                                    <a class="page-link" href="?page={{ tasks.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
-                                </li>
-                                {% else %}
-                                <li class="paginate_button previous disabled">
-                                  <a class="page-link" href="#" tabindex="-1">上一页</a>
-                                </li>
-                                {% endif %}
+                        </div>
+                    </form>
 
-                                <li class="paginate_button active">
-                                    <a class="page-link" href="#" tabindex="-1">{{ tasks.number }} / {{ tasks.paginator.num_pages }}</a>
-                                </li>
-
-                                {% if tasks.has_next %}
-                                <li class="paginate_button next">
-                                    <a class="page-link" href="?page={{ tasks.next_page_number }}&{{ parameters }}">下一页</a>
-                                </li>
-                                {% else %}
-                                <li class="paginate_button next disabled">
-                                    <a class="page-link" href="#">下一页</a>
-                                </li>
-                                {% endif %}
-
-                            </ul>
+                    <div class="row">
+                        <div class="col-sm-12">
+                          <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                  <th>状态</th>
+                                  <th>ID</th>
+                                  <th>项目</th>
+                                  <th>环境</th>
+                                  <th>发布人</th>
+                                  <th>创建日期</th>
+                                  <th>发布原因</th>
+                                  <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in tasks %}
+                                <tr>
+                                    <td>{{ task.get_status_display }}</td>
+                                    <td>{{ task.id }}</td>
+                                    <td>{{ task.project }}</td>
+                                    <td>{{ task.env }}</td>
+                                    <td>{% if task.creater.first_name %} {{ task.creater.first_name }}{% else %}{{ task.creater }}{% endif %}</td>
+                                    <td>{{ task.created_at }}</td>
+                                    <td>
+                                        <span {% if task.pretreatment %} title="{{ task.long_comment }}" data-toggle="tooltip" {% endif %}>{{ task.comment }}</span>
+                                    <td>
+                                        <a href="{% url 'deploy:detail' task.id %}">
+                                            <button type="button" class="btn btn-primary btn-sm" title="任务详情" data-toggle="tooltip" >
+                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                            </button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                          </tbody>
+                          </table>
                         </div>
                     </div>
-                </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="dataTables_paginate paging_simple_numbers" id="example1_paginate">
+                                <ul class="pagination">
+                                    {% if tasks.has_previous %}
+                                    <li class="page-item">
+                                    <li class="paginate_button previous">
+                                        <a class="page-link" href="?page={{ tasks.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="paginate_button previous disabled">
+                                      <a class="page-link" href="#" tabindex="-1">上一页</a>
+                                    </li>
+                                    {% endif %}
+
+                                    <li class="paginate_button active">
+                                        <a class="page-link" href="#" tabindex="-1">{{ tasks.number }} / {{ tasks.paginator.num_pages }}</a>
+                                    </li>
+
+                                    {% if tasks.has_next %}
+                                    <li class="paginate_button next">
+                                        <a class="page-link" href="?page={{ tasks.next_page_number }}&{{ parameters }}">下一页</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="paginate_button next disabled">
+                                        <a class="page-link" href="#">下一页</a>
+                                    </li>
+                                    {% endif %}
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
             </div>
             <!-- /.box-body -->
           </div>
@@ -108,5 +149,8 @@
 
 {% block script %}
 <script>
+    $("select[name=status], select[name=project], select[name=env], select[name=creater]").change(function() {
+        $("#form").submit();
+    });
 </script>
 {% endblock %}

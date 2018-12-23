@@ -8,6 +8,8 @@
 # file that was distributed with this source code.
 
 from django.db import models
+from django.contrib.auth.models import User
+
 from cmdb.models import HostGroup
 
 # Create your models here.
@@ -128,6 +130,7 @@ class Task(models.Model):
     )
 
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='project', null=True )
+    creater = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='user', null=True )
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, related_name='env', null=True )
     has_rollback = models.CharField('有无回滚', max_length=255, default='0')
     release_host_status = models.TextField('发布主机状态', default='', help_text='')
