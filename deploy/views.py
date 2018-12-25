@@ -22,7 +22,7 @@ from django.contrib.auth.models import User
 from deploy.models import Project, Task, Env
 from opendeploy import settings
 from .services import GitService, SvnService, DeployService, \
-        ProjectService, EnvService, SettingService, MailService
+        ProjectService, EnvService, SettingService, MailService, MyLoggingService
 from deploy.forms import ReleaseForm
 from cmdb.services import QcloudService, AliyunService
 
@@ -45,9 +45,8 @@ def index(request):
     })
 
 def test(request):
-    # DEPLOY_MODE_ALL
-    # DEPLOY_MODE_INCREMENT
-    d = DeployService(6, 4, mode=Project.DEPLOY_MODE_ALL)
+    # d = DeployService(1, action=Task.ACTION_ROLLBACK)
+    d = DeployService(10)
     d.run()
     return HttpResponse('hello world')
 
@@ -76,7 +75,7 @@ def release(request):
             task.comment = cleaned_data['comment']
             task.save()
             messages.info(request, '任务提交成功，准备发布...')
-            return redirect('deploy:tasks')
+            return redirect('deploy:detail', task.id)
         else:
             messages.error(request, '任务申请校验失败, 请重新提交!')
     else:
@@ -135,6 +134,8 @@ def tasks(request):
         return task
     tasks = map(rebuild_tasks, tasks)
 
+    get_copy = request.GET.copy()
+    parameters = get_copy.pop('page', True) and get_copy.urlencode()
     return TemplateResponse(request, 'deploy/tasks.html', {
         'projects': Project.objects.filter(status=Project.STATUS_ENABLED),
         'creaters': User.objects.filter(is_active=1),
@@ -145,6 +146,7 @@ def tasks(request):
         'param_project': param_project,
         'param_env': param_env,
         'param_creater': param_creater,
+        'parameters': parameters,
     })
 
 @login_required

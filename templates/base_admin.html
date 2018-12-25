@@ -228,5 +228,10 @@
 <script src="{% static "js/adminlte.min.js" %}"></script>
 {% block script %}
 {% endblock %}
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
 </body>
 </html>

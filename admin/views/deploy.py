@@ -130,81 +130,83 @@ def project_edit(request, id):
                 project.deploy_mode = cleaned_data['deploy_mode']
                 project.status = cleaned_data['status']
                 project.save()
+            except:
+                pass
 
-                # 增加环境关联值
-                envs = request.POST.getlist('projectEnvConfig')
-                if envs:
-                    for v in envs:
-                        # 存在更新
+            # 增加环境关联值
+            envs = request.POST.getlist('projectEnvConfig')
+            if envs:
+                for v in envs:
+                    # 存在更新
+                    try:
+                        config = ProjectEnvConfig.objects.get(pk=v)
+                        config.branch = request.POST.get('branch_' + v, 'master')
+                        config.before_hook = request.POST.get('before_hook_' + v, '')
+                        config.after_hook = request.POST.get('after_hook_' + v, '')
                         try:
-                            config = ProjectEnvConfig.objects.get(pk=v)
-                            config.branch = request.POST.get('branch_' + v)
-                            config.before_hook = request.POST.get('before_hook_' + v)
-                            config.after_hook = request.POST.get('after_hook_' + v)
-                            try:
-                                config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
-                            except:
-                                config.host_group = None
-                            config.save()
-
-                            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
-                            f = open(before_hook_path, 'w')
-                            f.write(config.before_hook)
-                            f.close()
-
-                            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
-                            f = open(after_hook_path, 'w')
-                            f.write(config.after_hook)
-                            f.close()
-
-                            if os.path.exists(before_hook_path):
-                                os.chmod(before_hook_path, stat.S_IRWXU)
-                                command = 'dos2unix ' + before_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
-
-                            if os.path.exists(after_hook_path):
-                                os.chmod(after_hook_path, stat.S_IRWXU)
-                                command = 'dos2unix ' + after_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
-                        # 不存在插入
+                            config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
                         except:
-                            projectEnvConfig = ProjectEnvConfig()
-                            projectEnvConfig.project = project
-                            projectEnvConfig.env = Env.objects.get(pk=v)
-                            if request.POST.get('branch_' + v):
-                                projectEnvConfig.branch = request.POST.get('branch_' + v)
-                            else:
-                                projectEnvConfig.branch = 'master'
-                            projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
-                            projectEnvConfig.before_hook = request.POST.get('before_hook_' + v)
-                            projectEnvConfig.after_hook = request.POST.get('after_hook_' + v)
-                            projectEnvConfig.save()
+                            config.host_group = None
+                        config.save()
 
-                            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
-                            f = open(before_hook_path, 'w')
-                            f.write(projectEnvConfig.before_hook)
-                            f.close()
+                        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
+                        f = open(before_hook_path, 'w')
+                        f.write(config.before_hook)
+                        f.close()
 
-                            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
-                            f = open(after_hook_path, 'w')
-                            f.write(projectEnvConfig.after_hook)
-                            f.close()
+                        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
+                        f = open(after_hook_path, 'w')
+                        f.write(config.after_hook)
+                        f.close()
 
-                            if os.path.exists(before_hook_path):
-                                os.chmod(before_hook_path, stat.S_IRWXU)
-                                command = 'dos2unix ' + before_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
+                        if os.path.exists(before_hook_path):
+                            os.chmod(before_hook_path, stat.S_IRWXU)
+                            command = 'dos2unix ' + before_hook_path
+                            commandService = CommandService(command)
+                            commandService.run_script()
 
-                            if os.path.exists(after_hook_path):
-                                os.chmod(after_hook_path, stat.S_IRWXU)
-                                command = 'dos2unix ' + after_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
-            finally:
-                return redirect('/admin/deploy/project')
+                        if os.path.exists(after_hook_path):
+                            os.chmod(after_hook_path, stat.S_IRWXU)
+                            command = 'dos2unix ' + after_hook_path
+                            commandService = CommandService(command)
+                            commandService.run_script()
+                    # 不存在插入
+                    except:
+                        projectEnvConfig = ProjectEnvConfig()
+                        projectEnvConfig.project = project
+                        projectEnvConfig.env = Env.objects.get(pk=v)
+                        if request.POST.get('branch_' + v):
+                            projectEnvConfig.branch = request.POST.get('branch_' + v, 'master')
+                        else:
+                            projectEnvConfig.branch = 'master'
+                        projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                        projectEnvConfig.before_hook = request.POST.get('before_hook_' + v, '')
+                        projectEnvConfig.after_hook = request.POST.get('after_hook_' + v, '')
+                        projectEnvConfig.save()
+
+                        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
+                        f = open(before_hook_path, 'w')
+                        f.write(projectEnvConfig.before_hook)
+                        f.close()
+
+                        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
+                        f = open(after_hook_path, 'w')
+                        f.write(projectEnvConfig.after_hook)
+                        f.close()
+
+                        if os.path.exists(before_hook_path):
+                            os.chmod(before_hook_path, stat.S_IRWXU)
+                            command = 'dos2unix ' + before_hook_path
+                            commandService = CommandService(command)
+                            commandService.run_script()
+
+                        if os.path.exists(after_hook_path):
+                            os.chmod(after_hook_path, stat.S_IRWXU)
+                            command = 'dos2unix ' + after_hook_path
+                            commandService = CommandService(command)
+                            commandService.run_script()
+            messages.info(request, '修改成功')
+            return redirect('/admin/deploy/project')
     else:
         f = AddProjectForm()
     return render(request, 'admin/deploy/edit_project.html', {
@@ -328,6 +330,7 @@ def credential_add(request):
                     f = open(key_path, 'w+')
                     f.write(credential.private_key)
                     f.close()
+                    os.chmod(key_path, stat.S_IRWXU)
                 messages.info(request, '修改成功')
             except:
                 messages.error(request, '修改失败')
@@ -367,6 +370,7 @@ def credential_edit(request, id):
                     f = open(key_path, 'w+')
                     f.write(credential.private_key)
                     f.close()
+                    os.chmod(key_path, stat.S_IRWXU)
                 messages.info(request, '修改成功')
             except:
                 messages.error(request, '修改失败')

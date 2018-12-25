@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'deploy',
     'admin',
     'setting',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -178,7 +179,10 @@ STATICFILES_DIRS = [
 # celery
 CELERY_RESULT_BACKEND = 'django-db'
 
-# WORKSPACE_PATH = os.path.join(BASE_DIR, "storage/workspace")
+# 工作区路径
 WORKSPACE_PATH = "~/.opendeploy/workspace"
+
+# 发布日志路径
+RELEASE_LOG_PATH = os.path.join(BASE_DIR, "storage/release_log"),
 
 LOGIN_REDIRECT_URL = '/accounts/login'
