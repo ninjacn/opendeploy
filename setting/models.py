@@ -11,7 +11,8 @@ from django.db import models
 
 # 通用
 class SettingGeneral(models.Model):
-    enable_register = models.BooleanField('开启用户注册', default=True)
+    enable_register = models.BooleanField('开启用户注册', default=False)
+    site_url = models.URLField('站点域名', default='', max_length=255, help_text='比如:http://opendeploy.ninjacn.com')
 
     def __str__(self):
         return 'setting_general'

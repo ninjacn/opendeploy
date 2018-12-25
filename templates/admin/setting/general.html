@@ -24,9 +24,15 @@
                 {% csrf_token %}
                 <div class="box-body">
 
+                    <div class="form-group {% if form.site_url.errors %} has-error {% endif %}">
+                        <label for="site_url">{{ form.site_url.label }}</label>
+                        <input type="text" name="site_url" class="form-control" placeholder="{{ form.site_url.help_text }}" value="{% if general_info.site_url %}{{ general_info.site_url }}{% else %}{% if form.site_url.value %}{{ form.site_url.value }}{% endif %}{% endif %}" >
+                        <span class="help-block">{{ form.site_url.errors }}</span>
+                    </div>
+
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" value="1" name="{{ form.enable_register.name }}" {% if form.enable_register.value %}checked{% endif %}> {{ form.enable_register.label }}
+                            <input type="checkbox" value="1" name="{{ form.enable_register.name }}" {% if general_info.enable_register%}  checked {% else %}{% if form.enable_register.value %}checked{% endif %}{% endif %}> {{ form.enable_register.label }}
                         </label>
                     </div>
 

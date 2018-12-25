@@ -29,8 +29,15 @@ class SettingService():
         if allinfo:
             for info in allinfo:
                 return info
+
     def is_enable_register(self):
         allinfo = SettingGeneral.objects.all()
         if allinfo:
             for info in allinfo:
                 return info.enable_register
+
+    def get_general_info(self):
+        allinfo = SettingGeneral.objects.all()
+        if allinfo:
+            for info in allinfo:
+                return info

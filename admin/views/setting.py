@@ -21,6 +21,8 @@ from setting.services import SettingService
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def general(request):
+    settingService = SettingService()
+    general_info = settingService.get_general_info()
     if request.method== 'POST':
         f = SettingGeneralForm(request.POST)
         if f.is_valid():
@@ -29,6 +31,7 @@ def general(request):
                 SettingGeneral.objects.all().delete()
                 setting = SettingGeneral()
                 setting.enable_register = cleaned_data['enable_register']
+                setting.site_url = cleaned_data['site_url']
                 setting.save()
                 messages.info(request, '修改成功')
             except:
@@ -39,6 +42,7 @@ def general(request):
         f = SettingGeneralForm()
     return render(request, 'admin/setting/general.html', {
         "form": f,
+        "general_info": general_info,
         })
 
 @user_passes_test(lambda u: u.is_superuser)
