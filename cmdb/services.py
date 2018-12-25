@@ -84,11 +84,12 @@ class AliyunService():
         except: 
             pass
     
-    def get_allhost(self, region="cn-beijing"):
-        self.region = region
+    def get_allhost(self, region="cn-beijing", PageNumber=1):
         try:
             self.request.set_action_name('DescribeInstances')
-            self.request.add_query_param('RegionId', self.region)
+            self.request.add_query_param('RegionId', region)
+            self.request.add_query_param('PageSize', 100)
+            self.request.add_query_param('PageNumber', PageNumber)
 
             return self.client.do_action(self.request)
         except:

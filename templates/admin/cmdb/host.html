@@ -58,7 +58,6 @@
                   <th>状态</th>
                   <th>备注</th>
                   <th>创建时间</th>
-                  <th>更新时间</th>
                   <th>操作</th>
                 </tr>
                 {% for host in hosts %}
@@ -69,7 +68,6 @@
                     <td>{{ host.get_status_display }}</td>
                     <td>{{ host.comment }}</td>
                     <td>{{ host.created_at }}</td>
-                    <td>{{ host.updated_at }}</td>
                     <td>
                         <a href="/admin/cmdb/host/edit/{{ host.id }}">
                             <button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button> 
@@ -82,6 +80,42 @@
             </div>
             <!-- /.box-body -->
           </div>
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dataTables_paginate paging_simple_numbers" id="example1_paginate">
+                            <ul class="pagination">
+                                {% if hosts.has_previous %}
+                                <li class="page-item">
+                                <li class="paginate_button previous">
+                                    <a class="page-link" href="?page={{ hosts.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button previous disabled">
+                                  <a class="page-link" href="#" tabindex="-1">上一页</a>
+                                </li>
+                                {% endif %}
+
+                                <li class="paginate_button active">
+                                    <a class="page-link" href="#" tabindex="-1">{{ hosts.number }} / {{ hosts.paginator.num_pages }}</a>
+                                </li>
+
+                                {% if hosts.has_next %}
+                                <li class="paginate_button next">
+                                    <a class="page-link" href="?page={{ hosts.next_page_number }}&{{ parameters }}">下一页</a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button next disabled">
+                                    <a class="page-link" href="#">下一页</a>
+                                </li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
           <!-- /.box -->
         </div>
       </div>
