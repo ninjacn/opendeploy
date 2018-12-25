@@ -1,0 +1,88 @@
+{% extends 'base_admin.html' %}
+
+{% block content-header %}
+
+        <div class="modal fade" id="modal-default">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">系统提示</h4>
+              </div>
+              <div class="modal-body">
+                <p>确定删除该Token吗?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                <a class="btn btn-danger btn-ok">删除</a>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+
+      <h1>
+        Api Token
+        <small>Token用于访问接口资源</small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><a href="{% url 'admin:homepage' %}"><i class="fa fa-home"></i>首页</a></li>
+          <li class="active"><a href="{% url 'admin:api.token' %}">Token</a></li>
+      </ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">列表</h3>
+
+              <div class="box-tools">
+                  <a href="{% url 'admin:api.token_add' %}">
+                    <button type="button" class="btn btn-default btn-sm"><i class="fa fa-plus"></i>添加</button>
+                  </a>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+              <table class="table table-hover">
+                <tbody><tr>
+                  <th>ID</th>
+                  <th>标题</th>
+                  <th>Token</th>
+                  <th>创建时间</th>
+                  <th>操作</th>
+                </tr>
+                {% for token in all_token %}
+                <tr>
+                    <td>{{ token.id }}</td>
+                    <td>{{ token.title }}</td>
+                    <td>{{ token.token }}</td>
+                    <td>{{ token.created_at }}</td>
+                    <td>
+                        <button data-href="{% url 'admin:api.token_del' token.id %}" data-id="{{ token.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i>删除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+              </tbody></table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+      </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#modal-default').on('show.bs.modal', function(e) {
+            $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+        });
+    </script>
+
+{% endblock %}

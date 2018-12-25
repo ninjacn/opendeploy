@@ -1,0 +1,49 @@
+{% extends 'base_admin.html' %}
+
+{% block content-header %}
+      <h1>
+        添加Token
+        <small></small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="{% url 'admin:homepage' %}"><i class="fa fa-home"></i>首页</a></li>
+        <li><a href="{% url 'admin:api.token' %}">Token</a></li>
+        <li class="active">添加</li>
+      </ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">设置表单</h3>
+            </div>
+            <!-- /.box-header -->
+            <!-- form start -->
+            <form role="form" method="post" action="">
+                {% csrf_token %}
+                <div class="box-body">
+                    <div class="form-group {% if form.title.errors %} has-error {% endif %}">
+                        <label for="title">标题</label>
+                        <input type="text" name="title" class="form-control" placeholder="" value="{% if form.title.value %}{{ form.title.value }}{% endif %}" >
+                        <span class="help-block">{{ form.title.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.token.errors %} has-error {% endif %}">
+                        <label for="token">Token</label>
+                        <input type="text" name="token" class="form-control" placeholder="" value="{% if form.token.value %}{{ form.token.value }}{% else %}{{ auto_generate_token }}{% endif %}">
+                        <span class="help-block">{{ form.token.errors }}</span>
+                    </div>
+
+              </div>
+              <!-- /.box-body -->
+
+              <div class="box-footer">
+                <button type="submit" class="btn btn-primary">提交</button>
+              </div>
+            </form>
+          </div>
+        </div>
+</div>
+{% endblock %}

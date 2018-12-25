@@ -161,6 +161,8 @@
           </ul>
         </li>
 
+        <li class=" {% if request.path|startswith:'/admin/api/token' %} active {% endif %}"><a href="{% url 'admin:api.token' %}"><i class="fa fa-key"></i> <span>Api Token管理</span></a></li>
+
         <li class="treeview {% if request.path|startswith:'/admin/setting/' %} active {% endif %}">
           <a href="#"><i class="fa fa-cogs"></i> <span>设置</span>
             <span class="pull-right-container">
