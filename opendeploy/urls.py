@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^test', test),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^admin/', include('admin.urls')),
+    url(r'^api/', include('api.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_URL)

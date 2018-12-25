@@ -9,7 +9,7 @@
 
 from django.conf.urls import url
 
-from admin.views import deploy, cmdb, accounts, setting
+from admin.views import deploy, cmdb, accounts, setting, api
 
 app_name = 'admin'
 urlpatterns = [
@@ -56,4 +56,9 @@ urlpatterns = [
     url(r'^setting/general$', setting.general, name='setting.general'),
     url(r'^setting/mail$', setting.mail, name='setting.mail'),
     url(r'^setting/public_cloud$', setting.public_cloud, name='setting.public_cloud'),
+
+    # api
+    url(r'^api/token$', api.token, name='api.token'),
+    url(r'^api/token/add$', api.token_add, name='api.token_add'),
+    url(r'^api/token/del/(?P<id>\d+)$', api.token_del, name='api.token_del'),
 ]

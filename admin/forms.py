@@ -14,6 +14,7 @@ from django import forms
 
 from cmdb.models import Host
 from setting.models import SettingMail, SettingGeneral, SettingPublicCloud
+from api.models import Token
 import re
 
 
@@ -67,7 +68,7 @@ class SettingGeneralForm(forms.ModelForm):
 
     class Meta:
         model = SettingGeneral
-        fields = ['enable_register',]
+        fields = ['enable_register', 'site_url']
 
 class SettingPublicCloudForm(forms.ModelForm):
 
@@ -123,3 +124,9 @@ class UserEditForm(forms.Form):
 class ImportFromPublicCloudForm(forms.Form):
     provider = forms.CharField()
     region = forms.CharField()
+
+class ApiTokenForm(forms.ModelForm):
+
+    class Meta:
+        model = Token
+        fields = ['title', 'token']
