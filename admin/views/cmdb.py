@@ -94,6 +94,9 @@ def host_edit(request, id):
                 host.status = cleaned_data['status']
                 host.comment = cleaned_data['comment']
                 host.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
             finally:
                 return redirect('admin:cmdb.host')
     else:
@@ -180,14 +183,28 @@ def hostgroup_edit(request, gid):
                 if hosts:
                     for id in hosts:
                         hostgroup.host.add(Host.objects.get(pk=id))
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
             finally:
                 return redirect('/admin/cmdb/hostgroup')
     else:
         f = EditHostGroupForm()
+
+    def rebuild_hosts(host):
+        tmp = {}
+        tmp['id'] = host.id
+        tmp['hostname'] = host.hostname
+        tmp['ipaddr'] = host.ipaddr
+        return tmp
+
+    hosts_render = []
+    hosts = Host.objects.filter(status=Host.STATUS_ENABLED)
+    hosts_render=map(rebuild_hosts, hosts)
     return render(request, 'admin/cmdb/edit_hostgroup.html', {
         "form": f,
         "hostgroup": hostgroup,
-        "hosts": Host.objects.filter(status=Host.STATUS_ENABLED),
+        "hosts": hosts_render,
         "status_choices": HostGroup.STATUS_CHOICES,
     })
 
