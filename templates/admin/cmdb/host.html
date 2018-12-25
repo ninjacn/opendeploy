@@ -55,6 +55,7 @@
                   <th>ID</th>
                   <th>IP地址</th>
                   <th>主机名</th>
+                  <th>服务商</th>
                   <th>状态</th>
                   <th>备注</th>
                   <th>创建时间</th>
@@ -65,14 +66,15 @@
                     <td>{{ host.id }}</td>
                     <td>{{ host.ipaddr }}</td>
                     <td>{{ host.hostname }}</td>
+                    <td>{{ host.get_provider_display }}</td>
                     <td>{{ host.get_status_display }}</td>
                     <td>{{ host.comment }}</td>
                     <td>{{ host.created_at }}</td>
                     <td>
-                        <a href="/admin/cmdb/host/edit/{{ host.id }}">
-                            <button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button> 
+                        <a href="/admin/cmdb/host/edit/{{ host.id }}" title="编辑" data-toggle="tooltip">
+                            <button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></button> 
                         </a>
-                        <button data-href="{% url 'admin:cmdb.host_del' host.id %}" data-id="{{ host.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i>删除</button>
+                        <button title="删除" data-toggle="tooltip" data-href="{% url 'admin:cmdb.host_del' host.id %}" data-id="{{ host.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
                 {% endfor %}

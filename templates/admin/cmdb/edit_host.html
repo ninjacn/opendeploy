@@ -24,6 +24,16 @@
             <form role="form" method="post" action="">
                 {% csrf_token %}
                 <div class="box-body">
+                    <div class="form-group {% if form.provider.errors %} has-error {% endif %}">
+                        <label for="provider">服务商</label>
+                        <select class="form-control" name="provider">
+                            {% for item in provider_choices %}
+                            <option {% if host.provider == item.0 %} selected {% endif %} value="{{ item.0 }}">{{ item.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="help-block">{{ form.provider.errors }}</span>
+                    </div>
+
                     <div class="form-group {% if form.ipaddr.errors %} has-error {% endif %}">
                         <label for="ipaddr">IP地址</label>
                         <input type="text" name="ipaddr" class="form-control" placeholder="" value="{% if form.ipaddr.value %}{{ form.ipaddr.value }}{% else %}{{ host.ipaddr }}{% endif %}" >
@@ -34,6 +44,12 @@
                         <label for="hostname">主机名</label>
                         <input type="text" name="hostname" class="form-control" placeholder="" value="{% if form.hostname.value %}{{ form.hostname.value }}{% else %}{{ host.hostname }}{% endif %}">
                         <span class="help-block">{{ form.hostname.errors }}</span>
+                    </div>
+
+                    <div class="form-group {% if form.root_password.errors %} has-error {% endif %}">
+                        <label for="root_password">root密码</label>
+                        <input type="text" name="root_password" class="form-control" placeholder="用于发布机与其它机器进行Key认证, 不填写需要手动认证" value="{% if host.root_password %}{{ host.root_password }}{% else %}{% if form.root_password.value %}{{ form.root_password.value }}{% endif %}{% endif %}">
+                        <span class="help-block">{{ form.root_password.errors }}</span>
                     </div>
 
                     <div class="form-group {% if form.comment.errors %} has-error {% endif %}">

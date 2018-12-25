@@ -15,6 +15,8 @@ from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse 
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm, \
         ImportFromPublicCloudForm
@@ -29,8 +31,22 @@ from cmdb.models import Host, ALIYUN, QCLOUD
 @user_passes_test(lambda u: u.is_superuser)
 def host(request):
     hosts = Host.objects.all()
+    paginator = Paginator(hosts, 15)
+    page = request.GET.get('page')
+    if not page:
+        page = 1
+    try:
+        hosts = paginator.page(page)
+    except PageNotAnInteger:
+        hosts = paginator.page(1)
+    except EmptyPage:
+        hosts = paginator.page(paginator.num_pages)
+
+    get_copy = request.GET.copy()
+    parameters = get_copy.pop('page', True) and get_copy.urlencode()
     return render(request, 'admin/cmdb/host.html', {
         "hosts": hosts,
+        'parameters': parameters,
     })
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -72,18 +88,21 @@ def host_edit(request, id):
             cleaned_data = f.cleaned_data
             try:
                 host.ipaddr = cleaned_data['ipaddr']
+                host.provider = cleaned_data['provider']
+                host.root_password = cleaned_data['root_password']
                 host.hostname = cleaned_data['hostname']
                 host.status = cleaned_data['status']
                 host.comment = cleaned_data['comment']
                 host.save()
             finally:
-                return redirect('/admin/cmdb/host')
+                return redirect('admin:cmdb.host')
     else:
         f = AddHostForm()
     return render(request, 'admin/cmdb/edit_host.html', {
         "form": f,
         "host": host,
         "status_choices": Host.STATUS_CHOICES,
+        "provider_choices": Host.PROVIDER_CHOICES,
     })
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -245,39 +264,46 @@ def import_from_public_cloud_as_api(request):
     vps_list = []
     if provider == ALIYUN:
         aliyun = AliyunService(auth_info.aliyun_access_key_id, auth_info.aliyun_access_key_secret)
-        json_data = json.loads(aliyun.get_allhost(region))
-        if ('TotalCount' in json_data) and (json_data['TotalCount'] > 0):
+        page = 1
+        while page < 100:
+            json_data = json.loads(aliyun.get_allhost(region, PageNumber=page))
             instances = json_data['Instances']['Instance']
-            for item in instances:
-                try:
-                    ipaddr = item['VpcAttributes']['PrivateIpAddress']['IpAddress'][0]
-                except:
-                    continue
+            page += 1
+            if instances:
+                instances = json_data['Instances']['Instance']
+                for item in instances:
+                    try:
+                        ipaddr = item['VpcAttributes']['PrivateIpAddress']['IpAddress'][0]
+                    except:
+                        continue
 
-                try:
-                    host = Host.objects.get(ipaddr=ipaddr)
-                    host.hostname = item['HostName']
-                    host.comment = item['Description']
-                    if item['Status'] == 'Running':
-                        host.status = Host.STATUS_ENABLED
-                    else:
-                        host.status = Host.STATUS_DISABLED
-                    host.save()
-                except:
-                    host = Host()
-                    host.provider = ALIYUN
-                    host.ipaddr = ipaddr
-                    host.hostname = item['HostName']
-                    host.instance_id = item['InstanceId']
-                    host.comment = item['Description']
-                    if item['Status'] == 'Running':
-                        host.status = Host.STATUS_ENABLED
-                    else:
-                        host.status = Host.STATUS_DISABLED
-                    host.save()
-                finally:
-                    count += 1
-                    vps_list.append(ipaddr + '-' + item['HostName'])
+                    try:
+                        hostname = item['HostName']
+                        host = Host.objects.get(Q(ipaddr=ipaddr) | Q(hostname=hostname))
+                        host.hostname = hostname
+                        host.comment = item['Description']
+                        if item['Status'] == 'Running':
+                            host.status = Host.STATUS_ENABLED
+                        else:
+                            host.status = Host.STATUS_DISABLED
+                        host.save()
+                    except:
+                        host = Host()
+                        host.provider = ALIYUN
+                        host.ipaddr = ipaddr
+                        host.hostname = item['HostName']
+                        host.instance_id = item['InstanceId']
+                        host.comment = item['Description']
+                        if item['Status'] == 'Running':
+                            host.status = Host.STATUS_ENABLED
+                        else:
+                            host.status = Host.STATUS_DISABLED
+                        host.save()
+                    finally:
+                        count += 1
+                        vps_list.append(ipaddr + '-' + item['HostName'])
+            else:
+                break
 
     elif provider == QCLOUD:
         qcloud = QcloudService(auth_info.qcloud_secret_id, auth_info.qcloud_secret_key)
