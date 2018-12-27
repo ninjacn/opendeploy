@@ -14,8 +14,10 @@ from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from admin.forms import  SettingGeneralForm, SettingMailForm, SettingPublicCloudForm
-from setting.models import SettingMail, SettingGeneral, SettingPublicCloud
+from admin.forms import  SettingGeneralForm, SettingMailForm, SettingPublicCloudForm, \
+        SettingLdapForm
+from setting.models import SettingMail, SettingGeneral, SettingPublicCloud, \
+        SettingLdap
 from setting.services import SettingService
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -103,4 +105,36 @@ def public_cloud(request):
     return render(request, 'admin/setting/public_cloud.html', {
         "form": f,
         "info": info,
+        })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def ldap(request):
+    settingService = SettingService()
+    ldap_info = settingService.get_ldap_info()
+    if request.method== 'POST':
+        f = SettingLdapForm(request.POST)
+        if f.is_valid():
+            cleaned_data = f.cleaned_data
+            try:
+                SettingLdap.objects.all().delete()
+                settingLdap = SettingLdap()
+                settingLdap.host = cleaned_data['host']
+                settingLdap.port = cleaned_data['port']
+                settingLdap.uid = cleaned_data['uid']
+                settingLdap.base = cleaned_data['base']
+                settingLdap.bind_dn = cleaned_data['bind_dn']
+                settingLdap.password = cleaned_data['password']
+                settingLdap.enable = cleaned_data['enable']
+                settingLdap.save()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:setting.ldap')
+    else:
+        f = SettingLdapForm()
+    return render(request, 'admin/setting/ldap.html', {
+        "form": f,
+        "ldap_info": ldap_info,
         })

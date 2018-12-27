@@ -119,11 +119,11 @@ def tasks(request):
     if not page:
         page = 1
     try:
-        tasks = paginator.page(page)
+        tasks_new = paginator.page(page)
     except PageNotAnInteger:
-        tasks = paginator.page(1)
+        tasks_new = paginator.page(1)
     except EmptyPage:
-        tasks = paginator.page(paginator.num_pages)
+        tasks_new = paginator.page(paginator.num_pages)
 
     def rebuild_tasks(task):
         task.pretreatment = False
@@ -132,7 +132,7 @@ def tasks(request):
             task.comment = task.comment[:8] + '...'
             task.pretreatment = True
         return task
-    tasks = map(rebuild_tasks, tasks)
+    tasks = map(rebuild_tasks, tasks_new)
 
     get_copy = request.GET.copy()
     parameters = get_copy.pop('page', True) and get_copy.urlencode()
@@ -142,6 +142,7 @@ def tasks(request):
         'envs': Env.objects.all(),
         'status_choices': Task.STATUS_CHOICES,
         'tasks': tasks,
+        'tasks_p': tasks_new, #分页数据，经过map之后tasks转换了list
         'param_status': param_status,
         'param_project': param_project,
         'param_env': param_env,

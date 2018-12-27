@@ -9,6 +9,8 @@
 
 import ldap
 
+from django.contrib.auth.models import User
+from accounts.models import UserDetail
 from setting.services import SettingService
 
 
@@ -39,3 +41,44 @@ class LdapService():
         if self.connect():
             searchFilter = "(objectClass=posixAccount)"
             return self.con.search_st(self.ldap_info.base, ldap.SCOPE_SUBTREE, searchFilter, None)
+
+    def sync_accounts(self):
+        all_staff = self.get_all_staff()
+        if all_staff:
+            for u in all_staff:
+                try:
+                    dn = u[0]
+                    uid = u[1]['uid'][0]
+                    mail = u[1]['mail'][0]
+                except:
+                    continue
+                if dn and uid:
+                    try:
+                        user = User.objects.get(username=uid)
+
+                        try:
+                            user_detail = UserDetail.objects.get(username=user)
+                            if len(user_detail.ldap_dn) == 0:
+                                user_detail.ldap_dn = dn
+                                user_detail.save()
+                        except:
+                            user_detail = UserDetail()
+                            user_detail.username = user
+                            user_detail.ldap_dn = dn
+                            user_detail.type = UserDetail.TYPE_LDAP
+                            user_detail.save()
+                    except:
+                        user = User()
+                        user.username = uid
+                        user.first_name = uid
+                        user.email = mail
+                        user.is_active = 1
+                        user.is_superuser = 0
+                        user.is_staff = 0
+                        user.save()
+
+                        user_detail = UserDetail()
+                        user_detail.username = user
+                        user_detail.ldap_dn = dn
+                        user_detail.type = UserDetail.TYPE_LDAP
+                        user_detail.save()

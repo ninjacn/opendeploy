@@ -13,7 +13,8 @@ from django.db.models import Q
 from django import forms
 
 from cmdb.models import Host
-from setting.models import SettingMail, SettingGeneral, SettingPublicCloud
+from setting.models import SettingMail, SettingGeneral, SettingPublicCloud, \
+        SettingLdap
 from api.models import Token
 import re
 
@@ -82,6 +83,12 @@ class SettingMailForm(forms.ModelForm):
         model = SettingMail
         fields = ['from_email', 'host', 'port', 'username', \
                 'password', 'use_tls']
+
+class SettingLdapForm(forms.ModelForm):
+    class Meta:
+        model = SettingLdap
+        fields = ['host', 'port', 'uid', 'base', \
+                'bind_dn', 'password', 'enable']
 
 class UserAddForm(forms.Form):
     username = forms.CharField()

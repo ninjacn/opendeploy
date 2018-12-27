@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f03a50870d8c6566ee0ea610ab53a8e8071da04eb15a4f6b9c680fe7afaa0a73"
+            "sha256": "aef9f9f1913345eb82f4ce117f207ff5f2eb3e44c71c7252d1200ed33c23cb61"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -277,6 +277,20 @@
             ],
             "version": "==3.6.1"
         },
+        "pyasn1": {
+            "hashes": [
+                "sha256:b9d3abc5031e61927c82d4d96c1cec1e55676c1a991623cfed28faea73cdd7ca",
+                "sha256:f58f2a3d12fd754aa123e9fa74fb7345333000a035f3921dbdaa08597aa53137"
+            ],
+            "version": "==0.4.4"
+        },
+        "pyasn1-modules": {
+            "hashes": [
+                "sha256:a0cf3e1842e7c60fde97cb22d275eb6f9524f5c5250489e292529de841417547",
+                "sha256:a38a8811ea784c0136abfdba73963876328f66172db21a05a82f9515909bfb4e"
+            ],
+            "version": "==0.2.2"
+        },
         "pycryptodome": {
             "hashes": [
                 "sha256:08dcfd52a6784c9ca6b8d098301326ec86a33b94e44759dac031ba71407a1a2e",
@@ -330,6 +344,13 @@
                 "sha256:88f9287c0174266bb0d8cedd395cfba9c58e87e5ad86b2ce58859bc11be3cf02"
             ],
             "version": "==2.7.5"
+        },
+        "python-ldap": {
+            "hashes": [
+                "sha256:41975e79406502c092732c57ef0c2c2eb318d91e8e765f81f5d4ab6c1db727c5"
+            ],
+            "index": "pypi",
+            "version": "==3.1.0"
         },
         "pytz": {
             "hashes": [
@@ -385,11 +406,11 @@
         },
         "sphinx": {
             "hashes": [
-                "sha256:120732cbddb1b2364471c3d9f8bfd4b0c5b550862f99a65736c77f970b142aea",
-                "sha256:b348790776490894e0424101af9c8413f2a86831524bd55c5f379d3e3e12ca64"
+                "sha256:429e3172466df289f0f742471d7e30ba3ee11f3b5aecd9a840480d03f14bcfe5",
+                "sha256:c4cb17ba44acffae3d3209646b6baec1e215cad3065e852c68cc569d4df1b9f8"
             ],
             "index": "pypi",
-            "version": "==1.8.2"
+            "version": "==1.8.3"
         },
         "sphinxcontrib-websupport": {
             "hashes": [
@@ -407,11 +428,11 @@
         },
         "tencentcloud-sdk-python": {
             "hashes": [
-                "sha256:4e46b26fec0e7c9feaccf4227e75ae6771464dc58e3df92a977518e78dc03035",
-                "sha256:ae75837e1f59548fcb7afc044616ad1a65da92f618aaa4e9c847f4f101aaa8fc"
+                "sha256:1d120339964a9f5d4e8f68eefed0d3a468875cde4f7f1e37b3c0349e3b262092",
+                "sha256:b6bca18dfc83e506fbae43a591829b2415161f932f64533421db0710d334638e"
             ],
             "index": "pypi",
-            "version": "==3.0.44"
+            "version": "==3.0.47"
         },
         "tornado": {
             "hashes": [

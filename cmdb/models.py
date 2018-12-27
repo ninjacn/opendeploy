@@ -9,7 +9,7 @@
 
 from django.db import models
 
-# Create your models here.
+from common.models import TimeStampedModel
 
 ALIYUN = 'aliyun'
 QCLOUD = 'qcloud'
@@ -18,7 +18,7 @@ PUBLIC_CLOUD_CHOICES = (
     (QCLOUD, '腾讯云'),
 )
 
-class Host(models.Model):
+class Host(TimeStampedModel):
     STATUS_ENABLED = '1'
     STATUS_DISABLED = '0'
     STATUS_CHOICES = (
@@ -38,8 +38,6 @@ class Host(models.Model):
     instance_id = models.CharField('InstanceId', max_length=255, blank=True, null=True)
     comment = models.CharField('备注', max_length=255, default='')
     status = models.CharField(max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.ipaddr
@@ -49,7 +47,7 @@ class Host(models.Model):
         verbose_name_plural = '主机'
         verbose_name = '主机'
 
-class HostGroup(models.Model):
+class HostGroup(TimeStampedModel):
     STATUS_ENABLED = '1'
     STATUS_DISABLED = '0'
     STATUS_CHOICES = (
@@ -60,8 +58,6 @@ class HostGroup(models.Model):
     host = models.ManyToManyField(Host)
     comment = models.CharField(max_length=255, default='')
     status = models.CharField(max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.name

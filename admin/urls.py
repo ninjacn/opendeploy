@@ -56,6 +56,7 @@ urlpatterns = [
     url(r'^setting/general$', setting.general, name='setting.general'),
     url(r'^setting/mail$', setting.mail, name='setting.mail'),
     url(r'^setting/public_cloud$', setting.public_cloud, name='setting.public_cloud'),
+    url(r'^setting/ldap$', setting.ldap, name='setting.ldap'),
 
     # api
     url(r'^api/token$', api.token, name='api.token'),

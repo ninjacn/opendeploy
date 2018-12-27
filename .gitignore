@@ -1,9 +1,11 @@
+node_modules/
+site/
 .env
 *.pyc
 *.log
 .env.local
 .env.prod
-node_modules/
 test_*.py
 test.py
-site/
+celerybeat.pid
+celerybeat-schedule

@@ -108,10 +108,10 @@
                         <div class="col-md-12">
                             <div class="dataTables_paginate paging_simple_numbers" id="example1_paginate">
                                 <ul class="pagination">
-                                    {% if tasks.has_previous %}
+                                    {% if tasks_p.has_previous %}
                                     <li class="page-item">
                                     <li class="paginate_button previous">
-                                        <a class="page-link" href="?page={{ tasks.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
+                                        <a class="page-link" href="?page={{ tasks_p.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
                                     </li>
                                     {% else %}
                                     <li class="paginate_button previous disabled">
@@ -120,12 +120,12 @@
                                     {% endif %}
 
                                     <li class="paginate_button active">
-                                        <a class="page-link" href="#" tabindex="-1">{{ tasks.number }} / {{ tasks.paginator.num_pages }}</a>
+                                        <a class="page-link" href="#" tabindex="-1">{{ tasks_p.number }} / {{ tasks_p.paginator.num_pages }}</a>
                                     </li>
 
-                                    {% if tasks.has_next %}
+                                    {% if tasks_p.has_next %}
                                     <li class="paginate_button next">
-                                        <a class="page-link" href="?page={{ tasks.next_page_number }}&{{ parameters }}">下一页</a>
+                                        <a class="page-link" href="?page={{ tasks_p.next_page_number }}&{{ parameters }}">下一页</a>
                                     </li>
                                     {% else %}
                                     <li class="paginate_button next disabled">

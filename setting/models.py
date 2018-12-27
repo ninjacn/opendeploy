@@ -8,9 +8,11 @@
 # file that was distributed with this source code.
 
 from django.db import models
+from common.models import TimeStampedModel
+
 
 # 通用
-class SettingGeneral(models.Model):
+class SettingGeneral(TimeStampedModel):
     enable_register = models.BooleanField('开启用户注册', default=False)
     site_url = models.URLField('站点域名', default='', max_length=255, help_text='比如:http://opendeploy.ninjacn.com')
 
@@ -22,7 +24,7 @@ class SettingGeneral(models.Model):
         verbose_name_plural = '设置 - 通用'
         verbose_name = '设置 - 通用'
 
-class SettingMail(models.Model):
+class SettingMail(TimeStampedModel):
     from_email = models.CharField('发送人', max_length=255, default='', help_text='例: opendeploy@ninjacn.com或Opendeploy<opendeploy@ninjacn.com>')
     host = models.CharField('SMTP主机', max_length=255, default='', help_text='例: smtp.exmail.qq.com')
     port = models.CharField('端口', max_length=255, default='25', help_text='25')
@@ -38,12 +40,14 @@ class SettingMail(models.Model):
         verbose_name_plural = '设置 - 邮箱'
         verbose_name = '设置 - 邮箱'
 
-class SettingLdap(models.Model):
-    host = models.CharField('发送人', max_length=255, default='')
-    port = models.CharField('发送人', max_length=255, default='389')
+class SettingLdap(TimeStampedModel):
+    host = models.CharField('主机地址或域名', max_length=255, default='')
+    port = models.CharField('端口', max_length=255, default='389')
     uid = models.CharField('uid', max_length=255, default='uid')
-    base = models.CharField('base', max_length=255, default='uid')
-    bind_dn = models.CharField('bind_dn', max_length=255, default='')
+    base = models.CharField('base', max_length=255, default='', \
+            help_text='例: dc=ninjacn,dc=com')
+    bind_dn = models.CharField('bind_dn', max_length=255, default='', \
+            help_text='例: cn=admin,dc=ninjacn,dc=com')
     password = models.CharField('密码', max_length=255, default='')
     enable = models.BooleanField('启用', default=False)
 
@@ -55,7 +59,7 @@ class SettingLdap(models.Model):
         verbose_name_plural = '设置 - LDAP'
         verbose_name = '设置 - LDAP'
 
-class SettingPublicCloud(models.Model):
+class SettingPublicCloud(TimeStampedModel):
     aliyun_access_key_id = models.CharField('阿里云-AccessKeyID', max_length=255, default='', blank=True)
     aliyun_access_key_secret = models.CharField('阿里云-AccessKeySecret', max_length=255, default='', blank=True)
     qcloud_secret_id = models.CharField('腾讯云-SecretId', max_length=255, default='', blank=True)

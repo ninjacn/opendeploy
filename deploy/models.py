@@ -11,14 +11,11 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from cmdb.models import HostGroup
+from common.models import TimeStampedModel
 
-# Create your models here.
-
-class Env(models.Model):
+class Env(TimeStampedModel):
     name = models.CharField(max_length=255,unique=True)
     comment = models.CharField(max_length=255, default='')
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -29,7 +26,7 @@ class Env(models.Model):
         verbose_name = '环境'
 
 ''' 凭据 '''
-class Credentials(models.Model):
+class Credentials(TimeStampedModel):
     TYPE_USER_PWD = 1
     TYPE_USER_PRIVATE_KEY = 2
     TYPE_CHOICES = (
@@ -41,8 +38,6 @@ class Credentials(models.Model):
     password = models.CharField('密码', max_length=255, default='')
     private_key = models.TextField('私钥', default='', help_text='')
     comment = models.CharField('备注', max_length=255, default='')
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.username
@@ -52,7 +47,7 @@ class Credentials(models.Model):
         verbose_name_plural = '凭据'
         verbose_name = '凭据'
 
-class Project(models.Model):
+class Project(TimeStampedModel):
     STATUS_ENABLED = '1'
     STATUS_DISABLED = '0'
     STATUS_CHOICES = (
@@ -84,8 +79,6 @@ class Project(models.Model):
     comment = models.CharField('备注', max_length=255, default='')
     deploy_mode = models.CharField('部署模式', max_length=2, default=DEPLOY_MODE_INCREMENT, choices=DEPLOY_MODE_CHOICES)
     status = models.CharField(max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -95,7 +88,7 @@ class Project(models.Model):
         verbose_name_plural = '项目'
         verbose_name = '项目'
 
-class ProjectEnvConfig(models.Model):
+class ProjectEnvConfig(TimeStampedModel):
     # pid = models.IntegerField('项目ID', null=True, help_text='')
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, null=True)
@@ -114,7 +107,7 @@ class ProjectEnvConfig(models.Model):
 
 
 ''' 发布任务 '''
-class Task(models.Model):
+class Task(TimeStampedModel):
     ACTION_RELEASE = '0'
     ACTION_ROLLBACK = '1'
 
@@ -137,8 +130,6 @@ class Task(models.Model):
     has_rollback = models.CharField('有无回滚', max_length=255, default='0')
     status = models.CharField('状态', max_length=16, default=STATUS_RELEASE_WAIT, choices=STATUS_CHOICES)
     comment = models.CharField('备注', max_length=255, default='')
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.id

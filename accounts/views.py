@@ -20,8 +20,8 @@ from opendeploy import settings
 from .forms import RegisterForm, LoginForm, ChangePasswordForm, \
         ChangeProfileForm
 from deploy.services import SettingService
+from accounts.models import UserDetail
 
-# Create your views here.
 
 @transaction.atomic
 def login(request):
@@ -39,7 +39,16 @@ def login(request):
             raw_password = form.cleaned_data.get('password')
             try:
                 user = User.objects.get(username=username, is_active=1)
-                user = authenticate(username=username, password=raw_password)
+                try:
+                    user_detail = UserDetail.objects.get(username=user)
+                    user_type = user_detail.type
+                except:
+                    user_type = UserDetail.TYPE_LOCAL
+                if user_type == UserDetail.TYPE_LOCAL:
+                    user = authenticate(username=username, password=raw_password)
+                else:
+                    # ldap
+                    pass
                 if user is not None:
                     auth_login(request, user)
                     redirect_to = request.POST.get('next')
@@ -78,6 +87,11 @@ def register(request):
             user.first_name = form.cleaned_data.get('first_name')
             user.set_password(raw_password)
             user.save()
+
+            user_detail = UserDetail()
+            user_detail.username = user
+            user_detail.type = UserDetail.TYPE_LOCAL
+            user_detail.save()
 
             user = authenticate(username=username, password=raw_password)
             auth_login(request, user)
