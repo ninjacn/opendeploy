@@ -37,6 +37,30 @@ class LdapService():
         except:
             self.error_msg = '未知错误'
 
+    def login(self, username, password):
+        if self.ldap_info.enable:
+            if self.connect():
+                try:
+                    user = User.objects.get(username=username, is_active=1)
+                except:
+                    self.error_msg = username + '用户不存在'
+                    return False
+                try:
+                    userDetail = UserDetail.objects.get(username=user, type=UserDetail.TYPE_LDAP)
+                except:
+                    self.error_msg = username + '用户LDAP信息不存在, 请联系管理员'
+                    return False
+
+                try:
+                    self.con.simple_bind_s(userDetail.ldap_dn, password)
+                    return True
+                except:
+                    return False
+        else:
+            self.error_msg = 'LDAP账号登录已禁用, 请联系管理员'
+        return False
+
+
     def get_all_staff(self):
         if self.connect():
             searchFilter = "(objectClass=posixAccount)"

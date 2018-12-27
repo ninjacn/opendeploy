@@ -14,6 +14,7 @@ from celery.task.schedules import crontab
 from celery.utils.log import get_task_logger
 
 from setting.services import SettingService
+from accounts.services import LdapService
 
 logger = get_task_logger(__name__)
 
@@ -24,7 +25,5 @@ logger = get_task_logger(__name__)
     ignore_result=True
 )
 def sync_ldap_accounts():
-    settingService = SettingService()
-    ldap_info = settingService.get_ldap_info()
-    if ldap_info.enable:
-        logger.info("Ldap login is enabled.")
+    ldapService = LdapService()
+    ldapService.sync_accounts()

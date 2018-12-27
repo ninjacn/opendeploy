@@ -20,6 +20,7 @@ from opendeploy import settings
 from .forms import RegisterForm, LoginForm, ChangePasswordForm, \
         ChangeProfileForm
 from deploy.services import SettingService
+from accounts.services import LdapService
 from accounts.models import UserDetail
 
 
@@ -37,6 +38,7 @@ def login(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password')
+            is_login = False
             try:
                 user = User.objects.get(username=username, is_active=1)
                 try:
@@ -45,11 +47,18 @@ def login(request):
                 except:
                     user_type = UserDetail.TYPE_LOCAL
                 if user_type == UserDetail.TYPE_LOCAL:
-                    user = authenticate(username=username, password=raw_password)
+                    if authenticate(username=username, password=raw_password):
+                        is_login = True
+                        auth_login(request, user)
                 else:
                     # ldap
-                    pass
-                if user is not None:
+                    ldapService = LdapService()
+                    if ldapService.login(username,raw_password):
+                        is_login = True
+                    else:
+                        error_msg = ldapService.error_msg
+
+                if is_login:
                     auth_login(request, user)
                     redirect_to = request.POST.get('next')
                     if redirect_to:
@@ -57,7 +66,9 @@ def login(request):
                     else:
                         return redirect('/')
                 else:
-                    form.add_error('username', '认证失败，用户名或密码错误!')
+                    if error_msg is None:
+                        error_msg = '认证失败，用户名或密码错误!'
+                    form.add_error('username', error_msg)
             except:
                 form.add_error('username', '认证失败，该用户没有激活!')
 
