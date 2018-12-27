@@ -14,13 +14,13 @@
         <input type="hidden" name="next" value="{{ redirect_to }}">
       <div class="form-group has-feedback  {% if form.username.errors %} has-error {% endif %}">
         <input type="text" class="form-control" placeholder="{{ form.username.help_text }}" name="{{ form.username.name }}" value="{% if form.username.value %} {{ form.username.value }} {% endif %}">
-        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+        <span class="fa fa-user form-control-feedback"></span>
         <span class="help-block">{{ form.username.errors }}</span>
       </div>
 
       <div class="form-group has-feedback  {% if form.password.errors %} has-error {% endif %}">
         <input type="password" class="form-control" placeholder="{{ form.password.help_text }}" name="{{ form.password.name }}">
-        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+        <span class="fa fa-key form-control-feedback"></span>
         <span class="help-block">{{ form.password.errors }}</span>
       </div>
       <div class="row">
