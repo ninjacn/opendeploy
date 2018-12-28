@@ -52,7 +52,7 @@
                   <th>姓名</th>
                   <th>管理员</th>
                   <th>激活</th>
-                  <th>最后登录</th>
+                  <th>账号类型</th>
                   <th>操作</th>
                 </tr>
                 {% for user in all_users %}
@@ -76,12 +76,10 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if user.last_login %}
-                        {{ user.last_login }}
-                        {% endif %}
+                        {{ user.user_type }}
                     <td>
-                        <a href="{% url 'admin:accounts.user_edit' user.id %}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button></a>
-                        <button data-href="{% url 'admin:accounts.user_del' user.id %}" data-id="{{ user.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i>删除</button>
+                        <a title="编辑" data-toggle="tooltip" href="{% url 'admin:accounts.user_edit' user.id %}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></button></a>
+                        <button title="删除" data-href="{% url 'admin:accounts.user_del' user.id %}" data-id="{{ user.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -89,6 +87,41 @@
             </div>
             <!-- /.box-body -->
           </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dataTables_paginate paging_simple_numbers" id="example1_paginate">
+                            <ul class="pagination">
+                                {% if all_users_p.has_previous %}
+                                <li class="page-item">
+                                <li class="paginate_button previous">
+                                    <a class="page-link" href="?page={{ all_users_p.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button previous disabled">
+                                  <a class="page-link" href="#" tabindex="-1">上一页</a>
+                                </li>
+                                {% endif %}
+
+                                <li class="paginate_button active">
+                                    <a class="page-link" href="#" tabindex="-1">{{ all_users_p.number }} / {{ all_users_p.paginator.num_pages }}</a>
+                                </li>
+
+                                {% if all_users_p.has_next %}
+                                <li class="paginate_button next">
+                                    <a class="page-link" href="?page={{ all_users_p.next_page_number }}&{{ parameters }}">下一页</a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button next disabled">
+                                    <a class="page-link" href="#">下一页</a>
+                                </li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
           <!-- /.box -->
         </div>
       </div>

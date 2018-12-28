@@ -78,7 +78,7 @@
                     <td>{{ item.updated_at }}</td>
                     <td>
                         <a title="编辑" data-toggle="tooltip" href="/admin/deploy/project/edit/{{ item.id }}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></button></a>
-                        <button title="删除" data-toggle="tooltip" data-href="{% url 'admin:deploy.project_del' item.id %}" data-id="{{ item.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
+                        <button title="删除" data-href="{% url 'admin:deploy.project_del' item.id %}" data-id="{{ item.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
                 {% endfor %}

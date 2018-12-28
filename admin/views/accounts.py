@@ -8,20 +8,45 @@
 # file that was distributed with this source code.
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.template.response import TemplateResponse
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from admin.forms import UserEditForm, UserAddForm
+from accounts.models import UserDetail
 
 @user_passes_test(lambda u: u.is_superuser)
 def all_users(request):
     all_users = User.objects.all()
+    paginator = Paginator(all_users, 10)
+    page = request.GET.get('page')
+    if not page:
+        page = 1
+    try:
+        all_users_p = paginator.page(page)
+    except PageNotAnInteger:
+        all_users_p = paginator.page(1)
+    except EmptyPage:
+        all_users_p = paginator.page(paginator.num_pages)
+
+    def rebuild_users(user):
+        try:
+            user_detail = UserDetail.objects.get(username=user)
+            user.user_type = user_detail.type
+        except:
+            user.user_type = UserDetail.TYPE_LOCAL
+        return user
+    all_users = map(rebuild_users, all_users_p)
+    parameters = ''
+
     return render(request, 'admin/accounts/all_users.html', {
         'all_users': all_users,
+        'all_users_p': all_users_p,
+        'parameters': parameters,
     })
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -58,7 +83,18 @@ def user_add(request):
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def user_edit(request, uid):
-    user = User.objects.get(pk=uid)
+    try:
+        user = User.objects.get(pk=uid)
+    except:
+        raise Http404('用户不存在')
+    try:
+        user_detail = UserDetail.objects.get(username=user)
+        user_type = user_detail.type
+        ldap_dn = user_detail.ldap_dn
+    except:
+        user_type = UserDetail.TYPE_LOCAL
+        ldap_dn = ''
+
     if request.method== 'POST':
         f = UserEditForm(request.POST, user=user)
         if f.is_valid():
@@ -71,6 +107,18 @@ def user_edit(request, uid):
                 user.is_active = cleaned_data.get('is_active')
                 user.is_staff = 0
                 user.save()
+
+                try:
+                    user_detail = UserDetail.objects.get(username=user)
+                    user_detail.type = request.POST.get('type')
+                    user_detail.ldap_dn = request.POST.get('ldap_dn')
+                    user_detail.save()
+                except:
+                    user_detail = UserDetail()
+                    user_detail.username = user
+                    user_detail.type = request.POST.get('type')
+                    user_detail.save()
+                    pass
                 messages.info(request, '操作成功')
             except:
                 messages.error(request, '操作失败')
@@ -82,7 +130,10 @@ def user_edit(request, uid):
         f = UserEditForm()
     return render(request, 'admin/accounts/user_edit.html', {
         "form": f,
+        "user_type": user_type,
+        "ldap_dn": ldap_dn,
         "user": user,
+        "type_choices": UserDetail.TYPE_CHOICES,
     })
 
 @user_passes_test(lambda u: u.is_superuser)

@@ -49,6 +49,7 @@
                     <div class="form-group {% if form.credential.errors %} has-error {% endif %}">
                         <label for="credential">认证凭据</label>
                         <select class="form-control" name="credential">
+                            <option value="">选择认证凭据</option>
                             {% for credential in credentials %}
                             <option value="{{ credential.id }}" {% if credential.id == project.credentials.id %} selected {% endif %} >{{ credential.get_type_display }} | {{ credential.username }} | {{ credential.comment }}</option>
                             {% endfor %}

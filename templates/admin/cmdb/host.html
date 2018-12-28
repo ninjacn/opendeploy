@@ -74,7 +74,7 @@
                         <a href="/admin/cmdb/host/edit/{{ host.id }}" title="编辑" data-toggle="tooltip">
                             <button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></button> 
                         </a>
-                        <button title="删除" data-toggle="tooltip" data-href="{% url 'admin:cmdb.host_del' host.id %}" data-id="{{ host.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
+                        <button title="删除" data-href="{% url 'admin:cmdb.host_del' host.id %}" data-id="{{ host.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
                 {% endfor %}
