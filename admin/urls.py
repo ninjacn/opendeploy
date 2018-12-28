@@ -57,6 +57,7 @@ urlpatterns = [
     url(r'^setting/mail$', setting.mail, name='setting.mail'),
     url(r'^setting/public_cloud$', setting.public_cloud, name='setting.public_cloud'),
     url(r'^setting/ldap$', setting.ldap, name='setting.ldap'),
+    url(r'^setting/check_ldap_account_valid$', setting.check_ldap_account_valid, name='setting.check_ldap_account_valid'),
 
     # api
     url(r'^api/token$', api.token, name='api.token'),

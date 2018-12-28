@@ -8,7 +8,7 @@
 # file that was distributed with this source code.
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
 from django.contrib import messages
@@ -19,6 +19,8 @@ from admin.forms import  SettingGeneralForm, SettingMailForm, SettingPublicCloud
 from setting.models import SettingMail, SettingGeneral, SettingPublicCloud, \
         SettingLdap
 from setting.services import SettingService
+from accounts.services import LdapService
+from common.views import get_common_response_by_api
 
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
@@ -138,3 +140,18 @@ def ldap(request):
         "form": f,
         "ldap_info": ldap_info,
         })
+
+@user_passes_test(lambda u: u.is_superuser)
+@transaction.atomic
+def check_ldap_account_valid(request):
+    res = get_common_response_by_api()
+    ldapService = LdapService()
+    if ldapService.check_account_valid():
+        res['msg'] = '账号检测成功'
+    else:
+        if ldapService.error_msg:
+            res['msg'] = '账号检测异常 - ' + ldapService.error_msg
+        else:
+            res['msg'] = '账号检测异常'
+        res['error_code'] = 1
+    return JsonResponse(res)

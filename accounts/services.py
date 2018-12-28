@@ -37,6 +37,11 @@ class LdapService():
         except:
             self.error_msg = '未知错误'
 
+    def check_account_valid(self):
+        if self.connect():
+            return True
+        return False
+
     def login(self, username, password):
         if self.ldap_info.enable:
             if self.connect():

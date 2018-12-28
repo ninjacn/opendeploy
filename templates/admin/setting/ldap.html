@@ -73,9 +73,32 @@
 
               <div class="box-footer">
                 <button type="submit" class="btn btn-primary">保存</button>
+                <button id="checkValidBtn" type="button" class="btn btn-default">检测账号可用性</button>
               </div>
             </form>
           </div>
         </div>
 </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function check_valid() {
+            url = "/admin/setting/check_ldap_account_valid"
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType: "json",
+                beforeSend: function() {
+                }
+            }).done(function(data) {
+                alert(data.msg);
+            }).fail(function(data,textStatus, xhr) {
+                alert("检测失败！");
+            });
+        }
+        $("#checkValidBtn").click(function() {
+            check_valid();
+        })
+    </script>
 {% endblock %}
