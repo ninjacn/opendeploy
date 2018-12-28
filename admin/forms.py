@@ -15,6 +15,7 @@ from django import forms
 from cmdb.models import Host
 from setting.models import SettingMail, SettingGeneral, SettingPublicCloud, \
         SettingLdap
+from deploy.models import Project
 from api.models import Token
 import re
 
@@ -41,15 +42,12 @@ class EditHostGroupForm(forms.Form):
     status = forms.CharField()
     comment = forms.CharField(required=False)
 
-class AddProjectForm(forms.Form):
-    name = forms.CharField()
-    vcs_type = forms.CharField()
-    credential = forms.CharField()
-    repository_url = forms.CharField()
-    dest_path = forms.CharField()
-    deploy_mode = forms.CharField()
-    status = forms.CharField()
-    comment = forms.CharField(required=False)
+class AddProjectForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ['name', 'vcs_type', 'repository_url', 'dest_path', \
+                'credentials', 'comment', 'deploy_mode', 'dingding_robot_webhook', \
+                'status']
 
 # 用户名与密码认证
 class AddCredentialForPasswordForm(forms.Form):

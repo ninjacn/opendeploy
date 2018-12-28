@@ -17,8 +17,9 @@ from django.template.response import TemplateResponse
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from opendeploy import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from opendeploy import settings
 from admin.forms import AddEnvForm, AddProjectForm, AddCredentialForPasswordForm, \
         AddCredentialForPrivateForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
@@ -34,9 +35,23 @@ def index(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def project(request):
-    projects = Project.objects.all()
+    projects = Project.objects.all().order_by('-status', '-updated_at')
+    paginator = Paginator(projects, 10)
+    page = request.GET.get('page')
+    if not page:
+        page = 1
+    try:
+        projects = paginator.page(page)
+    except PageNotAnInteger:
+        projects = paginator.page(1)
+    except EmptyPage:
+        projects = paginator.page(paginator.num_pages)
+
+    get_copy = request.GET.copy()
+    parameters = get_copy.pop('page', True) and get_copy.urlencode()
     return render(request, 'admin/deploy/project.html', {
         "projects": projects,
+        'parameters': parameters,
     })
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -45,16 +60,17 @@ def project_add(request):
     if request.method== 'POST':
         f = AddProjectForm(request.POST)
         if f.is_valid():
-            cleaned_data = f.cleaned_data
             try:
+                cleaned_data = f.cleaned_data
                 project = Project()
                 project.name = cleaned_data['name']
                 project.vcs_type = cleaned_data['vcs_type']
                 project.repository_url = cleaned_data['repository_url']
-                project.credentials = Credentials.objects.get(id=cleaned_data['credential'])
+                project.credentials = cleaned_data['credentials']
                 project.dest_path = cleaned_data['dest_path']
                 project.comment = cleaned_data['comment']
                 project.deploy_mode = cleaned_data['deploy_mode']
+                project.dingding_robot_webhook = cleaned_data['dingding_robot_webhook']
                 project.status = cleaned_data['status']
                 project.save()
 
@@ -68,18 +84,21 @@ def project_add(request):
                         projectEnvConfig.branch = request.POST.get('branch_' + env)
                         projectEnvConfig.before_hook = request.POST.get('before_hook_' + env)
                         projectEnvConfig.after_hook = request.POST.get('after_hook_' + env)
-                        projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + env))
+                        if len(request.POST.get('host_group_' + env)) > 0:
+                            projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + env))
                         projectEnvConfig.save()
 
                         before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
-                        f = open(before_hook_path, 'wb+')
-                        f.write(projectEnvConfig.before_hook)
-                        f.close()
+                        if len(projectEnvConfig.before_hook) > 0:
+                            f = open(before_hook_path, 'wb+')
+                            f.write(projectEnvConfig.before_hook)
+                            f.close()
 
                         after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
-                        f = open(after_hook_path, 'wb+')
-                        f.write(projectEnvConfig.after_hook)
-                        f.close()
+                        if len(projectEnvConfig.after_hook) > 0:
+                            f = open(after_hook_path, 'wb+')
+                            f.write(projectEnvConfig.after_hook)
+                            f.close()
 
                         if os.path.exists(before_hook_path):
                             os.chmod(before_hook_path, stat.S_IRWXU)
@@ -92,8 +111,13 @@ def project_add(request):
                             command = 'dos2unix ' + after_hook_path
                             commandService = CommandService(command)
                             commandService.run_script()
+                    messages.info(request, '添加成功')
+            except:
+                messages.error(request, '添加失败')
             finally:
                 return redirect('/admin/deploy/project')
+        else:
+            messages.error(request, '表单校验失败')
     else:
         f = AddProjectForm()
     return render(request, 'admin/deploy/add_project.html', {
@@ -117,96 +141,89 @@ def project_edit(request, id):
         env_list_by_project.append(v.env.id)
 
     if request.method== 'POST':
-        f = AddProjectForm(request.POST)
+        f = AddProjectForm(request.POST, instance=project)
         if f.is_valid():
             cleaned_data = f.cleaned_data
             try:
-                project.name = cleaned_data['name']
-                project.vcs_type = cleaned_data['vcs_type']
-                project.repository_url = cleaned_data['repository_url']
-                project.credentials = Credentials.objects.get(id=cleaned_data['credential'])
-                project.dest_path = cleaned_data['dest_path']
-                project.comment = cleaned_data['comment']
-                project.deploy_mode = cleaned_data['deploy_mode']
-                project.status = cleaned_data['status']
-                project.save()
-            except:
-                pass
+                f.save()
 
-            # 增加环境关联值
-            envs = request.POST.getlist('projectEnvConfig')
-            if envs:
-                for v in envs:
-                    # 存在更新
-                    try:
-                        config = ProjectEnvConfig.objects.get(pk=v)
-                        config.branch = request.POST.get('branch_' + v, 'master')
-                        config.before_hook = request.POST.get('before_hook_' + v, '')
-                        config.after_hook = request.POST.get('after_hook_' + v, '')
+                # 增加环境关联值
+                envs = request.POST.getlist('projectEnvConfig')
+                if envs:
+                    for v in envs:
+                        # 存在更新
                         try:
-                            config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            config = ProjectEnvConfig.objects.get(pk=v)
+                            config.branch = request.POST.get('branch_' + v, 'master')
+                            config.before_hook = request.POST.get('before_hook_' + v, '')
+                            config.after_hook = request.POST.get('after_hook_' + v, '')
+                            try:
+                                config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            except:
+                                config.host_group = None
+                            config.save()
+
+                            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
+                            f = open(before_hook_path, 'w')
+                            f.write(config.before_hook)
+                            f.close()
+
+                            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
+                            f = open(after_hook_path, 'w')
+                            f.write(config.after_hook)
+                            f.close()
+
+                            if os.path.exists(before_hook_path):
+                                os.chmod(before_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + before_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
+
+                            if os.path.exists(after_hook_path):
+                                os.chmod(after_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + after_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
+                        # 不存在插入
                         except:
-                            config.host_group = None
-                        config.save()
+                            projectEnvConfig = ProjectEnvConfig()
+                            projectEnvConfig.project = project
+                            projectEnvConfig.env = Env.objects.get(pk=v)
+                            if request.POST.get('branch_' + v):
+                                projectEnvConfig.branch = request.POST.get('branch_' + v, 'master')
+                            else:
+                                projectEnvConfig.branch = 'master'
+                            projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            projectEnvConfig.before_hook = request.POST.get('before_hook_' + v, '')
+                            projectEnvConfig.after_hook = request.POST.get('after_hook_' + v, '')
+                            projectEnvConfig.save()
 
-                        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
-                        f = open(before_hook_path, 'w')
-                        f.write(config.before_hook)
-                        f.close()
+                            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
+                            f = open(before_hook_path, 'w')
+                            f.write(projectEnvConfig.before_hook)
+                            f.close()
 
-                        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
-                        f = open(after_hook_path, 'w')
-                        f.write(config.after_hook)
-                        f.close()
+                            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
+                            f = open(after_hook_path, 'w')
+                            f.write(projectEnvConfig.after_hook)
+                            f.close()
 
-                        if os.path.exists(before_hook_path):
-                            os.chmod(before_hook_path, stat.S_IRWXU)
-                            command = 'dos2unix ' + before_hook_path
-                            commandService = CommandService(command)
-                            commandService.run_script()
+                            if os.path.exists(before_hook_path):
+                                os.chmod(before_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + before_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
 
-                        if os.path.exists(after_hook_path):
-                            os.chmod(after_hook_path, stat.S_IRWXU)
-                            command = 'dos2unix ' + after_hook_path
-                            commandService = CommandService(command)
-                            commandService.run_script()
-                    # 不存在插入
-                    except:
-                        projectEnvConfig = ProjectEnvConfig()
-                        projectEnvConfig.project = project
-                        projectEnvConfig.env = Env.objects.get(pk=v)
-                        if request.POST.get('branch_' + v):
-                            projectEnvConfig.branch = request.POST.get('branch_' + v, 'master')
-                        else:
-                            projectEnvConfig.branch = 'master'
-                        projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
-                        projectEnvConfig.before_hook = request.POST.get('before_hook_' + v, '')
-                        projectEnvConfig.after_hook = request.POST.get('after_hook_' + v, '')
-                        projectEnvConfig.save()
-
-                        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
-                        f = open(before_hook_path, 'w')
-                        f.write(projectEnvConfig.before_hook)
-                        f.close()
-
-                        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
-                        f = open(after_hook_path, 'w')
-                        f.write(projectEnvConfig.after_hook)
-                        f.close()
-
-                        if os.path.exists(before_hook_path):
-                            os.chmod(before_hook_path, stat.S_IRWXU)
-                            command = 'dos2unix ' + before_hook_path
-                            commandService = CommandService(command)
-                            commandService.run_script()
-
-                        if os.path.exists(after_hook_path):
-                            os.chmod(after_hook_path, stat.S_IRWXU)
-                            command = 'dos2unix ' + after_hook_path
-                            commandService = CommandService(command)
-                            commandService.run_script()
-            messages.info(request, '修改成功')
-            return redirect('/admin/deploy/project')
+                            if os.path.exists(after_hook_path):
+                                os.chmod(after_hook_path, stat.S_IRWXU)
+                                command = 'dos2unix ' + after_hook_path
+                                commandService = CommandService(command)
+                                commandService.run_script()
+                messages.info(request, '修改成功')
+            except:
+                messages.error(request, '修改失败')
+            finally:
+                return redirect('admin:deploy.project')
     else:
         f = AddProjectForm()
     return render(request, 'admin/deploy/edit_project.html', {

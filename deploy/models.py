@@ -44,8 +44,8 @@ class Credentials(TimeStampedModel):
 
     class Meta:
         db_table = 'deploy_credentials'
-        verbose_name_plural = '凭据'
-        verbose_name = '凭据'
+        verbose_name_plural = '认证凭证'
+        verbose_name = '认证凭证'
 
 class Project(TimeStampedModel):
     STATUS_ENABLED = '1'
@@ -75,9 +75,13 @@ class Project(TimeStampedModel):
     vcs_type = models.CharField('仓库类型', max_length=255, default=TYPE_GIT, choices=TYPE_CHOICES)
     repository_url = models.CharField('仓库地址', max_length=255)
     dest_path = models.CharField('项目路径', max_length=255, default='')
-    credentials = models.ForeignKey(Credentials, on_delete=models.SET_NULL, related_name='credentials', null=True )
-    comment = models.CharField('备注', max_length=255, default='')
-    deploy_mode = models.CharField('部署模式', max_length=2, default=DEPLOY_MODE_INCREMENT, choices=DEPLOY_MODE_CHOICES)
+    credentials = models.ForeignKey(Credentials, on_delete=models.SET_NULL, \
+            related_name='credentials', null=True, blank=True)
+    comment = models.CharField('备注', max_length=255, default='', null=True, blank=True)
+    deploy_mode = models.CharField('部署模式', max_length=2, default=DEPLOY_MODE_INCREMENT, \
+            choices=DEPLOY_MODE_CHOICES)
+    dingding_robot_webhook = models.URLField('钉钉机器人webhook', max_length=255, default='', \
+            null=True, blank=True)
     status = models.CharField(max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
 
     def __str__(self):

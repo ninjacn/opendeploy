@@ -84,6 +84,39 @@
                 {% endfor %}
               </tbody></table>
             </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dataTables_paginate paging_simple_numbers" id="example1_paginate">
+                            <ul class="pagination">
+                                {% if projects.has_previous %}
+                                <li class="page-item">
+                                <li class="paginate_button previous">
+                                    <a class="page-link" href="?page={{ projects.previous_page_number }}&{{ parameters }}" tabindex="-1">上一页</a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button previous disabled">
+                                  <a class="page-link" href="#" tabindex="-1">上一页</a>
+                                </li>
+                                {% endif %}
+
+                                <li class="paginate_button active">
+                                    <a class="page-link" href="#" tabindex="-1">{{ projects.number }} / {{ projects.paginator.num_pages }}</a>
+                                </li>
+
+                                {% if projects.has_next %}
+                                <li class="paginate_button next">
+                                    <a class="page-link" href="?page={{ projects.next_page_number }}&{{ parameters }}">下一页</a>
+                                </li>
+                                {% else %}
+                                <li class="paginate_button next disabled">
+                                    <a class="page-link" href="#">下一页</a>
+                                </li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             <!-- /.box-body -->
           </div>
           <!-- /.box -->

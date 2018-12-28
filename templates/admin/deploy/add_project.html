@@ -25,13 +25,13 @@
             <!-- form start -->
                 <div class="box-body">
                     <div class="form-group {% if form.name.errors %} has-error {% endif %}">
-                        <label for="name">名称</label>
+                        <label for="name">{{ form.name.label }}</label>
                         <input type="text" name="name" class="form-control" placeholder="" value="{% if form.name.value %}{{ form.name.value }}{% endif %}" >
                         <span class="help-block">{{ form.ipaddr.errors }}</span>
                     </div>
 
                     <div class="form-group {% if form.vcs_type.errors %} has-error {% endif %}">
-                        <label for="vcs_type">仓库类型</label>
+                        <label for="vcs_type">{{ form.vcs_type.label }}</label>
                         <select class="form-control" name="vcs_type">
                             {% for item in type_choices %}
                             <option value="{{ item.0 }}">{{ item.1 }}</option>
@@ -41,30 +41,30 @@
                     </div>
 
                     <div class="form-group {% if form.repository_url.errors %} has-error {% endif %}">
-                        <label for="repository_url">仓库地址</label>
+                        <label for="repository_url">{{ form.repository_url.label }}</label>
                         <input type="text" name="repository_url" class="form-control" placeholder="" value="{% if form.repository_url.value %}{{ form.repository_url.value }}{% endif %}">
                         <span class="help-block">{{ form.repository_url.errors }}</span>
                     </div>
 
-                    <div class="form-group {% if form.credential.errors %} has-error {% endif %}">
-                        <label for="credential">认证凭据</label>
-                        <select class="form-control" name="credential">
-                            <option value="">选择认证凭据</option>
+                    <div class="form-group {% if form.credentials.errors %} has-error {% endif %}">
+                        <label for="credential">认证凭证</label>
+                        <select class="form-control" name="credentials">
+                            <option value="">选择认证凭证</option>
                             {% for credential in credentials %}
                             <option value="{{ credential.id }}" {% if credential.id == project.credentials.id %} selected {% endif %} >{{ credential.get_type_display }} | {{ credential.username }} | {{ credential.comment }}</option>
                             {% endfor %}
                         </select>
-                        <span class="help-block">{{ form.credential.errors }}</span>
+                        <span class="help-block">{{ form.credentials.errors }}</span>
                     </div>
 
                     <div class="form-group {% if form.dest_path.errors %} has-error {% endif %}">
-                        <label for="dest_path">部署根目录</label>
+                        <label for="dest_path">{{ form.dest_path.label }}</label>
                         <input type="text" name="dest_path" class="form-control" placeholder="" value="{% if form.dest_path.value %}{{ form.dest_path.value }}{% endif %}">
                         <span class="help-block">{{ form.dest_path.errors }}</span>
                     </div>
 
                     <div class="form-group {% if form.deploy_mode.errors %} has-error {% endif %}">
-                        <label for="deploy_mode">部署模式</label>
+                        <label for="deploy_mode">{{ form.deploy_mode.label }}</label>
                         <select class="form-control" name="deploy_mode">
                             {% for item in deploy_mode_choices %}
                             <option value="{{ item.0 }}">{{ item.1 }}</option>
@@ -74,13 +74,19 @@
                     </div>
 
                     <div class="form-group {% if form.comment.errors %} has-error {% endif %}">
-                        <label for="comment">备注</label>
-                        <input type="text" name="comment" class="form-control" placeholder="" value="{% if form.comment.value %}{{ form.comment.value }}{% endif %}">
+                        <label for="comment">{{ form.comment.label }}</label>
+                        <input type="text" name="comment" class="form-control" placeholder="" value="{% if form.comment.value %}{{ form.comment.value }}{% else %}{% endif %}">
                         <span class="help-block">{{ form.comment.errors }}</span>
                     </div>
 
+                    <div class="form-group {% if form.dingding_robot_webhook.errors %} has-error {% endif %}">
+                        <label for="dingding_robot_webhook">{{ form.dingding_robot_webhook.label }}</label>
+                        <input type="text" name="dingding_robot_webhook" class="form-control" placeholder="" value="{% if form.dingding_robot_webhook.value %}{{ form.dingding_robot_webhook.value }}{% endif %}">
+                        <span class="help-block">{{ form.dingding_robot_webhook.errors }}</span>
+                    </div>
+
                     <div class="form-group {% if form.status.errors %} has-error {% endif %}">
-                        <label for="status">状态</label>
+                        <label for="status">{{ form.status.label }}</label>
                         <select class="form-control" name="status">
                             {% for item in status_choices %}
                             <option value="{{ item.0 }}">{{ item.1 }}</option>
