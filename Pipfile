@@ -19,6 +19,7 @@ aliyun-python-sdk-core-v3 = "==2.11.1"
 sphinx = "*"
 mkdocs = "*"
 python-ldap = "*"
+pexpect = "*"
 
 [dev-packages]
 

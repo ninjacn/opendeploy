@@ -38,7 +38,7 @@ class DingdingService():
             },
         }
         r = requests.post(url, json=data, timeout = 5).json()
-        print(r)
         if r['errcode'] > 0:
             return False
         return True
+
