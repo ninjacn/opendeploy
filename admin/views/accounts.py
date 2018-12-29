@@ -16,13 +16,14 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from opendeploy import settings
 from admin.forms import UserEditForm, UserAddForm
 from accounts.models import UserDetail
 
 @user_passes_test(lambda u: u.is_superuser)
 def all_users(request):
-    all_users = User.objects.all()
-    paginator = Paginator(all_users, 10)
+    all_users = User.objects.all().order_by('-is_active')
+    paginator = Paginator(all_users, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
         page = 1
@@ -36,12 +37,13 @@ def all_users(request):
     def rebuild_users(user):
         try:
             user_detail = UserDetail.objects.get(username=user)
-            user.user_type = user_detail.type
+            user.user_type = user_detail.get_type_display
         except:
-            user.user_type = UserDetail.TYPE_LOCAL
+            user.user_type = dict(UserDetail.TYPE_CHOICES)[UserDetail.TYPE_LOCAL]
         return user
     all_users = map(rebuild_users, all_users_p)
-    parameters = ''
+    get_copy = request.GET.copy()
+    parameters = get_copy.pop('page', True) and get_copy.urlencode()
 
     return render(request, 'admin/accounts/all_users.html', {
         'all_users': all_users,

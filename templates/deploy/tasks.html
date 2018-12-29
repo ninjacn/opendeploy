@@ -119,9 +119,23 @@
                                     </li>
                                     {% endif %}
 
-                                    <li class="paginate_button active">
-                                        <a class="page-link" href="#" tabindex="-1">{{ tasks_p.number }} / {{ tasks_p.paginator.num_pages }}</a>
-                                    </li>
+                                    {% if tasks_p.number|add:'-4' > 1 %}
+                                        <li class="paginate_button">
+                                            <a href="?page={{ tasks_p.number|add:'-5' }}">&hellip;</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for i in tasks_p.paginator.page_range %}
+                                        {% if tasks_p.number == i %}
+                                            <li class="paginate_button active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                        {% elif i > tasks_p.number|add:'-5' and i < tasks_p.number|add:'5' %}
+                                            <li class="paginate_button"><a href="?page={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if tasks_p.paginator.num_pages > tasks_p.number|add:'4' %}
+                                        <li class="paginate_button"><a href="?page={{ tasks_p.number|add:'5' }}">&hellip;</a></li>
+                                    {% endif %}
 
                                     {% if tasks_p.has_next %}
                                     <li class="paginate_button next">

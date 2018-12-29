@@ -82,7 +82,7 @@ class Project(TimeStampedModel):
             choices=DEPLOY_MODE_CHOICES)
     dingding_robot_webhook = models.URLField('钉钉机器人webhook', max_length=255, default='', \
             null=True, blank=True)
-    status = models.CharField(max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
+    status = models.CharField('状态', max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
 
     def __str__(self):
         return self.name

@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django import forms
 
-from cmdb.models import Host
+from cmdb.models import Host, HostGroup
 from setting.models import SettingMail, SettingGeneral, SettingPublicCloud, \
         SettingLdap
 from deploy.models import Project
@@ -32,9 +32,15 @@ class AddHostForm(forms.Form):
     status = forms.ChoiceField(choices=Host.STATUS_CHOICES)
     comment = forms.CharField(required=False)
 
+class HostGroupForm(forms.ModelForm):
+    class Meta:
+        model = HostGroup
+        fields = ['name', 'host', 'comment', 'status']
+
 class AddHostGroupForm(forms.Form):
     name = forms.CharField()
     status = forms.CharField()
+    host = forms.CharField()
     comment = forms.CharField(required=False)
 
 class EditHostGroupForm(forms.Form):
@@ -42,7 +48,7 @@ class EditHostGroupForm(forms.Form):
     status = forms.CharField()
     comment = forms.CharField(required=False)
 
-class AddProjectForm(forms.ModelForm):
+class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['name', 'vcs_type', 'repository_url', 'dest_path', \

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for opendeploy project.
 
@@ -86,8 +87,8 @@ WSGI_APPLICATION = 'opendeploy.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.mysql',
-        'ENGINE': 'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
+        # 'ENGINE': 'mysql.connector.django',
         'HOST': os.environ['MYSQL_HOST'],
         'USER': os.environ['MYSQL_USER'],
         'PASSWORD': os.environ['MYSQL_PWD'],
@@ -187,3 +188,5 @@ WORKSPACE_PATH = "~/.opendeploy/workspace"
 RELEASE_LOG_PATH = os.path.join(BASE_DIR, "storage/release_log"),
 
 LOGIN_REDIRECT_URL = '/accounts/login'
+
+PAGE_SIZE = 2

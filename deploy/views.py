@@ -114,7 +114,7 @@ def tasks(request):
     except:
         param_creater = 0
 
-    paginator = Paginator(tasks, 10)
+    paginator = Paginator(tasks, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
         page = 1

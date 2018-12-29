@@ -99,9 +99,23 @@
                                 </li>
                                 {% endif %}
 
-                                <li class="paginate_button active">
-                                    <a class="page-link" href="#" tabindex="-1">{{ hosts.number }} / {{ hosts.paginator.num_pages }}</a>
-                                </li>
+                                {% if hosts.number|add:'-4' > 1 %}
+                                    <li class="paginate_button">
+                                        <a href="?page={{ hosts.number|add:'-5' }}">&hellip;</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for i in hosts.paginator.page_range %}
+                                    {% if hosts.number == i %}
+                                        <li class="paginate_button active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                    {% elif i > hosts.number|add:'-5' and i < hosts.number|add:'5' %}
+                                        <li class="paginate_button"><a href="?page={{ i }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if hosts.paginator.num_pages > hosts.number|add:'4' %}
+                                    <li class="paginate_button"><a href="?page={{ hosts.number|add:'5' }}">&hellip;</a></li>
+                                {% endif %}
 
                                 {% if hosts.has_next %}
                                 <li class="paginate_button next">

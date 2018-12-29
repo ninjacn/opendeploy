@@ -99,10 +99,23 @@
                                 </li>
                                 {% endif %}
 
-                                <li class="paginate_button active">
-                                    <a class="page-link" href="#" tabindex="-1">{{ projects.number }} / {{ projects.paginator.num_pages }}</a>
-                                </li>
+                                {% if projects.number|add:'-4' > 1 %}
+                                    <li class="paginate_button">
+                                        <a href="?page={{ projects.number|add:'-5' }}">&hellip;</a>
+                                    </li>
+                                {% endif %}
 
+                                {% for i in projects.paginator.page_range %}
+                                    {% if projects.number == i %}
+                                        <li class="paginate_button active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                    {% elif i > projects.number|add:'-5' and i < projects.number|add:'5' %}
+                                        <li class="paginate_button"><a href="?page={{ i }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if projects.paginator.num_pages > projects.number|add:'4' %}
+                                    <li class="paginate_button"><a href="?page={{ projects.number|add:'5' }}">&hellip;</a></li>
+                                {% endif %}
                                 {% if projects.has_next %}
                                 <li class="paginate_button next">
                                     <a class="page-link" href="?page={{ projects.next_page_number }}&{{ parameters }}">下一页</a>

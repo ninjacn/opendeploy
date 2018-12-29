@@ -78,8 +78,8 @@
                     <td>{{ item.created_at }}</td>
                     <td>{{ item.updated_at }}</td>
                     <td>
-                        <a href="/admin/cmdb/hostgroup/edit/{{ item.id }}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i>编辑</button></a>
-                        <button data-href="{% url 'admin:cmdb.hostgroup_del' item.id %}" data-id="{{ item.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i>删除</button>
+                        <a title="编辑" href="/admin/cmdb/hostgroup/edit/{{ item.id }}"><button type="button" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></button></a>
+                        <button title="删除" data-href="{% url 'admin:cmdb.hostgroup_del' item.id %}" data-id="{{ item.id }}" type="button" class="btn btn-danger btn-sm btnDelete" data-toggle="modal" data-target="#modal-default"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
                 {% endfor %}

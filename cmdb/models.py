@@ -56,7 +56,7 @@ class HostGroup(TimeStampedModel):
     )
     name = models.CharField(max_length=255,unique=True)
     host = models.ManyToManyField(Host)
-    comment = models.CharField(max_length=255, default='')
+    comment = models.CharField(max_length=255, default='', null=True, blank=True)
     status = models.CharField(max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
 
     def __str__(self):

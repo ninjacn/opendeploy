@@ -72,7 +72,7 @@
                         {% if user.is_active %}
                             <span class="label label-success">是</span>
                         {% else %}
-                            <span class="label label-default">否</span>
+                            <span class="label label-danger">否</span>
                         {% endif %}
                     </td>
                     <td>
@@ -103,9 +103,23 @@
                                 </li>
                                 {% endif %}
 
-                                <li class="paginate_button active">
-                                    <a class="page-link" href="#" tabindex="-1">{{ all_users_p.number }} / {{ all_users_p.paginator.num_pages }}</a>
-                                </li>
+                                {% if all_users_p.number|add:'-4' > 1 %}
+                                    <li class="paginate_button">
+                                        <a href="?page={{ all_users_p.number|add:'-5' }}">&hellip;</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for i in all_users_p.paginator.page_range %}
+                                    {% if all_users_p.number == i %}
+                                        <li class="paginate_button active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                    {% elif i > all_users_p.number|add:'-5' and i < all_users_p.number|add:'5' %}
+                                        <li class="paginate_button"><a href="?page={{ i }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if all_users_p.paginator.num_pages > all_users_p.number|add:'4' %}
+                                    <li class="paginate_button"><a href="?page={{ all_users_p.number|add:'5' }}">&hellip;</a></li>
+                                {% endif %}
 
                                 {% if all_users_p.has_next %}
                                 <li class="paginate_button next">

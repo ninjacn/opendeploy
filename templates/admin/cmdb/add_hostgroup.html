@@ -33,8 +33,8 @@
                     <div class="form-group {% if form.host.errors %} has-error {% endif %}">
                         <label for="host">主机列表</label>
                         <select class="form-control select2" multiple="multiple" data-placeholder="搜索IP或主机名" style="width: 100%;" name="hosts">
-                            {% for host in hosts %}
-                            <option value="{{ host.id }}">{{ host.ipaddr }}({{ host.hostname }})</option>
+                            {% for item in hosts %}
+                            <option value="{{ item.id }}">{{ item.ipaddr }}({{ item.hostname }})</option>
                             {% endfor %}
                         </select>
                         <span class="help-block">{{ form.host.errors }}</span>

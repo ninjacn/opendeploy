@@ -18,8 +18,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from opendeploy import settings
 from admin.forms import AddHostForm, AddHostGroupForm, EditHostGroupForm, \
-        ImportFromPublicCloudForm
+        ImportFromPublicCloudForm, HostGroupForm
 from deploy.models import Env
 from cmdb.models import Host, HostGroup, PUBLIC_CLOUD_CHOICES, ALIYUN, QCLOUD
 from setting.services import SettingService
@@ -31,7 +32,7 @@ from cmdb.models import Host, ALIYUN, QCLOUD
 @user_passes_test(lambda u: u.is_superuser)
 def host(request):
     hosts = Host.objects.all()
-    paginator = Paginator(hosts, 15)
+    paginator = Paginator(hosts, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
         page = 1
@@ -157,8 +158,8 @@ def hostgroup_add(request):
             finally:
                 return redirect('/admin/cmdb/hostgroup')
     else:
-        f = AddHostGroupForm()
-    return render(request, 'admin/cmdb/add_hostgroup.html', {
+        f = HostGroupForm()
+    return TemplateResponse(request, 'admin/cmdb/add_hostgroup.html', {
         "form": f,
         "hosts": Host.objects.filter(status=Host.STATUS_ENABLED),
         "status_choices": HostGroup.STATUS_CHOICES,

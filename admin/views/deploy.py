@@ -20,7 +20,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from opendeploy import settings
-from admin.forms import AddEnvForm, AddProjectForm, AddCredentialForPasswordForm, \
+from admin.forms import AddEnvForm, ProjectForm, AddCredentialForPasswordForm, \
         AddCredentialForPrivateForm
 from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials
@@ -36,7 +36,7 @@ def index(request):
 @user_passes_test(lambda u: u.is_superuser)
 def project(request):
     projects = Project.objects.all().order_by('-status', '-updated_at')
-    paginator = Paginator(projects, 10)
+    paginator = Paginator(projects, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
         page = 1
@@ -58,7 +58,7 @@ def project(request):
 @transaction.atomic
 def project_add(request):
     if request.method== 'POST':
-        f = AddProjectForm(request.POST)
+        f = ProjectForm(request.POST)
         if f.is_valid():
             try:
                 cleaned_data = f.cleaned_data
@@ -119,7 +119,7 @@ def project_add(request):
         else:
             messages.error(request, '表单校验失败')
     else:
-        f = AddProjectForm()
+        f = ProjectForm()
     return render(request, 'admin/deploy/add_project.html', {
         "form": f,
         "status_choices": Project.STATUS_CHOICES,
@@ -141,7 +141,7 @@ def project_edit(request, id):
         env_list_by_project.append(v.env.id)
 
     if request.method== 'POST':
-        f = AddProjectForm(request.POST, instance=project)
+        f = ProjectForm(request.POST, instance=project)
         if f.is_valid():
             cleaned_data = f.cleaned_data
             try:
@@ -225,7 +225,7 @@ def project_edit(request, id):
             finally:
                 return redirect('admin:deploy.project')
     else:
-        f = AddProjectForm()
+        f = ProjectForm()
     return render(request, 'admin/deploy/edit_project.html', {
         "form": f,
         "project": project,
