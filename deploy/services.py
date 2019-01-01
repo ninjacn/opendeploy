@@ -10,7 +10,6 @@
 import os
 import sys
 import time
-import subprocess
 import logging
 from urllib.parse import urlparse
 
@@ -29,17 +28,8 @@ from deploy.models import Project, ProjectEnvConfig, Env, Credentials, Task
 from cmdb.models import Host
 from opendeploy import settings
 from setting.services import SettingService
+from common.services import CommandService
 
-
-class CommandService():
-    def __init__(self, command):
-        self.command = command
-
-    def run_script(self):
-        completed = subprocess.run(self.command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.returncode = completed.returncode
-        self.stdout = completed.stdout
-        self.stderr = completed.stderr
 
 class VcsServiceBase:
     def __init__(self, url, working_dir, myLoggingService):

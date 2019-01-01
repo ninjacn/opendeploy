@@ -7,12 +7,14 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code.
 
+import sys
+
+import pexpect
 from tencentcloud.common import credential
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException 
 from tencentcloud.cvm.v20170312 import cvm_client, models 
-
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
 

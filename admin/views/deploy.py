@@ -25,7 +25,7 @@ from admin.forms import AddEnvForm, ProjectForm, AddCredentialForPasswordForm, \
 from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials
 from cmdb.models import HostGroup
-from deploy.services import CommandService
+from common.services import CommandService
 
 # Create your views here.
 
