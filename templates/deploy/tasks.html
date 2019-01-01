@@ -34,25 +34,25 @@
                     <form class="form-horizontal" id="form" role="form" method="get" action="">
                         <div>
                             <span>条件过滤:</span>
-                            <select title="状态" name="status" class="form-control input-sm">
+                            <select title="状态" name="status" class="form-control input-sm select2" style="width: 10%;">
                                 <option value="">所有状态</option>
                                 {% for status in status_choices %}
                                 <option value="{{ status.0 }}" {% if param_status == status.0 %} selected {% endif %}>{{ status.1 }}</option>
                                 {% endfor %}
                             </select>
-                            <select title="项目" name="project" class="form-control input-sm">
+                            <select title="项目" name="project" class="form-control input-sm select2" style="width: 20%;">
                                 <option value="">所有项目</option>
                                 {% for project in projects %}
                                 <option value="{{ project.id }}" {% if param_project == project.id %} selected {% endif %}>{{ project }}</option>
                                 {% endfor %}
                             </select>
-                            <select title="环境" name="env" class="form-control input-sm">
+                            <select title="环境" name="env" class="form-control input-sm select2" style="width: 10%;">
                                 <option value="">所有环境</option>
                                 {% for env in envs %}
                                 <option value="{{ env.id }}" {% if param_env == env.id %} selected {% endif %}>{{ env }}</option>
                                 {% endfor %}
                             </select>
-                            <select title="发布人" name="creater" class="form-control input-sm">
+                            <select title="发布人" name="creater" class="form-control input-sm select2"  style="width: 20%;">
                                 <option value="">所有发布人</option>
                                 {% for creater in creaters %}
                                 <option value="{{ creater.id }}" {% if param_creater == creater.id %} selected {% endif %}>{% if creater.first_name %}{{ creater.first_name }}-{{ creater }}{% else %}{{ creater }}{% endif %}</option>
@@ -163,6 +163,9 @@
 
 {% block script %}
 <script>
+    $(function () {
+        $('.select2').select2()
+    })
     $("select[name=status], select[name=project], select[name=env], select[name=creater]").change(function() {
         $("#form").submit();
     });
