@@ -15,6 +15,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.db import transaction
+from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -35,7 +36,11 @@ def index(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def project(request):
-    projects = Project.objects.all().order_by('-status', '-updated_at')
+    q = request.GET.get('q')
+    if q:
+        projects = Project.objects.filter(Q(name__contains=q) | Q(repository_url__contains=q)).order_by('-status', '-updated_at')
+    else:
+        projects = Project.objects.all().order_by('-status', '-updated_at')
     paginator = Paginator(projects, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
@@ -52,6 +57,7 @@ def project(request):
     return render(request, 'admin/deploy/project.html', {
         "projects": projects,
         'parameters': parameters,
+        'q': q,
     })
 
 @user_passes_test(lambda u: u.is_superuser)

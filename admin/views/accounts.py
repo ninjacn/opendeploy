@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
 from django.template.response import TemplateResponse
 from django.db import transaction
+from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
@@ -22,7 +23,11 @@ from accounts.models import UserDetail
 
 @user_passes_test(lambda u: u.is_superuser)
 def all_users(request):
-    all_users = User.objects.all().order_by('-is_active')
+    q = request.GET.get('q')
+    if q:
+        all_users = User.objects.filter(Q(username__contains=q) | Q(last_name__contains=q) | Q(first_name__contains=q) | Q(email__contains=q))
+    else:
+        all_users = User.objects.all().order_by('-is_active')
     paginator = Paginator(all_users, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
@@ -49,6 +54,7 @@ def all_users(request):
         'all_users': all_users,
         'all_users_p': all_users_p,
         'parameters': parameters,
+        'q': q,
     })
 
 @user_passes_test(lambda u: u.is_superuser)

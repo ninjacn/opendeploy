@@ -31,7 +31,11 @@ from cmdb.models import Host, ALIYUN, QCLOUD
 
 @user_passes_test(lambda u: u.is_superuser)
 def host(request):
-    hosts = Host.objects.all()
+    q = request.GET.get('q')
+    if q:
+        hosts = Host.objects.filter(Q(ipaddr__contains=q) | Q(hostname__contains=q))
+    else:
+        hosts = Host.objects.all()
     paginator = Paginator(hosts, settings.PAGE_SIZE)
     page = request.GET.get('page')
     if not page:
@@ -48,6 +52,7 @@ def host(request):
     return render(request, 'admin/cmdb/host.html', {
         "hosts": hosts,
         'parameters': parameters,
+        'q': q,
     })
 
 @user_passes_test(lambda u: u.is_superuser)
