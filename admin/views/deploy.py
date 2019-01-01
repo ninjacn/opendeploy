@@ -72,7 +72,13 @@ def project_add(request):
                 project.deploy_mode = cleaned_data['deploy_mode']
                 project.dingding_robot_webhook = cleaned_data['dingding_robot_webhook']
                 project.status = cleaned_data['status']
+                project.exclude_file = cleaned_data['exclude_file']
                 project.save()
+                exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(project.id))
+                if len(exclude_file_path) > 0:
+                    f = open(exclude_file_path, 'wb+')
+                    f.write(project.exclude_file)
+                    f.close()
 
                 # 增加环境关联值
                 envs = request.POST.getlist('env')
@@ -146,6 +152,11 @@ def project_edit(request, id):
             cleaned_data = f.cleaned_data
             try:
                 f.save()
+                exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(id))
+                if len(exclude_file_path) > 0:
+                    f = open(exclude_file_path, 'wb+')
+                    f.write(cleaned_data['exclude_file'].encode())
+                    f.close()
 
                 # 增加环境关联值
                 envs = request.POST.getlist('projectEnvConfig')

@@ -80,6 +80,12 @@
                         <span class="help-block">{{ form.comment.errors }}</span>
                     </div>
 
+                    <div class="form-group {% if form.exclude_file.errors %} has-error {% endif %}">
+                        <label for="exclude_file">排除文件</label>
+                        <textarea class="form-control" rows="5" name="exclude_file" placeholder="每行一个, 支持文件或路径">{% if project.exclude_file %}{{ project.exclude_file }}{% else %}{% if form.exclude_file.value %}{{ form.exclude_file.value }}{% endif %}{% endif %}</textarea>
+                        <span class="help-block">{{ form.exclude_file.errors }}</span>
+                    </div>
+
                     <div class="form-group {% if form.dingding_robot_webhook.errors %} has-error {% endif %}">
                         <label for="dingding_robot_webhook">钉钉机器人webhook</label>
                         <input type="text" name="dingding_robot_webhook" class="form-control" placeholder="" value="{% if project.dingding_robot_webhook %}{{ project.dingding_robot_webhook }}{% else %}{% if form.dingding_robot_webhook.value %}{{ form.dingding_robot_webhook.value }}{% endif %}{% endif %}">

@@ -83,6 +83,7 @@ class Project(TimeStampedModel):
     dingding_robot_webhook = models.URLField('钉钉机器人webhook', max_length=255, default='', \
             null=True, blank=True)
     status = models.CharField('状态', max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
+    exclude_file = models.TextField('排除文件', default='', help_text='', null=True, blank=True)
 
     def __str__(self):
         return self.name

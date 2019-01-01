@@ -53,7 +53,7 @@ class ProjectForm(forms.ModelForm):
         model = Project
         fields = ['name', 'vcs_type', 'repository_url', 'dest_path', \
                 'credentials', 'comment', 'deploy_mode', 'dingding_robot_webhook', \
-                'status']
+                'status', 'exclude_file']
 
 # 用户名与密码认证
 class AddCredentialForPasswordForm(forms.Form):

@@ -189,4 +189,4 @@ RELEASE_LOG_PATH = os.path.join(BASE_DIR, "storage/release_log"),
 
 LOGIN_REDIRECT_URL = '/accounts/login'
 
-PAGE_SIZE = 2
+PAGE_SIZE = 10
