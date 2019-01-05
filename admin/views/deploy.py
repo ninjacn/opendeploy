@@ -115,14 +115,12 @@ def project_add(request):
                         if os.path.exists(before_hook_path):
                             os.chmod(before_hook_path, stat.S_IRWXU)
                             command = 'dos2unix ' + before_hook_path
-                            commandService = CommandService(command)
-                            commandService.run_script()
+                            CommandService(command)
 
                         if os.path.exists(after_hook_path):
                             os.chmod(after_hook_path, stat.S_IRWXU)
                             command = 'dos2unix ' + after_hook_path
-                            commandService = CommandService(command)
-                            commandService.run_script()
+                            CommandService(command)
                     messages.info(request, '添加成功')
             except:
                 messages.error(request, '添加失败')
@@ -193,14 +191,12 @@ def project_edit(request, id):
                             if os.path.exists(before_hook_path):
                                 os.chmod(before_hook_path, stat.S_IRWXU)
                                 command = 'dos2unix ' + before_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
+                                CommandService(command)
 
                             if os.path.exists(after_hook_path):
                                 os.chmod(after_hook_path, stat.S_IRWXU)
                                 command = 'dos2unix ' + after_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
+                                CommandService(command)
                         # 不存在插入
                         except:
                             projectEnvConfig = ProjectEnvConfig()
@@ -228,14 +224,12 @@ def project_edit(request, id):
                             if os.path.exists(before_hook_path):
                                 os.chmod(before_hook_path, stat.S_IRWXU)
                                 command = 'dos2unix ' + before_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
+                                CommandService(command)
 
                             if os.path.exists(after_hook_path):
                                 os.chmod(after_hook_path, stat.S_IRWXU)
                                 command = 'dos2unix ' + after_hook_path
-                                commandService = CommandService(command)
-                                commandService.run_script()
+                                CommandService(command)
                 messages.info(request, '修改成功')
             except:
                 messages.error(request, '修改失败')

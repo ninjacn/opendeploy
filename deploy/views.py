@@ -19,12 +19,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 
-from deploy.models import Project, Task, Env
+from deploy.models import Project, Task, Env, TaskHostRela
 from opendeploy import settings
 from .services import GitService, SvnService, DeployService, \
         ProjectService, EnvService, SettingService, MailService, MyLoggingService
 from deploy.forms import ReleaseForm
 from cmdb.services import QcloudService, AliyunService
+from deploy.services import MyLoggingService
 
 # Create your views here.
 logging.basicConfig(
@@ -46,7 +47,8 @@ def index(request):
 
 def test(request):
     # d = DeployService(1, action=Task.ACTION_ROLLBACK)
-    d = DeployService(10)
+    # d = DeployService(10)
+    d = DeployService(10, action=Task.ACTION_ROLLBACK)
     d.run()
     return HttpResponse('hello world')
 
@@ -157,6 +159,26 @@ def detail(request, id):
     except:
         # return HttpResponseNotFound('<h1>Page not found</h1>')
         return redirect('deploy:tasks')
+    taskHostRela = TaskHostRela.objects.filter(task=task)
+
+    release_log_file_path = os.path.join(settings.RELEASE_LOG_PATH[0], str(id) + '.log')
+    rollback_log_file_path = os.path.join(settings.RELEASE_LOG_PATH[0], str(id) + '_rollback.log')
+    release_log = []
+    try:
+        with open(release_log_file_path, mode='r') as f:
+            release_log = f.readlines()
+    except:
+        pass
+
+    rollback_log = []
+    try:
+        with open(rollback_log_file_path, mode='r') as f:
+            rollback_log = f.readlines()
+    except:
+        pass
     return TemplateResponse(request, 'deploy/detail.html', {
         'task': task,
+        'taskHostRela': taskHostRela,
+        'release_log': ''.join(release_log),
+        'rollback_log': ''.join(rollback_log),
     })

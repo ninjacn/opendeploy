@@ -7,6 +7,7 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code.
 
+import io
 import requests
 import subprocess
 import pexpect
@@ -49,12 +50,22 @@ class DingdingService():
 class CommandService():
     def __init__(self, command):
         self.command = command
+        self.run_script()
+
+    def pre_process_output(self, output):
+        res = []
+        output=str(output)
+        if len(output) > 0:
+            res=output.split("\\n")
+        return res
 
     def run_script(self):
         completed = subprocess.run(self.command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.returncode = completed.returncode
-        self.stdout = completed.stdout
-        self.stderr = completed.stderr
+        self.stdout = str(completed.stdout)
+        self.stdout_as_list = self.pre_process_output(completed.stdout)
+        self.stderr = str(completed.stderr)
+        self.stderr_as_list = self.pre_process_output(completed.stderr)
 
 
 '''
@@ -67,7 +78,6 @@ def ssh_connect(host, user, password):
     ssh_prefix = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
     command = ssh_prefix + user + '@' + host + ' echo ping'
     commandService = CommandService(command)
-    commandService.run_script()
     if commandService.returncode == 0:
         return True
 

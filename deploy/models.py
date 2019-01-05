@@ -10,7 +10,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from cmdb.models import HostGroup
+from cmdb.models import HostGroup, Host
 from common.models import TimeStampedModel
 
 class Env(TimeStampedModel):
@@ -116,10 +116,10 @@ class Task(TimeStampedModel):
     ACTION_RELEASE = '0'
     ACTION_ROLLBACK = '1'
 
-    STATUS_RELEASE_WAIT = '0'
-    STATUS_RELEASE_START = '1'
-    STATUS_RELEASE_FINISH = '2'
-    STATUS_RELEASE_FINISH_ERR = '3'
+    STATUS_RELEASE_WAIT = 0
+    STATUS_RELEASE_START = 1
+    STATUS_RELEASE_FINISH = 2
+    STATUS_RELEASE_FINISH_ERR = 3
     STATUS_CHOICES = (
         (STATUS_RELEASE_WAIT, '待发布'),
         (STATUS_RELEASE_START, '正在发布'),
@@ -127,13 +127,20 @@ class Task(TimeStampedModel):
         (STATUS_RELEASE_FINISH_ERR, '发布失败'),
     )
 
+    STATUS_ROLLBACK_WAIT = 0
+    STATUS_ROLLBACK_FINISH = 2
+    STATUS_ROLLBACK_FINISH_ERR = 3
+    STATUS_ROLLBACK_CHOICES = (
+        (STATUS_ROLLBACK_WAIT, '待回滚'),
+        (STATUS_ROLLBACK_FINISH, '回滚成功'),
+        (STATUS_ROLLBACK_FINISH_ERR, '回滚失败'),
+    )
+
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='project', null=True )
     creater = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='user', null=True )
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, related_name='env', null=True )
-    has_rollback = models.CharField('有无回滚', max_length=255, default='0')
-    release_host_status = models.TextField('发布主机状态', default='', help_text='')
-    has_rollback = models.CharField('有无回滚', max_length=255, default='0')
-    status = models.CharField('状态', max_length=16, default=STATUS_RELEASE_WAIT, choices=STATUS_CHOICES)
+    status = models.IntegerField('状态', default=STATUS_RELEASE_WAIT, choices=STATUS_CHOICES)
+    status_rollback = models.IntegerField('回滚状态', default=STATUS_ROLLBACK_WAIT, choices=STATUS_ROLLBACK_CHOICES)
     comment = models.CharField('备注', max_length=255, default='')
 
     def __str__(self):
@@ -144,3 +151,28 @@ class Task(TimeStampedModel):
         verbose_name_plural = '任务'
         verbose_name = '任务'
 
+class TaskHostRela(models.Model):
+    STATUS_RELEASE_WAIT = 0
+    STATUS_RELEASE_SUCCESS = 1
+    STATUS_RELEASE_ERROR = 2
+    STATUS_RELEASE_CHOICES = (
+        (STATUS_RELEASE_SUCCESS, '发布成功'),
+        (STATUS_RELEASE_ERROR, '发布失败'),
+    )
+    STATUS_ROLLBACK_WAIT = 0
+    STATUS_ROLLBACK_SUCCESS = 1
+    STATUS_ROLLBACK_ERROR = 2
+    STATUS_ROLLBACK_CHOICES = (
+        (STATUS_ROLLBACK_SUCCESS, '回滚成功'),
+        (STATUS_ROLLBACK_ERROR, '回滚失败'),
+    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    host = models.CharField('host or ip', max_length=255, default='')
+    status_release = models.IntegerField('发布状态', default=STATUS_RELEASE_WAIT, choices=STATUS_RELEASE_CHOICES)
+    status_rollback = models.IntegerField('回滚状态', default=STATUS_ROLLBACK_WAIT, choices=STATUS_ROLLBACK_CHOICES)
+
+    def __str__(self):
+        return self.host
+
+    class Meta:
+        db_table = 'deploy_task_host_rela'

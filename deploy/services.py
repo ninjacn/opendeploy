@@ -26,6 +26,7 @@ from django.template.loader import render_to_string
 
 from deploy.models import Project, ProjectEnvConfig, Env, Credentials, Task
 from cmdb.models import Host
+from deploy.models import TaskHostRela
 from opendeploy import settings
 from setting.services import SettingService
 from common.services import CommandService
@@ -222,15 +223,129 @@ class ProjectService(object):
         except:
             raise RuntimeError('项目配置不存在。')
 
+    def get_deploy_model_label(self, mode):
+        deploy_mode_choices=dict(Project.DEPLOY_MODE_CHOICES)
+        try:
+            return deploy_mode_choices.get(mode)
+        except:
+            pass
+
+
+class TaskService(object):
+    def __init__(self, id, myLoggingService=None):
+        self.id=id
+        if myLoggingService:
+            self.myLoggingService=myLoggingService
+        else:
+            raise RuntimeError('Logger初始化失败')
+        try:
+            self.task=Task.objects.get(id=self.id)
+            if self.task.project:
+                self.project=self.task.project
+            else:
+                self.myLoggingService.error('项目不存在')
+                raise RuntimeError('项目不存在')
+        except:
+            self.myLoggingService.error('任务不存在')
+            raise RuntimeError('任务不存在')
+
+        try:
+            self.projectEnvConfig=ProjectEnvConfig.objects.get(project=self.project, env=self.task.env)
+        except:
+            self.myLoggingService.error('项目环境配置不存在')
+            raise RuntimeError('项目环境配置不存在')
+
+    # 获取发布路径
+    def get_release_path(self):
+        if self.project.deploy_mode == Project.DEPLOY_MODE_ALL:
+            return self.project.dest_path + '_' + str(self.id)
+        elif self.project.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
+            return self.project.dest_path
+
+    # 获取回滚路径
+    def get_rollback_path(self):
+        if self.project.deploy_mode == Project.DEPLOY_MODE_ALL:
+            '''
+            哪个版本正常就回滚哪个。最新的任务是不能回滚的。
+            '''
+            return self.project.dest_path + '_release_' + str(self.id)
+        elif self.project.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
+            return self.project.dest_path + '_rollback_' + str(self.id)
+
+    def exec_hook_before_release(self):
+        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(self.projectEnvConfig.id))
+        if os.path.exists(before_hook_path):
+            commandService = CommandService(before_hook_path)
+            self.myLoggingService.info('检测到发布前Hook, 准备执行:')
+            self.myLoggingService.info('command:' + before_hook_path)
+            with open(before_hook_path) as f:
+                for line in f:
+                    self.myLoggingService.info(line.strip())
+            self.myLoggingService.info('exit_code:' + str(commandService.returncode))
+            if commandService.returncode > 0:
+                self.myLoggingService.error('发布前hook执行异常')
+                if len(commandService.stdout) > 0:
+                    self.myLoggingService.info('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.error(line)
+                if len(commandService.stderr) > 0:
+                    self.myLoggingService.error('脚本错误:')
+                    for line in commandService.stderr_as_list:
+                        self.myLoggingService.error(line)
+                return False
+            else:
+                self.myLoggingService.info('发布前hook执行正常')
+                if len(commandService.stdout_as_list) > 0:
+                    self.myLoggingService.info('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.info(line)
+        return True
+
+    def exec_hook_after_release(self):
+        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(self.projectEnvConfig.id))
+        if os.path.exists(after_hook_path):
+            commandService = CommandService(after_hook_path)
+            self.myLoggingService.info('检测到发布前Hook, 准备执行:')
+            self.myLoggingService.info('command:' + after_hook_path)
+            with open(after_hook_path) as f:
+                for line in f:
+                    self.myLoggingService.info(line.strip())
+            self.myLoggingService.info('exit_code:' + str(commandService.returncode))
+            if commandService.returncode > 0:
+                self.myLoggingService.error('发布前hook执行异常')
+                if len(commandService.stdout) > 0:
+                    self.myLoggingService.info('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.error(line)
+                if len(commandService.stderr) > 0:
+                    self.myLoggingService.error('脚本错误:')
+                    for line in commandService.stderr_as_list:
+                        self.myLoggingService.error(line)
+                return False
+            else:
+                self.myLoggingService.info('发布前hook执行正常')
+                if len(commandService.stdout_as_list) > 0:
+                    self.myLoggingService.info('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.info(line)
+        return True
+
+
+
 class DeployService():
     def __init__(self, tid, action=Task.ACTION_RELEASE):
         self.tid = tid
-        try:
-            self.task = Task.objects.get(id=self.tid)
-        except:
-            raise RuntimeError('任务不存在')
-
+        self.action = action
         self.myLoggingService = MyLoggingService(self.tid, action)
+        self.taskService = TaskService(self.tid, self.myLoggingService)
+        self.task = self.taskService.task
+        if self.action == Task.ACTION_RELEASE:
+            if self.task.status in [Task.STATUS_RELEASE_FINISH, Task.STATUS_RELEASE_FINISH_ERR]:
+                raise RuntimeError('任务已发布，退出.')
+        elif self.action == Task.ACTION_ROLLBACK:
+            if self.task.status_rollback in [Task.STATUS_ROLLBACK_FINISH, Task.STATUS_ROLLBACK_FINISH_ERR]:
+                raise RuntimeError('任务已回滚，退出.')
+
         self.myLoggingService.info('准备初始化工作区')
 
         self.workspace_path = os.path.expanduser(settings.WORKSPACE_PATH)
@@ -246,20 +361,29 @@ class DeployService():
 
         self.pid = self.task.project.id
         self.env_id = self.task.env.id
-        self.action = action
         self.project_obj = ProjectService(self.pid)
         self.project = self.project_obj.get()
         self.deploy_mode = self.project.deploy_mode
         self.config = self.project_obj.get_config(self.env_id)
-        self.myLoggingService.info('repository_url:' + self.project.repository_url)
+        if self.deploy_mode not in [Project.DEPLOY_MODE_ALL, Project.DEPLOY_MODE_INCREMENT] :
+            self.myLoggingService.info('模式不可用, 请检查项目配置')
+            raise RuntimeError('模式不可用, 请检查项目配置')
+        self.myLoggingService.info('项目名:' + self.project.name)
+        self.myLoggingService.info('仓库地址:' + self.project.repository_url)
         self.myLoggingService.info('环境:' + self.task.env.name)
+        self.myLoggingService.info('部署路径:' + self.project.dest_path)
+        self.myLoggingService.info('部署模式:' + self.project_obj.get_deploy_model_label(self.deploy_mode))
+        if self.action == Task.ACTION_ROLLBACK:
+            self.myLoggingService.info('动作: 回滚')
+        else:
+            self.myLoggingService.info('动作: 发布')
         if self.project.vcs_type == Project.TYPE_GIT:
             self.branch = self.config.branch
 
         self.all_host = self.project_obj.get_all_host(self.env_id)
         if not self.all_host:
-            self.myLoggingService.info('主机列表为空')
-            raise RuntimeError('主机列表为空')
+            self.myLoggingService.info('主机列表为空, 请在后台进行配置')
+            raise RuntimeError('主机列表为空, 请在后台进行配置')
             
         self.myLoggingService.info('主机列表:' + (','.join(self.all_host)))
 
@@ -294,49 +418,128 @@ class DeployService():
 
 
     def run(self):
-        self.myLoggingService.info('开始检出仓库')
-        if self.vcs.checkout() is not True:
-            self.myLoggingService.error(self.vcs.checkout_errmsg)
-            raise RuntimeError(self.vcs.checkout_errmsg)
-        self.myLoggingService.info('检出仓库完成')
-
         if self.action == Task.ACTION_RELEASE:
-            # before_release hook, 不同环境对应不同的hook
+            self.myLoggingService.info('开始检出仓库')
+            if self.vcs.checkout() is not True:
+                self.myLoggingService.error(self.vcs.checkout_errmsg)
+                raise RuntimeError(self.vcs.checkout_errmsg)
+            self.myLoggingService.info('检出仓库完成')
+
+            # before hook
+            if self.taskService.exec_hook_before_release():
+                self.myLoggingService.info('发布前调用钩子成功')
+            else:
+                self.myLoggingService.error('发布前调用钩子失败')
+                raise RuntimeError('发布前调用钩子失败')
+
             self.release()
-            # after_release
         # rollback
         elif self.action == Task.ACTION_ROLLBACK:
             self.rollback()
-        else:
-            self.myLoggingService.error('执行动作异常')
-            raise RuntimeError('执行动作异常')
 
 
     def release(self):
-        task_id = 100
+        errno=0
         for host in self.all_host:
+            self.myLoggingService.info('开始发布主机, host:' + host)
             if self.deploy_mode == Project.DEPLOY_MODE_ALL:
                 command = self.rsync_prefix + self.rsync_exclude_parms + self.working_dir + '/ ' + \
-                        host + ':' + self.project.dest_path + '_' + str(task_id)
+                        host + ':' + self.taskService.get_release_path()
             elif self.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
                 command = self.rsync_prefix + self.rsync_exclude_parms + self.working_dir + '/ ' + \
-                        host + ':' + self.project.dest_path
-            else:
-                RuntimeError('模式不可用')
-            print(command)
+                        host + ':' + self.taskService.get_release_path() + ' --backup --backup-dir=' + self.taskService.get_rollback_path()
+
+            self.myLoggingService.info('command:' + command)
             commandService = CommandService(command)
-            commandService.run_script()
-            print(commandService.returncode)
-            print(commandService.stdout)
-            print(commandService.stderr)
+            self.myLoggingService.info('exit_code:' + str(commandService.returncode))
             if commandService.returncode > 0:
+                self.myLoggingService.error('同步异常, host:' + host)
+                if len(commandService.stdout_as_list) > 0:
+                    self.myLoggingService.error('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.error(line)
+                if len(commandService.stderr) > 0:
+                    self.myLoggingService.error('脚本错误:')
+                    for line in commandService.stderr_as_list:
+                        self.myLoggingService.error(line)
+                errno+=1
+                #标记主机状态
+                taskHostRela = TaskHostRela()
+                taskHostRela.host=host
+                taskHostRela.task=self.task
+                taskHostRela.status_release=TaskHostRela.STATUS_RELEASE_ERROR
+                taskHostRela.save()
                 continue
+            else:
+                self.myLoggingService.info('同步正常, host:' + host)
+                if len(commandService.stdout_as_list) > 0:
+                    self.myLoggingService.info('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.info(line)
+
+                # after hook
+                if self.taskService.exec_hook_after_release():
+                    status_release=TaskHostRela.STATUS_RELEASE_SUCCESS
+                    self.myLoggingService.info('发布后调用钩子成功')
+                else:
+                    status_release=TaskHostRela.STATUS_RELEASE_ERROR
+                    self.myLoggingService.error('发布后调用钩子失败')
+
             # add link
             if self.deploy_mode == Project.DEPLOY_MODE_ALL:
                 pass
+            #标记主机状态
+            taskHostRela = TaskHostRela()
+            taskHostRela.task=self.task
+            taskHostRela.host=host
+            taskHostRela.status_release=status_release
+            taskHostRela.save()
+        if errno > 0:
+            self.task.status=Task.STATUS_RELEASE_FINISH_ERR
+            self.myLoggingService.info('发布结束，有异常情况')
+        else:
+            self.task.status=Task.STATUS_RELEASE_FINISH
+            self.myLoggingService.info('发布成功')
+        self.task.save()
 
-        def rollback(self):
-            pass
+
+    def rollback(self):
+        errno=0
+        for host in self.all_host:
+            self.myLoggingService.info('开始回滚主机, host:' + host)
+            if self.deploy_mode == Project.DEPLOY_MODE_ALL:
+                pass
+            elif self.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
+                command = self.ssh_prefix + host + " '" + self.rsync_prefix + self.rsync_exclude_parms + self.taskService.get_rollback_path() + \
+                        ' ' + self.taskService.get_release_path() + "'"
+            self.myLoggingService.info('command:' + command)
+            commandService = CommandService(command)
+            if commandService.returncode > 0:
+                self.myLoggingService.error('回滚异常, host:' + host)
+                if len(commandService.stdout_as_list) > 0:
+                    self.myLoggingService.error('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.error(line)
+                if len(commandService.stderr_as_list) > 0:
+                    self.myLoggingService.error('脚本错误:')
+                    for line in commandService.stderr_as_list:
+                        self.myLoggingService.error(line)
+                errno+=1
+                continue
+            else:
+                self.myLoggingService.info('回滚正常, host:' + host)
+                if len(commandService.stdout_as_list) > 0:
+                    self.myLoggingService.info('脚本输出:')
+                    for line in commandService.stdout_as_list:
+                        self.myLoggingService.info(line)
+                # after hook
+                if self.taskService.exec_hook_after_release():
+                    status_rollback=TaskHostRela.STATUS_ROLLBACK_FINISH
+                    self.myLoggingService.info('回滚后调用钩子成功')
+                else:
+                    status_rollback=TaskHostRela.STATUS_ROLLBACK_FINISH_ERR
+                    self.myLoggingService.error('回滚后调用钩子失败')
+
 
 class EnvService():
 
@@ -374,8 +577,8 @@ class MyLoggingService():
                 filename = str(tid) + '_rollback.log'
             self.logger = logging.getLogger(filename)
             self.logger.setLevel(logging.DEBUG)
-            file_path = os.path.join(settings.RELEASE_LOG_PATH[0], filename)
-            handler = logging.FileHandler(file_path, 'w')
+            self.file_path = os.path.join(settings.RELEASE_LOG_PATH[0], filename)
+            handler = logging.FileHandler(self.file_path, 'w')
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
