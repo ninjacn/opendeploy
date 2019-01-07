@@ -11,7 +11,7 @@ import os
 import logging
 import json
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseNotFound
 from django.template.response import TemplateResponse
@@ -92,7 +92,7 @@ def release(request):
             task.comment = cleaned_data['comment']
             task.save()
             messages.info(request, '任务提交成功，准备发布...')
-            return redirect('deploy:detail', task.id)
+            return redirect('deploy:progress', task.id)
         else:
             messages.error(request, '任务申请校验失败, 请重新提交!')
     else:
@@ -100,7 +100,7 @@ def release(request):
 
 @login_required
 def rollback(request, id):
-    return HttpResponse('xx')
+    return redirect(reverse('deploy:progress', args=[id]) + '?rollback=1')
 
 @login_required
 def history(request):
@@ -191,9 +191,27 @@ def detail(request, id):
             rollback_log = f.readlines()
     except:
         pass
+
+    can_rollback=False
+    if (task.status in [Task.STATUS_RELEASE_FINISH, Task.STATUS_RELEASE_FINISH_ERR]) and (task.status_rollback==Task.STATUS_ROLLBACK_WAIT):
+        can_rollback=True
     return TemplateResponse(request, 'deploy/detail.html', {
         'task': task,
         'taskHostRela': taskHostRela,
         'release_log': ''.join(release_log),
         'rollback_log': ''.join(rollback_log),
+        'can_rollback': can_rollback,
+    })
+
+
+@login_required
+def progress(request, id):
+    rollback = request.GET.get('rollback')
+    try:
+        task = Task.objects.get(id=id)
+    except:
+        return HttpResponseNotFound('<h1>Page not found</h1>')
+    return TemplateResponse(request, 'deploy/progress.html', {
+        'task': task,
+        'rollback': rollback,
     })

@@ -42,7 +42,9 @@
               <h3 class="box-title">任务详情</h3>
 
               <div class="box-tools">
+                  {% if can_rollback %}
                   <button type="button" data-href="{% url 'deploy:rollback' task.id %}" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-default" ><i class="fa fa-undo"></i>执行回滚</button>
+                  {% endif %}
               </div>
             </div>
             <!-- /.box-header -->
