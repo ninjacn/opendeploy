@@ -58,7 +58,7 @@
                                 <option value="{{ creater.id }}" {% if param_creater == creater.id %} selected {% endif %}>{% if creater.first_name %}{{ creater.first_name }}-{{ creater }}{% else %}{{ creater }}{% endif %}</option>
                                 {% endfor %}
                             </select>
-                            <a href="{% url 'deploy:tasks' %}">
+                            <a href="{% url 'deploy:history' %}">
                                 <button type="button" class="btn btn-outline-primary btn-sm">置空</button>
                             </a>
                         </div>

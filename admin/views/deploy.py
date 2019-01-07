@@ -27,6 +27,7 @@ from deploy.models import Env, Project, ProjectEnvConfig,  \
         Credentials
 from cmdb.models import HostGroup
 from common.services import CommandService
+from setting.services import SettingService
 
 # Create your views here.
 
@@ -244,6 +245,8 @@ def project_edit(request, id):
                 return redirect('admin:deploy.project')
     else:
         f = ProjectForm()
+    settingService = SettingService()
+    general_info = settingService.get_general_info()
     return render(request, 'admin/deploy/edit_project.html', {
         "form": f,
         "project": project,
@@ -255,6 +258,7 @@ def project_edit(request, id):
         "host_group": HostGroup.objects.all(),
         "credentials": Credentials.objects.all(),
         "env_list_by_project": env_list_by_project,
+        "general_info": general_info,
     })
 
 @user_passes_test(lambda u: u.is_superuser)

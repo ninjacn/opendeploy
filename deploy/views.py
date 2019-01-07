@@ -100,10 +100,10 @@ def release(request):
 
 @login_required
 def rollback(request, id):
-    pass
+    return HttpResponse('xx')
 
 @login_required
-def tasks(request):
+def history(request):
     tasks = Task.objects.all().order_by('-id')
 
     param_status = request.GET.get('status')
@@ -153,7 +153,7 @@ def tasks(request):
 
     get_copy = request.GET.copy()
     parameters = get_copy.pop('page', True) and get_copy.urlencode()
-    return TemplateResponse(request, 'deploy/tasks.html', {
+    return TemplateResponse(request, 'deploy/history.html', {
         'projects': Project.objects.filter(status=Project.STATUS_ENABLED),
         'creaters': User.objects.filter(is_active=1),
         'envs': Env.objects.all(),

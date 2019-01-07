@@ -29,6 +29,7 @@ gulp.task('concatScripts', function() {
           'node_modules/bootstrap/dist/js/bootstrap.min.js',
           'node_modules/select2/dist/js/select2.min.js',
           'static/plugins/iCheck/icheck.min.js',
+          'node_modules/clipboard/dist/clipboard.min.js',
     ])
     .pipe(concat('common.js'))
     .pipe(gulp.dest('static/js/'))
