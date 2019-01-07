@@ -19,4 +19,5 @@ urlpatterns = [
     url(r'^rollback/(?P<id>\d+)$', views.rollback, name='rollback'),
     url(r'^tasks/$', views.tasks, name='tasks'),
     url(r'^detail/(?P<id>\d+)$', views.detail, name='detail'),
+    url(r'^release-log/(?P<id>\d+)', views.release_log, name='release_log'),
 ]

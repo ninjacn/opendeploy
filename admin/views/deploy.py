@@ -92,12 +92,18 @@ def project_add(request):
                     for env in envs:
                         projectEnvConfig = ProjectEnvConfig()
                         projectEnvConfig.project = project
-                        projectEnvConfig.env = Env.objects.get(pk=env)
+                        try:
+                            projectEnvConfig.env = Env.objects.get(pk=env)
+                        except:
+                            pass
                         projectEnvConfig.branch = request.POST.get('branch_' + env)
                         projectEnvConfig.before_hook = request.POST.get('before_hook_' + env)
                         projectEnvConfig.after_hook = request.POST.get('after_hook_' + env)
-                        if len(request.POST.get('host_group_' + env)) > 0:
-                            projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + env))
+                        if request.POST.get('host_group_' + env):
+                            try:
+                                projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + env))
+                            except:
+                                pass
                         projectEnvConfig.save()
 
                         before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
@@ -125,7 +131,7 @@ def project_add(request):
             except:
                 messages.error(request, '添加失败')
             finally:
-                return redirect('/admin/deploy/project')
+                return redirect('admin:deploy.project')
         else:
             messages.error(request, '表单校验失败')
     else:
@@ -161,7 +167,6 @@ def project_edit(request, id):
                     f = open(exclude_file_path, 'wb+')
                     f.write(cleaned_data['exclude_file'].encode())
                     f.close()
-
                 # 增加环境关联值
                 envs = request.POST.getlist('projectEnvConfig')
                 if envs:
@@ -169,13 +174,14 @@ def project_edit(request, id):
                         # 存在更新
                         try:
                             config = ProjectEnvConfig.objects.get(pk=v)
-                            config.branch = request.POST.get('branch_' + v, 'master')
+                            if request.POST.get('branch_' + v):
+                                config.branch = request.POST.get('branch_' + v)
+                            else:
+                                config.branch = 'master'
                             config.before_hook = request.POST.get('before_hook_' + v, '')
                             config.after_hook = request.POST.get('after_hook_' + v, '')
-                            try:
+                            if request.POST.get('host_group_' + v):
                                 config.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
-                            except:
-                                config.host_group = None
                             config.save()
 
                             before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
@@ -203,10 +209,11 @@ def project_edit(request, id):
                             projectEnvConfig.project = project
                             projectEnvConfig.env = Env.objects.get(pk=v)
                             if request.POST.get('branch_' + v):
-                                projectEnvConfig.branch = request.POST.get('branch_' + v, 'master')
+                                projectEnvConfig.branch = request.POST.get('branch_' + v)
                             else:
                                 projectEnvConfig.branch = 'master'
-                            projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
+                            if request.POST.get('host_group_' + v):
+                                projectEnvConfig.host_group = HostGroup.objects.get(pk=request.POST.get('host_group_' + v))
                             projectEnvConfig.before_hook = request.POST.get('before_hook_' + v, '')
                             projectEnvConfig.after_hook = request.POST.get('after_hook_' + v, '')
                             projectEnvConfig.save()

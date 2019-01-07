@@ -74,7 +74,7 @@ class Project(TimeStampedModel):
     name = models.CharField('名称', max_length=255, unique=True, null=True)
     vcs_type = models.CharField('仓库类型', max_length=255, default=TYPE_GIT, choices=TYPE_CHOICES)
     repository_url = models.CharField('仓库地址', max_length=255)
-    dest_path = models.CharField('项目路径', max_length=255, default='')
+    dest_path = models.CharField('部署路径', max_length=255, default='')
     credentials = models.ForeignKey(Credentials, on_delete=models.SET_NULL, \
             related_name='credentials', null=True, blank=True)
     comment = models.CharField('备注', max_length=255, default='', null=True, blank=True)
@@ -128,10 +128,12 @@ class Task(TimeStampedModel):
     )
 
     STATUS_ROLLBACK_WAIT = 0
+    STATUS_ROLLBACK_START = 1
     STATUS_ROLLBACK_FINISH = 2
     STATUS_ROLLBACK_FINISH_ERR = 3
     STATUS_ROLLBACK_CHOICES = (
         (STATUS_ROLLBACK_WAIT, '待回滚'),
+        (STATUS_ROLLBACK_START, '正在回滚'),
         (STATUS_ROLLBACK_FINISH, '回滚成功'),
         (STATUS_ROLLBACK_FINISH_ERR, '回滚失败'),
     )

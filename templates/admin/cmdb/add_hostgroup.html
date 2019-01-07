@@ -34,7 +34,7 @@
                         <label for="host">主机列表</label>
                         <select class="form-control select2" multiple="multiple" data-placeholder="搜索IP或主机名" style="width: 100%;" name="hosts">
                             {% for item in hosts %}
-                            <option value="{{ item.id }}">{{ item.ipaddr }}({{ item.hostname }})</option>
+                            <option value="{{ item.id }}">{{ item.ipaddr }}{% if item.hostname %}({{ item.hostname }}){% endif %}</option>
                             {% endfor %}
                         </select>
                         <span class="help-block">{{ form.host.errors }}</span>

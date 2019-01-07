@@ -32,7 +32,7 @@ class Host(TimeStampedModel):
         (QCLOUD, '腾讯云'),
     )
     ipaddr = models.CharField('IP地址', max_length=64,unique=True)
-    hostname = models.CharField('主机名', max_length=255, unique=True, null=True, blank=True)
+    hostname = models.CharField('主机名', max_length=255, null=True, blank=True)
     root_password = models.CharField('root密码', max_length=255, null=True, blank=True)
     provider = models.CharField('服务商', max_length=16, default=PROVIDER_OWN, choices=PROVIDER_CHOICES)
     instance_id = models.CharField('InstanceId', max_length=255, blank=True, null=True)

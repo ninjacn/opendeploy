@@ -40,7 +40,7 @@ class HostGroupForm(forms.ModelForm):
 class AddHostGroupForm(forms.Form):
     name = forms.CharField()
     status = forms.CharField()
-    host = forms.CharField()
+    hosts = forms.CharField()
     comment = forms.CharField(required=False)
 
 class EditHostGroupForm(forms.Form):

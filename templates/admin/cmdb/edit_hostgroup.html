@@ -43,7 +43,7 @@
                                     {% endfor %}
                                 {% endif %}
                                     
-                                    >{{ host.ipaddr }}({{ host.hostname }})</option>
+                                    >{{ host.ipaddr }}{% if host.hostname %}({{ host.hostname }}){% endif %}</option>
                             {% endfor %}
                         </select>
                         <span class="help-block">{{ form.host.errors }}</span>

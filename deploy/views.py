@@ -46,11 +46,26 @@ def index(request):
     })
 
 def test(request):
+    d = DeployService(4)
     # d = DeployService(1, action=Task.ACTION_ROLLBACK)
-    # d = DeployService(10)
-    d = DeployService(10, action=Task.ACTION_ROLLBACK)
     d.run()
     return HttpResponse('hello world')
+
+
+@login_required
+def release_log(request, id):
+    rollback=request.GET.get('rollback')
+    if rollback:
+        filename = str(id) + '_rollback.log'
+    else:
+        filename = str(id) + '.log'
+    file_path = os.path.join(settings.RELEASE_LOG_PATH[0], filename)
+    try:
+        with open(file_path, mode='r') as f:
+            log_body = f.readlines()
+    except:
+        return HttpResponseNotFound("日志不存在")
+    return HttpResponse(log_body, content_type='text/plain; charset=utf-8')
 
 @login_required
 def release(request):

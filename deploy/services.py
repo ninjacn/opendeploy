@@ -45,10 +45,10 @@ class GitService(VcsServiceBase):
         self.repo = None
         self.branch = kwargs['branch']
 
-        if kwargs['auth_type'] is None:
-            self.auth_type = Credentials.TYPE_USER_PRIVATE_KEY
-        else:
+        try:
             self.auth_type = kwargs['auth_type']
+        except:
+            self.auth_type = None
 
         u = urlparse(url)
         # 转换url，添加用户名和密码
@@ -65,7 +65,7 @@ class GitService(VcsServiceBase):
 
     def checkout(self):
         # git version >= 2.3
-        git_ssh_cmd = ''
+        git_ssh_cmd = 'ssh'
         if self.auth_type == Credentials.TYPE_USER_PRIVATE_KEY:
             git_ssh_cmd = 'ssh -i %s' % self.private_key_path
 
@@ -336,16 +336,25 @@ class DeployService():
     def __init__(self, tid, action=Task.ACTION_RELEASE):
         self.tid = tid
         self.action = action
-        self.myLoggingService = MyLoggingService(self.tid, action)
-        self.taskService = TaskService(self.tid, self.myLoggingService)
-        self.task = self.taskService.task
+        try:
+            self.task = Task.objects.get(pk=tid)
+        except:
+            raise RuntimeError('任务不存在，退出.')
+
         if self.action == Task.ACTION_RELEASE:
             if self.task.status in [Task.STATUS_RELEASE_FINISH, Task.STATUS_RELEASE_FINISH_ERR]:
                 raise RuntimeError('任务已发布，退出.')
+            # 状态标记
+            self.task.status = Task.STATUS_RELEASE_START
         elif self.action == Task.ACTION_ROLLBACK:
             if self.task.status_rollback in [Task.STATUS_ROLLBACK_FINISH, Task.STATUS_ROLLBACK_FINISH_ERR]:
                 raise RuntimeError('任务已回滚，退出.')
+            # 状态标记
+            self.task.status_rollback = Task.STATUS_ROLLBACK_START
+        self.task.save()
 
+        self.myLoggingService = MyLoggingService(self.tid, action)
+        self.taskService = TaskService(self.tid, self.myLoggingService)
         self.myLoggingService.info('准备初始化工作区')
 
         self.workspace_path = os.path.expanduser(settings.WORKSPACE_PATH)
@@ -382,32 +391,40 @@ class DeployService():
 
         self.all_host = self.project_obj.get_all_host(self.env_id)
         if not self.all_host:
-            self.myLoggingService.info('主机列表为空, 请在后台进行配置')
+            self.myLoggingService.error('主机列表为空, 请在后台进行配置')
             raise RuntimeError('主机列表为空, 请在后台进行配置')
             
         self.myLoggingService.info('主机列表:' + (','.join(self.all_host)))
 
         self.myLoggingService.info('初始化仓库')
+
         if self.project.vcs_type == Project.TYPE_GIT:
             self.working_dir = os.path.join(self.workspace_path, str(self.pid) \
                     + "_" + self.branch)
             self.myLoggingService.info('工作区路径:' + self.working_dir)
-            if self.project.credentials.type == Credentials.TYPE_USER_PRIVATE_KEY:
-                private_key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(self.project.credentials.id))
-                self.myLoggingService.info('使用私钥认证')
-                self.myLoggingService.info('私钥路径:' + private_key_path)
-                self.vcs = GitService(self.project.repository_url, self.working_dir, 
-                    self.myLoggingService,
-                    branch=self.branch,
-                    auth_type=Credentials.TYPE_USER_PRIVATE_KEY, 
-                    private_key_path=private_key_path)
+            if self.project.credentials:
+                if self.project.credentials.type == Credentials.TYPE_USER_PRIVATE_KEY:
+                    private_key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(self.project.credentials.id))
+                    self.myLoggingService.info('使用私钥认证')
+                    self.myLoggingService.info('私钥路径:' + private_key_path)
+                    self.vcs = GitService(self.project.repository_url, self.working_dir, 
+                        self.myLoggingService,
+                        branch=self.branch,
+                        auth_type=Credentials.TYPE_USER_PRIVATE_KEY, 
+                        private_key_path=private_key_path)
+                else:
+                    self.myLoggingService.info('使用用户名密码认证')
+                    self.vcs = GitService(self.project.repository_url, self.working_dir, 
+                        self.myLoggingService,
+                        branch=self.branch,
+                        auth_type=Credentials.TYPE_USER_PWD, username=self.project.credentials.username, 
+                        password=self.project.credentials.password)
             else:
-                self.myLoggingService.info('使用用户名密码认证')
+                self.myLoggingService.info('使用匿名认证')
                 self.vcs = GitService(self.project.repository_url, self.working_dir, 
                     self.myLoggingService,
-                    branch=self.branch,
-                    auth_type=Credentials.TYPE_USER_PWD, username=self.project.credentials.username, 
-                    password=self.project.credentials.password)
+                    branch=self.branch
+                    )
         else:
             self.working_dir = os.path.join(self.workspace_path, str(self.pid)) 
             self.vcs = SvnService(self.project.repository_url, self.working_dir, 
@@ -525,6 +542,9 @@ class DeployService():
                     for line in commandService.stderr_as_list:
                         self.myLoggingService.error(line)
                 errno+=1
+                taskHostRela = TaskHostRela.objects.get(host=host)
+                taskHostRela.status_rollback=TaskHostRela.STATUS_ROLLBACK_ERROR
+                taskHostRela.save()
                 continue
             else:
                 self.myLoggingService.info('回滚正常, host:' + host)
@@ -534,11 +554,25 @@ class DeployService():
                         self.myLoggingService.info(line)
                 # after hook
                 if self.taskService.exec_hook_after_release():
-                    status_rollback=TaskHostRela.STATUS_ROLLBACK_FINISH
+                    status_rollback=TaskHostRela.STATUS_ROLLBACK_SUCCESS
                     self.myLoggingService.info('回滚后调用钩子成功')
                 else:
-                    status_rollback=TaskHostRela.STATUS_ROLLBACK_FINISH_ERR
+                    status_rollback=TaskHostRela.STATUS_ROLLBACK_ERROR
                     self.myLoggingService.error('回滚后调用钩子失败')
+            #标记主机状态
+            try:
+                taskHostRela = TaskHostRela.objects.get(host=host)
+                taskHostRela.status_rollback=status_rollback
+                taskHostRela.save()
+            except:
+                pass
+        if errno > 0:
+            self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH_ERR
+            self.myLoggingService.info('回滚结束，有异常情况')
+        else:
+            self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH
+            self.myLoggingService.info('回滚成功')
+        self.task.save()
 
 
 class EnvService():

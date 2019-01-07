@@ -82,7 +82,28 @@
                             <tbody>
                                 {% for task in tasks %}
                                 <tr>
-                                    <td>{{ task.get_status_display }}</td>
+                                    <td>
+                                      {% if task.status == 0 %}
+                                        <small class="text-muted">{{ task.get_status_display }}</small>
+                                      {% elif task.status == 1 %}
+                                        <small class="text-muted">{{ task.get_status_display }}</small>
+                                      {% elif task.status == 2 %}
+                                        <small class="label bg-green">{{ task.get_status_display }}</small>
+                                      {% elif task.status == 3 %}
+                                        <small class="label bg-red">{{ task.get_status_display }}</small>
+                                      {% endif %}
+                                      {% if task.status_rollback > 0 %}
+                                          {% if task.status_rollback == 0 %}
+                                            <small class="text-muted">{{ task.get_status_rollback_display }}</small>
+                                          {% elif task.status_rollback == 1 %}
+                                            <small class="text-muted">{{ task.get_status_rollback_display }}</small>
+                                          {% elif task.status_rollback == 2 %}
+                                            <small class="label bg-green">{{ task.get_status_rollback_display }}</small>
+                                          {% elif task.status_rollback == 3 %}
+                                            <small class="label bg-red">{{ task.get_status_rollback_display }}</small>
+                                          {% endif %}
+                                      {% endif %}
+                                    </td>
                                     <td>{{ task.id }}</td>
                                     <td>{{ task.project }}</td>
                                     <td>{{ task.env }}</td>

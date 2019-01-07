@@ -59,7 +59,7 @@
 
 
                     <div class="form-group {% if form.dest_path.errors %} has-error {% endif %}">
-                        <label for="dest_path">项目路径</label>
+                        <label for="dest_path">部署路径</label>
                         <input type="text" name="dest_path" class="form-control" placeholder="" value="{% if form.dest_path.value %}{{ form.dest_path.value }}{% else %}{{ project.dest_path }}{% endif %}">
                         <span class="help-block">{{ form.dest_path.errors }}</span>
                     </div>
