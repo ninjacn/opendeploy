@@ -82,7 +82,7 @@ def project_add(request):
                 project.exclude_file = cleaned_data['exclude_file']
                 project.save()
                 exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(project.id))
-                if len(exclude_file_path) > 0:
+                if len(project.exclude_file) > 0:
                     f = open(exclude_file_path, 'wb+')
                     f.write(project.exclude_file)
                     f.close()
@@ -164,10 +164,13 @@ def project_edit(request, id):
             try:
                 f.save()
                 exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(id))
-                if len(exclude_file_path) > 0:
+                if len(cleaned_data['exclude_file']) > 0:
                     f = open(exclude_file_path, 'wb+')
                     f.write(cleaned_data['exclude_file'].encode())
                     f.close()
+                else:
+                    if os.path.exists(exclude_file_path):
+                        os.unlink(exclude_file_path)
                 # 增加环境关联值
                 envs = request.POST.getlist('projectEnvConfig')
                 if envs:
@@ -186,14 +189,22 @@ def project_edit(request, id):
                             config.save()
 
                             before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
-                            f = open(before_hook_path, 'w')
-                            f.write(config.before_hook)
-                            f.close()
+                            if len(config.before_hook)>0:
+                                f = open(before_hook_path, 'w')
+                                f.write(config.before_hook)
+                                f.close()
+                            else:
+                                if os.path.exists(before_hook_path):
+                                    os.unlink(before_hook_path)
 
                             after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
-                            f = open(after_hook_path, 'w')
-                            f.write(config.after_hook)
-                            f.close()
+                            if len(config.after_hook)>0:
+                                f = open(after_hook_path, 'w')
+                                f.write(config.after_hook)
+                                f.close()
+                            else:
+                                if os.path.exists(after_hook_path):
+                                    os.unlink(after_hook_path)
 
                             if os.path.exists(before_hook_path):
                                 os.chmod(before_hook_path, stat.S_IRWXU)

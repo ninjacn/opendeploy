@@ -94,7 +94,6 @@ class Project(TimeStampedModel):
         verbose_name = '项目'
 
 class ProjectEnvConfig(TimeStampedModel):
-    # pid = models.IntegerField('项目ID', null=True, help_text='')
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, null=True)
     branch = models.CharField('分支名', max_length=255, default='master', null=True)
@@ -109,6 +108,9 @@ class ProjectEnvConfig(TimeStampedModel):
         db_table = 'deploy_project_env_config'
         verbose_name_plural = '项目环境配置'
         verbose_name = '项目环境配置'
+        indexes = [
+            models.Index(fields=['project', 'env']),
+        ]
 
 
 ''' 发布任务 '''
