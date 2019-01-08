@@ -299,7 +299,7 @@ class TaskService(object):
                     self.myLoggingService.info('脚本输出:')
                     for line in commandService.stdout_as_list:
                         self.myLoggingService.info(line)
-        return True
+                return True
 
     def exec_hook_after_release(self):
         after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(self.projectEnvConfig.id))
@@ -328,7 +328,23 @@ class TaskService(object):
                     self.myLoggingService.info('脚本输出:')
                     for line in commandService.stdout_as_list:
                         self.myLoggingService.info(line)
-        return True
+                return True
+
+    # 退出任务
+    def exit_task(self, rollback=False):
+        if rollback:
+            self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH_ERR
+        else:
+            self.task.status=Task.STATUS_RELEASE_FINISH_ERR
+        self.task.save()
+
+    # 完成任务
+    def finish_task(self, rollback=False):
+        if rollback:
+            self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH
+        else:
+            self.task.status=Task.STATUS_RELEASE_FINISH
+        self.task.save()
 
 
 
@@ -376,6 +392,7 @@ class DeployService():
         self.config = self.project_obj.get_config(self.env_id)
         if self.deploy_mode not in [Project.DEPLOY_MODE_ALL, Project.DEPLOY_MODE_INCREMENT] :
             self.myLoggingService.info('模式不可用, 请检查项目配置')
+            self.taskService.exit_task()
             raise RuntimeError('模式不可用, 请检查项目配置')
         self.myLoggingService.info('项目名:' + self.project.name)
         self.myLoggingService.info('仓库地址:' + self.project.repository_url)
@@ -392,6 +409,7 @@ class DeployService():
         self.all_host = self.project_obj.get_all_host(self.env_id)
         if not self.all_host:
             self.myLoggingService.error('主机列表为空, 请在后台进行配置')
+            self.taskService.exit_task()
             raise RuntimeError('主机列表为空, 请在后台进行配置')
             
         self.myLoggingService.info('主机列表:' + (','.join(self.all_host)))
@@ -439,15 +457,20 @@ class DeployService():
             self.myLoggingService.info('开始检出仓库')
             if self.vcs.checkout() is not True:
                 self.myLoggingService.error(self.vcs.checkout_errmsg)
+                self.taskService.exit_task()
                 raise RuntimeError(self.vcs.checkout_errmsg)
             self.myLoggingService.info('检出仓库完成')
 
             # before hook
-            if self.taskService.exec_hook_before_release():
+            res_hook_befor = self.taskService.exec_hook_before_release()
+            if res_hook_befor:
                 self.myLoggingService.info('发布前调用钩子成功')
-            else:
+            elif res_hook_befor == False:
                 self.myLoggingService.error('发布前调用钩子失败')
+                self.taskService.exit_task()
                 raise RuntimeError('发布前调用钩子失败')
+            else:
+                self.myLoggingService.info('未检测到发布前钩子')
 
             self.release()
         # rollback
@@ -488,6 +511,7 @@ class DeployService():
                 taskHostRela.save()
                 continue
             else:
+                status_release=TaskHostRela.STATUS_RELEASE_SUCCESS
                 self.myLoggingService.info('同步正常, host:' + host)
                 if len(commandService.stdout_as_list) > 0:
                     self.myLoggingService.info('脚本输出:')
@@ -495,12 +519,15 @@ class DeployService():
                         self.myLoggingService.info(line)
 
                 # after hook
-                if self.taskService.exec_hook_after_release():
+                res_hook_after = self.taskService.exec_hook_after_release()
+                if res_hook_after:
                     status_release=TaskHostRela.STATUS_RELEASE_SUCCESS
                     self.myLoggingService.info('发布后调用钩子成功')
-                else:
+                elif res_hook_after == False:
                     status_release=TaskHostRela.STATUS_RELEASE_ERROR
                     self.myLoggingService.error('发布后调用钩子失败')
+                else:
+                    self.myLoggingService.info('未检测到发布后钩子')
 
             # add link
             if self.deploy_mode == Project.DEPLOY_MODE_ALL:
@@ -542,26 +569,31 @@ class DeployService():
                     for line in commandService.stderr_as_list:
                         self.myLoggingService.error(line)
                 errno+=1
-                taskHostRela = TaskHostRela.objects.get(host=host)
+                taskHostRela = TaskHostRela.objects.get(host=host, task=self.task)
                 taskHostRela.status_rollback=TaskHostRela.STATUS_ROLLBACK_ERROR
                 taskHostRela.save()
                 continue
             else:
+                status_rollback=TaskHostRela.STATUS_ROLLBACK_SUCCESS
                 self.myLoggingService.info('回滚正常, host:' + host)
                 if len(commandService.stdout_as_list) > 0:
                     self.myLoggingService.info('脚本输出:')
                     for line in commandService.stdout_as_list:
                         self.myLoggingService.info(line)
                 # after hook
-                if self.taskService.exec_hook_after_release():
+                res_hook_after = self.taskService.exec_hook_after_release() 
+                if res_hook_after:
                     status_rollback=TaskHostRela.STATUS_ROLLBACK_SUCCESS
                     self.myLoggingService.info('回滚后调用钩子成功')
-                else:
+                elif res_hook_after == False:
                     status_rollback=TaskHostRela.STATUS_ROLLBACK_ERROR
                     self.myLoggingService.error('回滚后调用钩子失败')
+                else:
+                    status_rollback=TaskHostRela.STATUS_ROLLBACK_SUCCESS
+                    self.myLoggingService.info('未检测到回滚后调用钩子')
             #标记主机状态
             try:
-                taskHostRela = TaskHostRela.objects.get(host=host)
+                taskHostRela = TaskHostRela.objects.get(host=host, task=self.task)
                 taskHostRela.status_rollback=status_rollback
                 taskHostRela.save()
             except:

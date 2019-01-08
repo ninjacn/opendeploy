@@ -377,10 +377,11 @@ def credential_add(request):
 
                 if auth_type != Credentials.TYPE_USER_PWD:
                     key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + credential.id)
-                    f = open(key_path, 'w+')
-                    f.write(credential.private_key)
-                    f.close()
-                    os.chmod(key_path, stat.S_IRWXU)
+                    if len(credential.private_key) > 0:
+                        f = open(key_path, 'w+')
+                        f.write(credential.private_key)
+                        f.close()
+                        os.chmod(key_path, stat.S_IRWXU)
                 messages.info(request, '修改成功')
             except:
                 messages.error(request, '修改失败')
@@ -417,10 +418,14 @@ def credential_edit(request, id):
                 credential.save()
                 if auth_type != Credentials.TYPE_USER_PWD:
                     key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(credential.id))
-                    f = open(key_path, 'w+')
-                    f.write(credential.private_key)
-                    f.close()
-                    os.chmod(key_path, stat.S_IRWXU)
+                    if len(credential.private_key) > 0:
+                        f = open(key_path, 'w+')
+                        f.write(credential.private_key)
+                        f.close()
+                        os.chmod(key_path, stat.S_IRWXU)
+                    else:
+                        if os.path.exists(key_path):
+                            os.unlink(key_path)
                 messages.info(request, '修改成功')
             except:
                 messages.error(request, '修改失败')
