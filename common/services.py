@@ -11,6 +11,7 @@ import io
 import requests
 import subprocess
 import pexpect
+import json
 
 from deploy.models import Task
 
@@ -116,3 +117,67 @@ def ssh_connect(host, user, password):
     except:
         return False
 
+
+# 处理webhook请求正文
+class WebhookRequestBody():
+
+    def __init__(self, request):
+        try:
+            self.body = json.loads(request.body)
+            self.request = request
+        except:
+            raise RuntimeError('POST数据校验不正确，请确认为Json格式')
+
+    def get_body(self):
+        return self.body
+
+
+
+class WebhookRequestBodyOfGitlabService(WebhookRequestBody):
+
+    def get_event_name(self):
+        return self.body['object_kind']
+
+    def get_branch_name(self):
+        try:
+            if self.get_event_name() == 'push':
+                return self.body['ref'].split("/")[2]
+            elif (self.get_event_name() == 'merge_request') and (self.body['object_attributes']['state'] == 'merged'):
+                return self.body['object_attributes']['target_branch']
+        except:
+            return 'master'
+
+    def get_comment(self):
+        try:
+            if self.get_event_name() == 'push':
+                return self.body['user_name'] + ' ' + self.body['checkout_sha'] + ' ' + self.body['commits'][0]['message']
+            elif (self.get_event_name() == 'merge_request') and (self.body['object_attributes']['state'] == 'merged'):
+                return self.body['object_attributes']['last_commit']['author']['name'] + ' ' + \
+                        self.body['object_attributes']['last_commit']['id'] + ' ' + \
+                        self.body['object_attributes']['last_commit']['message']
+        except:
+            return ''
+
+
+
+class WebhookRequestBodyOfGithubService(WebhookRequestBody):
+    def get_event_name(self):
+        try:
+            return self.request.META['X-GitHub-Event']
+        except:
+            pass
+
+    def get_branch_name(self):
+        try:
+            if self.get_event_name() == 'push':
+                return self.body['ref'].split("/")[2]
+        except:
+            pass
+        return 'master'
+
+    def get_comment(self):
+        try:
+            return self.body['head_commit']['author']['name'] + ' ' + \
+                    self.body['head_commit']['sha'] + ' ' + self.body['head_commit']['message']
+        except:
+            return ''

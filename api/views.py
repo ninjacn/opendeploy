@@ -7,22 +7,109 @@
 # For the full copyright and license information, please view the LICENSE
 # file that was distributed with this source code.
 
+import json
+import logging
+from pprint import pprint, pformat
+
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse, HttpResponseServerError
 
+from api.models import Token
+from deploy.models import Project, Env, ProjectEnvConfig
+from common.services import WebhookRequestBodyOfGitlabService, WebhookRequestBodyOfGithubService
+
+logger = logging.getLogger('webhook')
+
+def check_api_token(func):
+    def func_wrapper(request, *args, **kwargs):
+        res = {
+            'error_code': 10000,
+            'msg': '非法请求, 请求方法必须为POST，或token不正确',
+        }
+        try:
+            token = Token.objects.get(token=request.GET.get('token'))
+        except:
+            pass
+        if request.method == 'POST':
+            return func(request, *args, **kwargs)
+        return JsonResponse(res, safe=False)
+    return func_wrapper
 
 @csrf_exempt
-@login_required
-def webhook_gitlab(pid, env_id):
-    print(pid)
-    print(env_id)
+@check_api_token
+def webhook_gitlab(request, pid, env_id):
+    logger.info('request path:' + request.get_full_path())
+    logger.info('request header:')
+    logger.info(pformat(request.META))
+    logger.info('request body:')
+    try:
+        gitlabService = WebhookRequestBodyOfGitlabService(request)
+        request_body = gitlabService.get_body()
+        logger.info(pformat(request_body))
+    except RuntimeError as e:
+        logger.error(str(e))
+        logger.error(pformat(request.body))
+        return HttpResponse(str(e), status=500)
+    except:
+        logger.error('未知问题')
+        return HttpResponse('未知问题', status=500)
+    try:
+        project = Project.objects.get(id=pid)
+    except:
+        return HttpResponseNotFound('项目没找到')
+    try:
+        env = Env.objects.get(id=env_id)
+    except:
+        return HttpResponseNotFound('环境没找到')
+    try:
+        projectEnvConfig = ProjectEnvConfig.objects.get(project=project, env=env)
+    except:
+        return HttpResponseNotFound('项目环境配置未匹配')
+    events = ['push', 'merge_request']
+    if request_body['object_kind'] not in events:
+        return HttpResponseNotFound('只支持push及merge_request事件')
+    logger.info('branch_name:' + gitlabService.get_branch_name())
+    if projectEnvConfig.branch != gitlabService.get_branch_name():
+        logger.error('项目环境配置中分支名不匹配')
+        return HttpResponseNotFound('项目环境配置中分支名不匹配')
+    comment = gitlabService.get_comment()
     return HttpResponse('webhook_gitlab')
 
 @csrf_exempt
-@login_required
-def webhook_github(pid, env_id):
-    print(pid)
-    print(env_id)
+@check_api_token
+def webhook_github(request, pid, env_id):
+    logger.info('request path:' + request.get_full_path())
+    logger.info('request header:')
+    logger.info(pformat(request.META))
+    logger.info('request body:')
+    try:
+        githubService = WebhookRequestBodyOfGithubService(request)
+        request_body = githubService.get_body()
+        logger.info(pformat(request_body))
+    except RuntimeError as e:
+        logger.error(str(e))
+        logger.error(pformat(request.body))
+        return HttpResponse(str(e), status=500)
+    except:
+        logger.error('未知问题')
+        return HttpResponse('未知问题', status=500)
+    try:
+        project = Project.objects.get(id=pid)
+    except:
+        return HttpResponseNotFound('项目没找到')
+    try:
+        env = Env.objects.get(id=env_id)
+    except:
+        return HttpResponseNotFound('环境没找到')
+    try:
+        projectEnvConfig = ProjectEnvConfig.objects.get(project=project, env=env)
+    except:
+        return HttpResponseNotFound('项目环境配置未匹配')
+    logger.info('branch_name:' + githubService.get_branch_name())
+    if projectEnvConfig.branch != githubService.get_branch_name():
+        logger.error('项目环境配置中分支名不匹配')
+        return HttpResponseNotFound('项目环境配置中分支名不匹配')
+    comment = githubService.get_comment()
     return HttpResponse('webhook_github')

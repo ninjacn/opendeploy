@@ -14,6 +14,6 @@ from . import views
 app_name='api'
 
 urlpatterns = [
-    url(r'^webhook/gitlab/(?P<pid>\d+)-(?P<env_id>\d+)$', views.webhook_gitlab, name='webhook_gitlab'),
-    url(r'^webhook/github/(?P<pid>\d+)-(?P<env_id>\d+)$', views.webhook_github, name='webhook_github'),
+    url(r'^webhook/gitlab/(?P<pid>\d+)-(?P<env_id>\d+)', views.webhook_gitlab, name='webhook_gitlab'),
+    url(r'^webhook/github/(?P<pid>\d+)-(?P<env_id>\d+)', views.webhook_github, name='webhook_github'),
 ]

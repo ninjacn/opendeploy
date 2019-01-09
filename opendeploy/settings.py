@@ -130,13 +130,19 @@ LOGGING = {
         'system': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR + '/debug.log',
+            'filename': BASE_DIR + '/storage/logs/debug.log',
             'formatter': 'verbose',
         },
         'app': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR + '/app.log',
+            'filename': BASE_DIR + '/storage/logs/app.log',
+            'formatter': 'verbose',
+        },
+        'webhook': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR + '/storage/logs/webhook.log',
             'formatter': 'verbose',
         },
     },
@@ -148,6 +154,11 @@ LOGGING = {
         },
         'app': {
             'handlers': ['app'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'webhook': {
+            'handlers': ['webhook'],
             'level': 'DEBUG',
             'propagate': True,
         },
