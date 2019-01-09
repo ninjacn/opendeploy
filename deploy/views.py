@@ -46,8 +46,8 @@ def index(request):
     })
 
 def test(request):
-    d = DeployService(4)
-    # d = DeployService(1, action=Task.ACTION_ROLLBACK)
+    # d = DeployService(9)
+    d = DeployService(9, action=Task.ACTION_ROLLBACK)
     d.run()
     return HttpResponse('hello world')
 
@@ -73,24 +73,15 @@ def release(request):
         f = ReleaseForm(request.POST)
         if f.is_valid():
             cleaned_data = f.cleaned_data
-            task = Task()
+            pid = cleaned_data['project']
+            env_id = cleaned_data['env']
+            comment = cleaned_data['comment']
             try:
-                project = Project.objects.get(id=cleaned_data['project'])
-            except:
-                messages.error(request, '项目不存在!')
+                projectService = ProjectService(pid)
+                task = projectService.create_task(env_id, request.user, comment)
+            except RuntimeError as e:
+                messages.error(request, str(e))
                 return redirect('deploy:homepage')
-
-            try:
-                env = Env.objects.get(id=cleaned_data['env'])
-            except:
-                messages.error(request, '环境不存在!')
-                return redirect('deploy:homepage')
-
-            task.project = project
-            task.env = env
-            task.creater = request.user
-            task.comment = cleaned_data['comment']
-            task.save()
             messages.info(request, '任务提交成功，准备发布...')
             return redirect('deploy:progress', task.id)
         else:

@@ -11,13 +11,17 @@ import json
 import logging
 from pprint import pprint, pformat
 
+from django.contrib.auth.models import User
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse, HttpResponseServerError
+from django.core.exceptions import ObjectDoesNotExist
 
 from api.models import Token
 from deploy.models import Project, Env, ProjectEnvConfig
+from deploy.services import ProjectService
 from common.services import WebhookRequestBodyOfGitlabService, WebhookRequestBodyOfGithubService
 
 logger = logging.getLogger('webhook')
@@ -75,7 +79,15 @@ def webhook_gitlab(request, pid, env_id):
         logger.error('项目环境配置中分支名不匹配')
         return HttpResponseNotFound('项目环境配置中分支名不匹配')
     comment = gitlabService.get_comment()
-    return HttpResponse('webhook_gitlab')
+    try:
+        projectService = ProjectService(pid)
+        creater = User.objects.get(username='git_robot')
+        task = projectService.create_task(env_id, creater, comment)
+        return HttpResponse('创建成功, url:' + reverse('deploy:detail', args=[task.id]))
+    except (RuntimeError, ObjectDoesNotExist) as e:
+        return HttpResponse(str(e), status=500)
+    except:
+        return HttpResponse('创建失败，未知异常', status=500)
 
 @csrf_exempt
 @check_api_token
@@ -112,4 +124,12 @@ def webhook_github(request, pid, env_id):
         logger.error('项目环境配置中分支名不匹配')
         return HttpResponseNotFound('项目环境配置中分支名不匹配')
     comment = githubService.get_comment()
-    return HttpResponse('webhook_github')
+    try:
+        projectService = ProjectService(pid)
+        creater = User.objects.get(username='git_robot')
+        task = projectService.create_task(env_id, creater, comment)
+        return HttpResponse('创建成功, url:' + reverse('deploy:detail', args=[task.id]))
+    except (RuntimeError, ObjectDoesNotExist) as e:
+        return HttpResponse(str(e), status=500)
+    except:
+        return HttpResponse('创建失败，未知异常', status=500)

@@ -188,11 +188,28 @@ class ProjectService(object):
 
     def __init__(self, id=None):
         if id:
-            self.id = id
             try:
+                self.id = id
                 self.project = Project.objects.get(id=self.id)
             except:
-                raise RuntimeError('项目不存在。')
+                raise RuntimeError('项目不存在')
+
+    # 创建任务
+    def create_task(self, env_id, creater, comment=''):
+        try:
+            env = Env.objects.get(id=env_id)
+        except:
+            raise RuntimeError('环境不存在')
+        try:
+            task = Task()
+            task.project = self.project
+            task.env = env
+            task.creater = creater
+            task.comment = comment
+            task.save()
+            return task
+        except:
+            raise RuntimeError('创建任务失败')
 
     def get_valid_all(self):
         return Project.objects.filter(status=Project.STATUS_ENABLED)
