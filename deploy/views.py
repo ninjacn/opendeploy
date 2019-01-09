@@ -79,11 +79,11 @@ def release(request):
             try:
                 projectService = ProjectService(pid)
                 task = projectService.create_task(env_id, request.user, comment)
+                messages.info(request, '任务提交成功，准备发布...')
+                return redirect('deploy:progress', task.id)
             except RuntimeError as e:
                 messages.error(request, str(e))
                 return redirect('deploy:homepage')
-            messages.info(request, '任务提交成功，准备发布...')
-            return redirect('deploy:progress', task.id)
         else:
             messages.error(request, '任务申请校验失败, 请重新提交!')
     else:
