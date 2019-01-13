@@ -81,9 +81,15 @@
                     </div>
 
                     <div class="form-group {% if form.exclude_file.errors %} has-error {% endif %}">
-                        <label for="exclude_file">排除文件</label>
+                        <label for="exclude_file">Rsync排除文件</label>
                         <textarea class="form-control" rows="5" name="exclude_file" placeholder="每行一个, 支持文件或路径">{% if project.exclude_file %}{{ project.exclude_file }}{% else %}{% if form.exclude_file.value %}{{ form.exclude_file.value }}{% endif %}{% endif %}</textarea>
                         <span class="help-block">{{ form.exclude_file.errors }}</span>
+                    </div>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="1" name="{{ form.rsync_enable_delete.name }}" {% if project.rsync_enable_delete%}  checked {% else %}{% if form.rsync_enable_delete.value %}checked{% endif %}{% endif %}> 启用rsync删除选项
+                        </label>
                     </div>
 
                     <div class="form-group {% if form.dingding_robot_webhook.errors %} has-error {% endif %}">

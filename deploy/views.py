@@ -46,8 +46,10 @@ def index(request):
     })
 
 def test(request):
-    # d = DeployService(9)
-    d = DeployService(9, action=Task.ACTION_ROLLBACK)
+    # mailService = MailService()
+    # mailService.send_mail()
+    # d = DeployService(20)
+    d = DeployService(20, action=Task.ACTION_ROLLBACK)
     d.run()
     return HttpResponse('hello world')
 

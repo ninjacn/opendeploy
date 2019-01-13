@@ -12,9 +12,10 @@ import requests
 import subprocess
 import pexpect
 import json
+from django.urls import reverse
 
 from deploy.models import Task
-
+from setting.services import SettingService
 
 class DingdingService():
 
@@ -27,19 +28,37 @@ class DingdingService():
     url = 'https://oapi.dingtalk.com/robot/send?access_token=xx'
     dingdingService.send_chat_robot(url, 1)
     '''
-    def send_chat_robot(self, url, tid):
+    def send_chat_robot(self, url, tid, start=True, rollback=False):
+        settingService = SettingService()
+        site_url = settingService.get_site_url()
         try:
             task = Task.objects.get(id=tid)
-            task_url = '/detail/12'
+            task_url = site_url + reverse('deploy:detail', args=[tid])
         except:
             return False
+
+        def get_status_display(status, status_choices):
+            for item in status_choices:
+                if item[0] == status:
+                    return item[1]
+        status_str = ''
+        if start:
+            if rollback:
+                status_str = '开始回滚'
+            else:
+                status_str = '开始发布'
+        else:
+            if rollback:
+                status_str = '回滚结束 - ' + get_status_display(task.status_rollback, Task.STATUS_ROLLBACK_CHOICES)
+            else:
+                status_str = '发布结束 - ' + get_status_display(task.status, Task.STATUS_CHOICES)
 
         data = {
             'msgtype': 'markdown',
             'markdown': {
                 'title': 'Opendeploy',
                 'text': "Opendeploy\n\n #" + str(tid) + ' 项目:' + task.project.name + \
-                        "\n\n发布完成   [任务详情](" + task_url + ")",
+                        "\n\n" + status_str + "  [任务详情](" + task_url + ")",
             },
         }
         r = requests.post(url, json=data, timeout = 5).json()

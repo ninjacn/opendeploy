@@ -82,8 +82,9 @@ class Project(TimeStampedModel):
             choices=DEPLOY_MODE_CHOICES)
     dingding_robot_webhook = models.URLField('钉钉机器人webhook', max_length=255, default='', \
             null=True, blank=True)
+    exclude_file = models.TextField('rsync排除文件', default='', help_text='', null=True, blank=True)
+    rsync_enable_delete = models.BooleanField('启用rsync删除选项', default=False)
     status = models.CharField('状态', max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
-    exclude_file = models.TextField('排除文件', default='', help_text='', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -145,10 +146,12 @@ class Task(TimeStampedModel):
     env = models.ForeignKey(Env, on_delete=models.SET_NULL, related_name='env', null=True )
     status = models.IntegerField('状态', default=STATUS_RELEASE_WAIT, choices=STATUS_CHOICES)
     status_rollback = models.IntegerField('回滚状态', default=STATUS_ROLLBACK_WAIT, choices=STATUS_ROLLBACK_CHOICES)
+    version = models.CharField('版本', max_length=255, default='')
+    version_message = models.CharField('版本注释', max_length=255, default='')
     comment = models.CharField('备注', max_length=255, default='')
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         db_table = 'deploy_task'

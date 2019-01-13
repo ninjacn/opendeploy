@@ -23,6 +23,7 @@ from svn.exception import SvnException
 from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.utils.crypto import get_random_string
 
 from deploy.models import Project, ProjectEnvConfig, Env, Credentials, Task
 from cmdb.models import Host
@@ -30,6 +31,11 @@ from deploy.models import TaskHostRela
 from opendeploy import settings
 from setting.services import SettingService
 from common.services import CommandService
+
+
+RSYNC_PREFIX = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDv '
+RSYNC_EXCLUDE_PARMS = ' --exclude=.git/ --exclude=.svn/ '
+SSH_PREFIX = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
 
 
 class VcsServiceBase:
@@ -182,6 +188,15 @@ class SvnService(VcsServiceBase):
         except:
             pass
 
+    def get_commit(self):
+        if self.version:
+            return self.version
+        return '0'
+
+    def get_commit_message(self):
+        return ''
+
+
 class ProjectService(object):
     # def __new__(cls, id):
         # super(ProjectService, cls).__new__(cls)
@@ -275,7 +290,8 @@ class TaskService(object):
     # 获取发布路径
     def get_release_path(self):
         if self.project.deploy_mode == Project.DEPLOY_MODE_ALL:
-            return self.project.dest_path + '_' + str(self.id)
+            # return self.project.dest_path + '_' + str(self.id)
+            return self.project.dest_path + '_release_' + str(self.id)
         elif self.project.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
             return self.project.dest_path
 
@@ -318,18 +334,32 @@ class TaskService(object):
                         self.myLoggingService.info(line)
                 return True
 
-    def exec_hook_after_release(self):
+    def exec_hook_after_release(self, host):
         after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(self.projectEnvConfig.id))
         if os.path.exists(after_hook_path):
-            commandService = CommandService(after_hook_path)
-            self.myLoggingService.info('检测到发布前Hook, 准备执行:')
-            self.myLoggingService.info('command:' + after_hook_path)
+            self.myLoggingService.info('检测到发布后Hook, 准备执行:')
             with open(after_hook_path) as f:
                 for line in f:
                     self.myLoggingService.info(line.strip())
+            # 推送脚本
+            filename = 'opendeploy_hook_after_' + str(self.id) + '_' + get_random_string(30)
+            remote_path = '/tmp/' + filename;
+            command = RSYNC_PREFIX + after_hook_path + ' ' + host + ':' + remote_path
+            self.myLoggingService.info(command)
+            commandService = CommandService(command)
+            if commandService.returncode > 0:
+                self.myLoggingService.error('推送脚本异常')
+                return False
+            # @TODO
+            self.myLoggingService.info('开始执行...')
+            # command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && sudo OPENDEPLOY_ID=' + str(self.id) + ' ' \
+            command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && ' \
+                     + remote_path + ' && ' + 'rm -f ' + remote_path + ' 2>&1"'
+            self.myLoggingService.info(command)
+            commandService = CommandService(command)
             self.myLoggingService.info('exit_code:' + str(commandService.returncode))
             if commandService.returncode > 0:
-                self.myLoggingService.error('发布前hook执行异常')
+                self.myLoggingService.error('发布后hook执行异常')
                 if len(commandService.stdout) > 0:
                     self.myLoggingService.info('脚本输出:')
                     for line in commandService.stdout_as_list:
@@ -340,7 +370,7 @@ class TaskService(object):
                         self.myLoggingService.error(line)
                 return False
             else:
-                self.myLoggingService.info('发布前hook执行正常')
+                self.myLoggingService.info('发布后hook执行正常')
                 if len(commandService.stdout_as_list) > 0:
                     self.myLoggingService.info('脚本输出:')
                     for line in commandService.stdout_as_list:
@@ -393,13 +423,7 @@ class DeployService():
         self.workspace_path = os.path.expanduser(settings.WORKSPACE_PATH)
         if os.path.exists(self.workspace_path) == False:
             os.makedirs(self.workspace_path)
-
         self.myLoggingService.info('初始化工作区完成')
-
-        self.rsync_prefix = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDKv '
-        self.rsync_exclude_parms = ' --exclude=.git/ --exclude=.svn/ '
-
-        self.ssh_prefix = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
 
         self.pid = self.task.project.id
         self.env_id = self.task.env.id
@@ -430,9 +454,7 @@ class DeployService():
             raise RuntimeError('主机列表为空, 请在后台进行配置')
             
         self.myLoggingService.info('主机列表:' + (','.join(self.all_host)))
-
         self.myLoggingService.info('初始化仓库')
-
         if self.project.vcs_type == Project.TYPE_GIT:
             self.working_dir = os.path.join(self.workspace_path, str(self.pid) \
                     + "_" + self.branch)
@@ -462,7 +484,9 @@ class DeployService():
                     )
         else:
             self.working_dir = os.path.join(self.workspace_path, str(self.pid)) 
+            self.myLoggingService.info('工作区路径:' + self.working_dir)
             self.vcs = SvnService(self.project.repository_url, self.working_dir, 
+                    self.myLoggingService,
                     username=self.project.credentials.username, 
                     password=self.project.credentials.password)
 
@@ -470,6 +494,10 @@ class DeployService():
 
 
     def run(self):
+        if self.project.rsync_enable_delete:
+            self.rsync_prefix = RSYNC_PREFIX + ' --delete '
+        else:
+            self.rsync_prefix = RSYNC_PREFIX
         if self.action == Task.ACTION_RELEASE:
             self.myLoggingService.info('开始检出仓库')
             if self.vcs.checkout() is not True:
@@ -477,6 +505,9 @@ class DeployService():
                 self.taskService.exit_task()
                 raise RuntimeError(self.vcs.checkout_errmsg)
             self.myLoggingService.info('检出仓库完成')
+            self.task.version = self.vcs.get_commit()
+            self.task.version_message = self.vcs.get_commit_message()
+            self.task.save()
 
             # before hook
             res_hook_befor = self.taskService.exec_hook_before_release()
@@ -500,10 +531,10 @@ class DeployService():
         for host in self.all_host:
             self.myLoggingService.info('开始发布主机, host:' + host)
             if self.deploy_mode == Project.DEPLOY_MODE_ALL:
-                command = self.rsync_prefix + self.rsync_exclude_parms + self.working_dir + '/ ' + \
+                command = self.rsync_prefix + RSYNC_EXCLUDE_PARMS + self.working_dir + '/ ' + \
                         host + ':' + self.taskService.get_release_path()
             elif self.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
-                command = self.rsync_prefix + self.rsync_exclude_parms + self.working_dir + '/ ' + \
+                command = self.rsync_prefix + RSYNC_EXCLUDE_PARMS + self.working_dir + '/ ' + \
                         host + ':' + self.taskService.get_release_path() + ' --backup --backup-dir=' + self.taskService.get_rollback_path()
 
             self.myLoggingService.info('command:' + command)
@@ -535,8 +566,27 @@ class DeployService():
                     for line in commandService.stdout_as_list:
                         self.myLoggingService.info(line)
 
+                # add link
+                if self.deploy_mode == Project.DEPLOY_MODE_ALL:
+                    self.myLoggingService.info('准备切换软链接...')
+                    command = SSH_PREFIX + host + ' " rm -f ' + self.project.dest_path + ' && ln -s -f ' + self.taskService.get_release_path() \
+                            + ' ' + self.project.dest_path + '"'
+                    self.myLoggingService.info(command)
+                    commandService = CommandService(command)
+                    if len(commandService.stdout_as_list) > 0:
+                        self.myLoggingService.info('切换软链接出错')
+                        for line in commandService.stdout_as_list:
+                            self.myLoggingService.info(line)
+                        taskHostRela = TaskHostRela()
+                        taskHostRela.host=host
+                        taskHostRela.task=self.task
+                        taskHostRela.status_release=TaskHostRela.STATUS_RELEASE_ERROR
+                        taskHostRela.save()
+                        continue
+                    self.myLoggingService.info('切换软链接完成')
+
                 # after hook
-                res_hook_after = self.taskService.exec_hook_after_release()
+                res_hook_after = self.taskService.exec_hook_after_release(host)
                 if res_hook_after:
                     status_release=TaskHostRela.STATUS_RELEASE_SUCCESS
                     self.myLoggingService.info('发布后调用钩子成功')
@@ -546,9 +596,6 @@ class DeployService():
                 else:
                     self.myLoggingService.info('未检测到发布后钩子')
 
-            # add link
-            if self.deploy_mode == Project.DEPLOY_MODE_ALL:
-                pass
             #标记主机状态
             taskHostRela = TaskHostRela()
             taskHostRela.task=self.task
@@ -569,9 +616,10 @@ class DeployService():
         for host in self.all_host:
             self.myLoggingService.info('开始回滚主机, host:' + host)
             if self.deploy_mode == Project.DEPLOY_MODE_ALL:
-                pass
+                command = SSH_PREFIX + host + ' " rm -f ' + self.project.dest_path + ' && ln -s -f ' + self.taskService.get_rollback_path() \
+                            + ' ' + self.project.dest_path + '"'
             elif self.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
-                command = self.ssh_prefix + host + " '" + self.rsync_prefix + self.rsync_exclude_parms + self.taskService.get_rollback_path() + \
+                command = SSH_PREFIX + host + " '" + self.rsync_prefix + RSYNC_EXCLUDE_PARMS + self.taskService.get_rollback_path() + \
                         ' ' + self.taskService.get_release_path() + "'"
             self.myLoggingService.info('command:' + command)
             commandService = CommandService(command)
@@ -586,7 +634,12 @@ class DeployService():
                     for line in commandService.stderr_as_list:
                         self.myLoggingService.error(line)
                 errno+=1
-                taskHostRela = TaskHostRela.objects.get(host=host, task=self.task)
+                try:
+                    taskHostRela = TaskHostRela.objects.get(host=host, task=self.task)
+                except:
+                    taskHostRela = TaskHostRela(task=self.task)
+                    taskHostRela.task=self.task
+                    taskHostRela.host=host
                 taskHostRela.status_rollback=TaskHostRela.STATUS_ROLLBACK_ERROR
                 taskHostRela.save()
                 continue
@@ -598,7 +651,7 @@ class DeployService():
                     for line in commandService.stdout_as_list:
                         self.myLoggingService.info(line)
                 # after hook
-                res_hook_after = self.taskService.exec_hook_after_release() 
+                res_hook_after = self.taskService.exec_hook_after_release(host) 
                 if res_hook_after:
                     status_rollback=TaskHostRela.STATUS_ROLLBACK_SUCCESS
                     self.myLoggingService.info('回滚后调用钩子成功')
@@ -639,13 +692,13 @@ class MailService():
         else:
             use_tls = False
         self.backend = EmailBackend(host=mail_info.host, port=mail_info.port, username=mail_info.username, \
-                password=mail_info.password, use_tls=use_tls, timeout=10)
+                password=mail_info.password, use_tls=use_tls, timeout=30)
 
     def send_mail(self):
         subject, to = 'test', 'x@ninjacn.com'
-        # body = render_to_string('deploy/index.html', {
-        # })
-        body = "hello world"
+        body = render_to_string('emails/release.html', {
+        })
+        # body = "hello world"
         msg = EmailMultiAlternatives(subject, body, self.from_email, [to], connection=self.backend)
         msg.attach_alternative(body, "text/html")
         return msg.send()

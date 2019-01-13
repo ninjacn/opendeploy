@@ -85,6 +85,13 @@
                         <span class="help-block">{{ form.exclude_file.errors }}</span>
                     </div>
 
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="1" name="{{ form.rsync_enable_delete.name }}" {% if form.rsync_enable_delete.value %}checked{% endif %}> {{ form.rsync_enable_delete.label }}
+                        </label>
+                    </div>
+
+
                     <div class="form-group {% if form.dingding_robot_webhook.errors %} has-error {% endif %}">
                         <label for="dingding_robot_webhook">{{ form.dingding_robot_webhook.label }}</label>
                         <input type="text" name="dingding_robot_webhook" class="form-control" placeholder="" value="{% if form.dingding_robot_webhook.value %}{{ form.dingding_robot_webhook.value }}{% endif %}">

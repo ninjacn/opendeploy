@@ -41,3 +41,9 @@ class SettingService():
         if allinfo:
             for info in allinfo:
                 return info
+
+    def get_site_url(self):
+        info = self.get_general_info()
+        if info:
+            return info.site_url
+        return ''
