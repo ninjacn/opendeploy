@@ -20,8 +20,6 @@ import svn.remote
 import svn.local
 from svn.exception import SvnException
 
-from django.core.mail.backends.smtp import EmailBackend
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
 
@@ -682,26 +680,6 @@ class EnvService():
     def get_all(self):
         return Env.objects.all()
 
-class MailService():
-    def __init__(self):
-        settingService = SettingService()
-        mail_info = settingService.get_mail_info()
-        self.from_email = mail_info.from_email
-        if mail_info.use_tls:
-            use_tls = True
-        else:
-            use_tls = False
-        self.backend = EmailBackend(host=mail_info.host, port=mail_info.port, username=mail_info.username, \
-                password=mail_info.password, use_tls=use_tls, timeout=30)
-
-    def send_mail(self):
-        subject, to = 'test', 'x@ninjacn.com'
-        body = render_to_string('emails/release.html', {
-        })
-        # body = "hello world"
-        msg = EmailMultiAlternatives(subject, body, self.from_email, [to], connection=self.backend)
-        msg.attach_alternative(body, "text/html")
-        return msg.send()
 
 class MyLoggingService():
 

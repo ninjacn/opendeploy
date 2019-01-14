@@ -8,13 +8,19 @@
 # file that was distributed with this source code.
 
 import io
+import os
 import requests
 import subprocess
 import pexpect
 import json
+
+from django.core.mail.backends.smtp import EmailBackend
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.urls import reverse
 
-from deploy.models import Task
+from opendeploy import settings
+from deploy.models import Task, TaskHostRela
 from setting.services import SettingService
 
 class DingdingService():
@@ -200,3 +206,73 @@ class WebhookRequestBodyOfGithubService(WebhookRequestBody):
                     self.body['head_commit']['sha'] + ' ' + self.body['head_commit']['message']
         except:
             return ''
+
+
+class MailService():
+    def __init__(self):
+        settingService = SettingService()
+        mail_info = settingService.get_mail_info()
+        self.from_email = mail_info.from_email
+        if mail_info.use_tls:
+            use_tls = True
+        else:
+            use_tls = False
+        self.backend = EmailBackend(host=mail_info.host, port=mail_info.port, username=mail_info.username, \
+                password=mail_info.password, use_tls=use_tls, timeout=30)
+
+    def send_mail(self, tid, rollback=False):
+        def get_status_display(status, status_choices):
+            for item in status_choices:
+                if item[0] == status:
+                    return item[1]
+        try:
+            task = Task.objects.get(id=tid)
+        except:
+            raise RuntimeError('任务不存在')
+        taskHostRela = TaskHostRela.objects.filter(task=task)
+        settingService = SettingService()
+        site_url = settingService.get_site_url()
+        task_url = site_url + reverse('deploy:detail', args=[tid])
+        status_str = ''
+        if rollback:
+            status_str = get_status_display(task.status_rollback, Task.STATUS_ROLLBACK_CHOICES)
+        else:
+            status_str = get_status_display(task.status, Task.STATUS_CHOICES)
+        subject = status_str + ' #' + str(task.id) + ' [' + task.project.name + ']'
+        to_list = []
+        if task.creater.email:
+            to_list.append(task.creater.email)
+        else:
+            raise RuntimeError('邮件为空')
+        if rollback:
+            log_filename = str(tid) + '_rollback.log'
+        else:
+            log_filename = str(tid) + '.log'
+        log_path = os.path.join(settings.RELEASE_LOG_PATH[0], log_filename)
+        log_body = ''
+        attach = []
+        try:
+            with open(log_path, 'r') as f:
+                log_body = f.read()
+            attach.append({'body': log_body}) 
+        except:
+            pass
+        body = render_to_string('emails/release.html', {
+            'task': task,
+            'taskHostRela': taskHostRela,
+            'url': task_url,
+            'rollback': rollback,
+        })
+        return self.send(to_list, subject, body, attach)
+
+    def send(self, to, subject, body, attach=[]):
+        msg = EmailMultiAlternatives(subject, body, self.from_email, to, connection=self.backend)
+        msg.attach_alternative(body, "text/html")
+        if attach:
+            for item in attach:
+                msg.attach('详情日志.log', item['body'], 'text/plain')
+        try:
+            return msg.send()
+        except:
+            return False
+

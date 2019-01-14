@@ -22,7 +22,8 @@ from django.contrib.auth.models import User
 from deploy.models import Project, Task, Env, TaskHostRela
 from opendeploy import settings
 from .services import GitService, SvnService, DeployService, \
-        ProjectService, EnvService, SettingService, MailService, MyLoggingService
+        ProjectService, EnvService, SettingService, MyLoggingService
+from common.services import MailService
 from deploy.forms import ReleaseForm
 from cmdb.services import QcloudService, AliyunService
 from deploy.services import MyLoggingService
@@ -46,11 +47,9 @@ def index(request):
     })
 
 def test(request):
-    # mailService = MailService()
-    # mailService.send_mail()
     # d = DeployService(20)
-    d = DeployService(20, action=Task.ACTION_ROLLBACK)
-    d.run()
+    # d = DeployService(20, action=Task.ACTION_ROLLBACK)
+    # d.run()
     return HttpResponse('hello world')
 
 
