@@ -47,6 +47,8 @@ def index(request):
     })
 
 def test(request):
+    mailService = MailService()
+    mailService.send_mail(1, rollback=True)
     # d = DeployService(20)
     # d = DeployService(20, action=Task.ACTION_ROLLBACK)
     # d.run()

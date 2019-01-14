@@ -92,6 +92,12 @@
                         </label>
                     </div>
 
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="1" name="{{ form.enable_mail_notify.name }}" {% if project.enable_mail_notify%}  checked {% else %}{% if form.enable_mail_notify.value %}checked{% endif %}{% endif %}> 启用邮件通知
+                        </label>
+                    </div>
+
                     <div class="form-group {% if form.dingding_robot_webhook.errors %} has-error {% endif %}">
                         <label for="dingding_robot_webhook">钉钉机器人webhook</label>
                         <input type="text" name="dingding_robot_webhook" class="form-control" placeholder="" value="{% if project.dingding_robot_webhook %}{{ project.dingding_robot_webhook }}{% else %}{% if form.dingding_robot_webhook.value %}{{ form.dingding_robot_webhook.value }}{% endif %}{% endif %}">

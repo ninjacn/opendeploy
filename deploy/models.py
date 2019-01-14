@@ -84,6 +84,7 @@ class Project(TimeStampedModel):
             null=True, blank=True)
     exclude_file = models.TextField('rsync排除文件', default='', help_text='', null=True, blank=True)
     rsync_enable_delete = models.BooleanField('启用rsync删除选项', default=False)
+    enable_mail_notify = models.BooleanField('启用邮件通知', default=False)
     status = models.CharField('状态', max_length=2, default=STATUS_ENABLED, choices=STATUS_CHOICES)
 
     def __str__(self):

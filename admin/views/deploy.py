@@ -80,6 +80,8 @@ def project_add(request):
                 project.dingding_robot_webhook = cleaned_data['dingding_robot_webhook']
                 project.status = cleaned_data['status']
                 project.exclude_file = cleaned_data['exclude_file']
+                project.rsync_enable_delete = cleaned_data['rsync_enable_delete']
+                project.enable_mail_notify = cleaned_data['enable_mail_notify']
                 project.save()
                 exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(project.id))
                 if len(project.exclude_file) > 0:

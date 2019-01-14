@@ -29,6 +29,7 @@ from deploy.models import TaskHostRela
 from opendeploy import settings
 from setting.services import SettingService
 from common.services import CommandService
+from deploy import tasks
 
 
 RSYNC_PREFIX = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDv '
@@ -607,6 +608,7 @@ class DeployService():
             self.task.status=Task.STATUS_RELEASE_FINISH
             self.myLoggingService.info('发布成功')
         self.task.save()
+        tasks.send_notify.delay(self.task.id)
 
 
     def rollback(self):
@@ -673,6 +675,7 @@ class DeployService():
             self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH
             self.myLoggingService.info('回滚成功')
         self.task.save()
+        tasks.send_notify.delay(self.task.id, rollback=True)
 
 
 class EnvService():
