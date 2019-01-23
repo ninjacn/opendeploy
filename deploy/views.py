@@ -13,9 +13,10 @@ import json
 
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.template.response import TemplateResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 
@@ -47,8 +48,6 @@ def index(request):
     })
 
 def test(request):
-    mailService = MailService()
-    mailService.send_mail(1, rollback=True)
     # d = DeployService(20)
     # d = DeployService(20, action=Task.ACTION_ROLLBACK)
     # d.run()
@@ -209,3 +208,25 @@ def progress(request, id):
         'task': task,
         'rollback': rollback,
     })
+
+@login_required
+@csrf_exempt
+def release_status(request, id):
+    data = {
+        'percent_value': 0,
+        'log_body': '',
+    }
+    rollback=request.GET.get('rollback')
+    if rollback:
+        filename = str(id) + '_rollback.log'
+    else:
+        filename = str(id) + '.log'
+    file_path = os.path.join(settings.RELEASE_LOG_PATH[0], filename)
+    try:
+        with open(file_path, mode='r') as f:
+            data['log_body'] = f.readlines()
+    except:
+        pass
+    percent_value = 100
+    data['percent_value'] = percent_value
+    return JsonResponse(data)

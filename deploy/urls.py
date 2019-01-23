@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^task/history$', views.history, name='history'),
     url(r'^task/detail/(?P<id>\d+)$', views.detail, name='detail'),
     url(r'^task/release-log/(?P<id>\d+)', views.release_log, name='release_log'),
+    url(r'^task/get-release-status/(?P<id>\d+)', views.release_status, name='release_status'),
     url(r'^task/$', views.history),
 ]

@@ -137,7 +137,7 @@
     <div class="row">
         <div class="col-md-12">
             <h4>发布日志
-                <a href="/release-log/{{ task.id }}/" target="_blank">
+                <a href="{% url 'deploy:release_log' task.id %}" target="_blank">
                 <button data-toggle="tooltip" data-placement="top" title="新窗口打开" type="button" class="btn btn-outline-primary btn-sm"><i class="fa fa-external-link" aria-hidden="true"></i></button>
                 </a>
             </h4>
@@ -152,7 +152,7 @@
     <div class="row">
         <div class="col-md-12">
             <h4>回滚日志
-                <a href="/release-log/{{ task.id }}/?rollback=1" target="_blank">
+                <a href="{% url 'deploy:release_log' task.id %}?rollback=1" target="_blank">
                 <button data-toggle="tooltip" data-placement="top" title="新窗口打开" type="button" class="btn btn-outline-primary btn-sm"><i class="fa fa-external-link" aria-hidden="true"></i></button>
                 </a>
             </h4>
