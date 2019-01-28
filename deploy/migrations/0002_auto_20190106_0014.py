@@ -6,13 +6,16 @@ from django.db import migrations
 
 
 def load_envs(apps, schema_editor):
-    Env = apps.get_model("deploy", "Env")
-    env = Env(name='生产', comment='线上环境')
-    env.save()
-    env = Env(name='仿真', comment='模拟生产环境')
-    env.save()
-    env = Env(name='测试', comment='用于QA测试')
-    env.save()
+    try:
+        Env = apps.get_model("deploy", "Env")
+        env = Env(name='生产', comment='线上环境')
+        env.save()
+        env = Env(name='仿真', comment='模拟生产环境')
+        env.save()
+        env = Env(name='测试', comment='用于QA测试')
+        env.save()
+    except:
+        pass
 
 def delete_envs(apps, schema_editor):
     pass

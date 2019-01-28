@@ -22,12 +22,12 @@ from django.contrib.auth.models import User
 
 from deploy.models import Project, Task, Env, TaskHostRela
 from opendeploy import settings
-from .services import GitService, SvnService, DeployService, \
+from deploy.services import GitService, SvnService, DeployService, \
         ProjectService, EnvService, SettingService, MyLoggingService
 from common.services import MailService
 from deploy.forms import ReleaseForm
 from cmdb.services import QcloudService, AliyunService
-from deploy.services import MyLoggingService
+from deploy.tasks import release as task_release 
 
 # Create your views here.
 logging.basicConfig(
@@ -81,6 +81,8 @@ def release(request):
             try:
                 projectService = ProjectService(pid)
                 task = projectService.create_task(env_id, request.user, comment)
+
+                task_release.delay(task.id)
                 messages.info(request, '任务提交成功，准备发布...')
                 return redirect('deploy:progress', task.id)
             except RuntimeError as e:
@@ -93,6 +95,7 @@ def release(request):
 
 @login_required
 def rollback(request, id):
+    task_release.delay(id, rollback=True)
     return redirect(reverse('deploy:progress', args=[id]) + '?rollback=1')
 
 @login_required

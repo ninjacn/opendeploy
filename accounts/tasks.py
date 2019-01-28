@@ -25,5 +25,9 @@ logger = get_task_logger(__name__)
     ignore_result=True
 )
 def sync_ldap_accounts():
-    ldapService = LdapService()
-    ldapService.sync_accounts()
+    settingService = SettingService()
+    if settingService.get_ldap_info():
+        ldapService = LdapService()
+        ldapService.sync_accounts()
+    else:
+        print('LDAP info is empty.')

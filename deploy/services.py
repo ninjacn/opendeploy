@@ -25,16 +25,30 @@ from django.utils.crypto import get_random_string
 
 from deploy.models import Project, ProjectEnvConfig, Env, Credentials, Task
 from cmdb.models import Host
-from deploy.models import TaskHostRela
+from deploy.models import TaskHostRela, Task
 from opendeploy import settings
 from setting.services import SettingService
-from common.services import CommandService
-from deploy import tasks
+from common.services import CommandService, DingdingService
 
 
 RSYNC_PREFIX = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDv '
 RSYNC_EXCLUDE_PARMS = ' --exclude=.git/ --exclude=.svn/ '
 SSH_PREFIX = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no '
+
+def send_notify(tid, rollback=False):
+    try:
+        task = Task.objects.get(id=tid)
+        if task.project.enable_mail_notify:
+            send_mail(tid, rollback)
+    except:
+        pass
+
+    try:
+        if task.project.dingding_robot_webhook:
+            dingdingService = DingdingService()    
+            dingdingService.send_chat_robot(task.project.dingding_robot_webhook, tid, rollback)
+    except:
+        pass
 
 
 class VcsServiceBase:
@@ -608,7 +622,7 @@ class DeployService():
             self.task.status=Task.STATUS_RELEASE_FINISH
             self.myLoggingService.info('发布成功')
         self.task.save()
-        tasks.send_notify.delay(self.task.id)
+        send_notify(self.task.id)
 
 
     def rollback(self):
@@ -675,7 +689,7 @@ class DeployService():
             self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH
             self.myLoggingService.info('回滚成功')
         self.task.save()
-        tasks.send_notify.delay(self.task.id, rollback=True)
+        send_notify(self.task.id, rollback=True)
 
 
 class EnvService():

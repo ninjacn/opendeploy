@@ -20,8 +20,9 @@ def load_accounts(apps, schema_editor):
         pass
 
 def delete_accounts(apps, schema_editor):
-    User = apps.get_model("accounts", "User")
-    User.objects.get(username='git_robot').delete()
+    pass
+    # User = apps.get_model("accounts", "User")
+    # User.objects.get(username='git_robot').delete()
 
 
 class Migration(migrations.Migration):

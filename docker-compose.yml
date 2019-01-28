@@ -1,0 +1,71 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: 'python /app/manage.py runserver 0.0.0.0:8000'
+    volumes:
+      - .:/app
+    ports:
+      - 10080:8000
+    env_file: 
+      - .env
+    links:
+      - db
+    depends_on:
+      - db
+  worker:
+    build: .
+    command: 'celery -A opendeploy worker -l info'
+    volumes:
+      - .:/app
+    env_file: 
+      - .env
+    links:
+      - db
+      - rabbit
+    depends_on:
+      - db
+      - rabbit
+  beat:
+    build: .
+    command: 'celery -A opendeploy beat -l info'
+    volumes:
+      - .:/app
+    env_file: 
+      - .env
+    links:
+      - db
+      - rabbit
+    depends_on:
+      - db
+      - rabbit
+  db:
+    image: mysql:5.6
+    restart: always
+    command: ['mysqld', '--character-set-server=utf8', '--collation-server=utf8_unicode_ci']
+    volumes:
+      - ./db_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: opendeploy
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: Wh4LsrGxpg59XUuH
+      MYSQL_PASSWORD: Wh4LsrGxpg59XUuH
+    ports:
+      - 13306:3306
+    healthcheck:
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        interval: 10s
+        timeout: 10s
+        retries: 10
+  rabbit:
+      image: rabbitmq:latest
+      ports:
+          - 10082:15672
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 10081:8080
+
+#volumes:
+  #db_data:

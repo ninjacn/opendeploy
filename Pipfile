@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 django = "==1.11.17"
 #mysql-connector-python = "*"
-mysqlclient = "*"
+mysqlclient = "==1.3.14"
 environ = "*"
 gunicorn = "*"
 requests = "*"
@@ -24,4 +24,4 @@ pexpect = "*"
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+#python_version = "3.7"

@@ -88,11 +88,11 @@ WSGI_APPLICATION = 'opendeploy.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        # 'ENGINE': 'mysql.connector.django',
         'HOST': os.environ['MYSQL_HOST'],
+        'PORT': os.environ['MYSQL_PORT'],
         'USER': os.environ['MYSQL_USER'],
         'PASSWORD': os.environ['MYSQL_PWD'],
-        'NAME': 'open_deploy',
+        'NAME': 'opendeploy',
     }
 }
 

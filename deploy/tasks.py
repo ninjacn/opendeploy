@@ -12,25 +12,19 @@ from opendeploy.celery import app
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from common.services import MailService, DingdingService
+from deploy.models import Task
+from deploy.services import DeployService
 
+
+@app.task
+def release(tid, rollback=False):
+    if rollback:
+        deployService = DeployService(tid, action=Task.ACTION_ROLLBACK)
+    else:
+        deployService = DeployService(tid)
+    deployService.run()
 
 @app.task
 def send_mail(tid, rollback=False):
     mailService = MailService()
     mailService.send_mail(tid, rollback)
-
-@app.task
-def send_notify(tid, rollback=False):
-    try:
-        task = Task.objects.get(id=tid)
-        if task.project.enable_mail_notify:
-            send_mail(tid, rollback)
-    except:
-        pass
-
-    try:
-        if task.project.dingding_robot_webhook:
-            dingdingService = DingdingService()    
-            dingdingService.send_chat_robot(task.project.dingding_robot_webhook, tid, rollback)
-    except:
-        pass

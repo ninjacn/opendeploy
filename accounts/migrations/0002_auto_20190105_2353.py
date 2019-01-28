@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 def load_accounts(apps, schema_editor):
@@ -15,14 +16,16 @@ def load_accounts(apps, schema_editor):
         user.is_active = 1
         user.is_staff = 1
         user.is_superuser = 1
+        user.last_login = timezone.now()
         user.set_password(raw_password)
         user.save()
     except:
         pass
 
 def delete_accounts(apps, schema_editor):
-    User = apps.get_model("accounts", "User")
-    User.objects.all().delete()
+    pass
+    # User = apps.get_model("accounts", "User")
+    # User.objects.all().delete()
 
 
 class Migration(migrations.Migration):
