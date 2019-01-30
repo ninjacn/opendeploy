@@ -15,4 +15,6 @@ RUN pip install -U pipenv
 RUN pip install pipenv
 COPY ./Pipfile /app/Pipfile
 RUN pipenv install --system --skip-lock
-#COPY . /app
+RUN mkdir -p /root/.ssh
+ADD conf/ssh_key/opendeploy /root/.ssh/id_rsa
+RUN chmod 600 /root/.ssh/id_rsa
