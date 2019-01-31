@@ -147,13 +147,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="before_hook_{{ item.id }}">发布前钩子</label>
-                        <textarea class="form-control" rows="5" name="before_hook_{{ item.id }}" placeholder="可以是任意脚本语言，只要目标机器支持。比如bash shell, php,python等">{% if item.before_hook %}{{ item.before_hook }}{% endif %}</textarea>
+                        <label for="before_hook_{{ item.id }}">发布前钩子(在发布机执行)</label>
+                        <textarea class="form-control" rows="5" name="before_hook_{{ item.id }}" placeholder="可以是任意脚本语言，只要发布机支持。比如bash shell, php,python等">{% if item.before_hook %}{{ item.before_hook }}{% endif %}</textarea>
                         <span class="help-block"></span>
                     </div>
 
                     <div class="form-group">
-                        <label for="after_hook_{{ item.id }}">发布后钩子</label>
+                        <label for="after_hook_{{ item.id }}">发布后钩子(在目标机器执行)</label>
                         <textarea class="form-control" rows="5" name="after_hook_{{ item.id }}" placeholder="可以是任意脚本语言，只要目标机器支持。比如bash shell, php,python等">{% if item.after_hook %}{{ item.after_hook }}{% endif %}</textarea>
                         <span class="help-block"></span>
                     </div>

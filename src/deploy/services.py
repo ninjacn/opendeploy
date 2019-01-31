@@ -507,8 +507,9 @@ class DeployService():
 
 
     def run(self):
-        if self.project.rsync_enable_delete:
-            self.rsync_prefix = RSYNC_PREFIX + ' --delete '
+        if self.action == Task.ACTION_RELEASE:
+            if self.project.rsync_enable_delete:
+                self.rsync_prefix = RSYNC_PREFIX + ' --delete '
         else:
             self.rsync_prefix = RSYNC_PREFIX
         if self.action == Task.ACTION_RELEASE:
@@ -634,7 +635,7 @@ class DeployService():
                             + ' ' + self.project.dest_path + '"'
             elif self.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
                 command = SSH_PREFIX + host + " '" + self.rsync_prefix + RSYNC_EXCLUDE_PARMS + self.taskService.get_rollback_path() + \
-                        ' ' + self.taskService.get_release_path() + "'"
+                        '/ ' + self.taskService.get_release_path() + "/'"
             self.myLoggingService.info('command:' + command)
             commandService = CommandService(command)
             if commandService.returncode > 0:

@@ -5,6 +5,12 @@ services:
     command: 'python /app/manage.py runserver 0.0.0.0:8000'
     volumes:
       - ./src:/app
+      - ./logs/app:/app/storage/logs
+      - ./logs/release_log:/app/storage/release_log
+      - ./data/exclude_file:/app/storage/exclude_file
+      - ./data/files:/app/storage/files
+      - ./data/hooks:/app/storage/hooks
+      - ./data/privary_key:/app/storage/privary_key
     ports:
       - 10080:8000
     env_file: 
@@ -18,6 +24,12 @@ services:
     command: 'celery -A opendeploy worker -l info'
     volumes:
       - ./src:/app
+      - ./logs/app:/app/storage/logs
+      - ./logs/release_log:/app/storage/release_log
+      - ./data/exclude_file:/app/storage/exclude_file
+      - ./data/files:/app/storage/files
+      - ./data/hooks:/app/storage/hooks
+      - ./data/privary_key:/app/storage/privary_key
     env_file: 
       - .env
     links:
@@ -31,6 +43,12 @@ services:
     command: 'celery -A opendeploy beat -l info'
     volumes:
       - ./src:/app
+      - ./logs/app:/app/storage/logs
+      - ./logs/release_log:/app/storage/release_log
+      - ./data/exclude_file:/app/storage/exclude_file
+      - ./data/files:/app/storage/files
+      - ./data/hooks:/app/storage/hooks
+      - ./data/privary_key:/app/storage/privary_key
     env_file: 
       - .env
     links:
@@ -42,8 +60,9 @@ services:
   db:
     image: mysql:5.6
     restart: always
-    command: ['mysqld', '--character-set-server=utf8', '--collation-server=utf8_unicode_ci']
+    command: ['mysqld']
     volumes:
+      - ./conf/mysql/mysqld.cnf:/etc/mysql/conf.d/docker.cnf
       - ./data/db:/var/lib/mysql
     environment:
       MYSQL_DATABASE: opendeploy
