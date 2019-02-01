@@ -23,7 +23,7 @@ services:
       - redis
   worker:
     image: ninjacn/opendeploy
-    command: 'celery -A opendeploy worker -l info'
+    command: 'celery -A opendeploy worker --concurrency=5 -l info'
     volumes:
       - ./src:/app
       - ./logs/app:/app/storage/logs
