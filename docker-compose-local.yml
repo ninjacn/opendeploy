@@ -1,7 +1,16 @@
 version: '3'
 services:
   nginx:
-    image: nginx:latest
+    image: ninjacn/opendeploy_nginx:latest
+    volumes:
+      - ./src:/app
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - 10080:80
+    links:
+      - web
+    depends_on:
+      - web
   web:
     image: ninjacn/opendeploy
     command: 'python /app/manage.py runserver 0.0.0.0:8000'
@@ -13,6 +22,8 @@ services:
       - ./data/files:/app/storage/files
       - ./data/hooks:/app/storage/hooks
       - ./data/privary_key:/app/storage/privary_key
+    env_file: 
+      - .env.local
     links:
       - db
       - redis
@@ -31,6 +42,8 @@ services:
       - ./data/hooks:/app/storage/hooks
       - ./data/privary_key:/app/storage/privary_key
       - ./data/workspace:/root/.opendeploy/workspace
+    env_file: 
+      - .env.local
     links:
       - db
       - redis
@@ -50,6 +63,8 @@ services:
       - ./data/files:/app/storage/files
       - ./data/hooks:/app/storage/hooks
       - ./data/privary_key:/app/storage/privary_key
+    env_file: 
+      - .env.local
     links:
       - db
       - rabbit

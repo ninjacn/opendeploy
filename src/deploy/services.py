@@ -508,9 +508,8 @@ class DeployService():
 
 
     def run(self):
-        if self.action == Task.ACTION_RELEASE:
-            if self.project.rsync_enable_delete:
-                self.rsync_prefix = RSYNC_PREFIX + ' --delete '
+        if self.action == Task.ACTION_RELEASE and self.project.rsync_enable_delete:
+            self.rsync_prefix = RSYNC_PREFIX + ' --delete '
         else:
             self.rsync_prefix = RSYNC_PREFIX
         if self.action == Task.ACTION_RELEASE:

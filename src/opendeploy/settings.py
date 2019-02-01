@@ -21,13 +21,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '^5kjj!_4r^=ep%z%3_qh%^d__3pa#(0vwuz2$wj#qdm81wj06_'
+# SECRET_KEY = '^5kjj!_4r^=ep%z%3_qh%^d__3pa#(0vwuz2$wj#qdm81wj06_'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if os.environ['DEBUG'] == 'False':
-    DEBUG = False
+if os.getenv('DEBUG') == 'False':
+    DEBUG=False
 else:
-    DEBUG = True
+    DEBUG=True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -84,11 +85,11 @@ WSGI_APPLICATION = 'opendeploy.wsgi.application'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": 'redis://' + os.environ['CACHE_HOST'],
+        "LOCATION": 'redis://' + os.getenv('CACHE_HOST'),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             'DB': 0,
-            # 'PASSWORD': os.environ['CACHE_PASSWORD'],
+            # 'PASSWORD': os.getenv('CACHE_PASSWORD'),
         }
     }
 }
@@ -99,10 +100,10 @@ CACHES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.environ['MYSQL_HOST'],
-        'PORT': os.environ['MYSQL_PORT'],
-        'USER': os.environ['MYSQL_USER'],
-        'PASSWORD': os.environ['MYSQL_PWD'],
+        'HOST': os.getenv('MYSQL_HOST'),
+        'PORT': os.getenv('MYSQL_PORT'),
+        'USER': os.getenv('MYSQL_USER'),
+        'PASSWORD': os.getenv('MYSQL_PWD'),
         'NAME': 'opendeploy',
     }
 }
