@@ -22,6 +22,7 @@ from svn.exception import SvnException
 
 from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
+from django.core.cache import cache
 
 from deploy.models import Project, ProjectEnvConfig, Env, Credentials, Task
 from cmdb.models import Host
@@ -523,6 +524,9 @@ class DeployService():
             self.task.version_message = self.vcs.get_commit_message()
             self.task.save()
 
+            percent_key = 'opendeploy:percent:' + str(self.task.id)
+            cache.set(percent_key, 50)
+
             # before hook
             res_hook_befor = self.taskService.exec_hook_before_release()
             if res_hook_befor:
@@ -537,7 +541,10 @@ class DeployService():
             self.release()
         # rollback
         elif self.action == Task.ACTION_ROLLBACK:
+            percent_key = 'opendeploy:percent:rollback:' + str(self.task.id)
+            cache.set(percent_key, 50)
             self.rollback()
+        cache.set(percent_key, 100)
 
 
     def release(self):

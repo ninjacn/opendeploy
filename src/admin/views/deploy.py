@@ -421,9 +421,11 @@ def credential_edit(request, id):
                 if auth_type != Credentials.TYPE_USER_PWD:
                     key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(credential.id))
                     if len(credential.private_key) > 0:
-                        f = open(key_path, 'w+')
-                        f.write(credential.private_key)
+                        f = open(key_path, 'w')
+                        f.write(credential.private_key.rstrip() + '\n')
                         f.close()
+                        command = 'dos2unix ' + key_path
+                        CommandService(command)
                         os.chmod(key_path, stat.S_IRWXU)
                     else:
                         if os.path.exists(key_path):

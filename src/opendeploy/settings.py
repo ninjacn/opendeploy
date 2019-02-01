@@ -81,6 +81,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'opendeploy.wsgi.application'
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": 'redis://' + os.environ['CACHE_HOST'],
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            'DB': 0,
+            # 'PASSWORD': os.environ['CACHE_PASSWORD'],
+        }
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases

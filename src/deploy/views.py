@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
+from django.core.cache import cache
 
 from deploy.models import Project, Task, Env, TaskHostRela
 from opendeploy import settings
@@ -222,14 +223,19 @@ def release_status(request, id):
     rollback=request.GET.get('rollback')
     if rollback:
         filename = str(id) + '_rollback.log'
+        percent_key = 'opendeploy:percent:rollback:' + str(id)
     else:
         filename = str(id) + '.log'
+        percent_key = 'opendeploy:percent:' + str(id)
     file_path = os.path.join(settings.RELEASE_LOG_PATH[0], filename)
     try:
         with open(file_path, mode='r') as f:
             data['log_body'] = f.readlines()
     except:
         pass
-    percent_value = 100
-    data['percent_value'] = percent_value
+    percent_value = cache.get(percent_key)
+    if percent_value:
+        data['percent_value'] = percent_value
+    else:
+        data['percent_value'] = 0
     return JsonResponse(data)

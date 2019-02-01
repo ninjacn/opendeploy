@@ -17,8 +17,10 @@ services:
       - .env
     links:
       - db
+      - redis
     depends_on:
       - db
+      - redis
   worker:
     image: ninjacn/opendeploy
     command: 'celery -A opendeploy worker -l info'
@@ -30,13 +32,16 @@ services:
       - ./data/files:/app/storage/files
       - ./data/hooks:/app/storage/hooks
       - ./data/privary_key:/app/storage/privary_key
+      - ./data/workspace:/root/.opendeploy/workspace
     env_file: 
       - .env
     links:
       - db
+      - redis
       - rabbit
     depends_on:
       - db
+      - redis
       - rabbit
   beat:
     image: ninjacn/opendeploy
@@ -80,6 +85,10 @@ services:
       image: rabbitmq:latest
       ports:
           - 10082:15672
+  redis:
+      image: redis:5
+      ports:
+          - 10083:6379
   adminer:
     image: adminer
     restart: always

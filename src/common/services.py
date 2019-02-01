@@ -64,7 +64,7 @@ class DingdingService():
             'markdown': {
                 'title': 'Opendeploy',
                 'text': "Opendeploy\n\n #" + str(tid) + ' 项目:' + task.project.name + \
-                        "\n\n" + status_str + "  [任务详情](" + task_url + ")",
+                        "\n\n发布说明:" + task.comment + "\n\n" + status_str + "  [任务详情](" + task_url + ")",
             },
         }
         r = requests.post(url, json=data, timeout = 5).json()
