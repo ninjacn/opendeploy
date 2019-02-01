@@ -12,7 +12,7 @@ services:
     depends_on:
       - web
   web:
-    image: ninjacn/opendeploy
+    image: ninjacn/opendeploy:latest
     command: 'python /app/manage.py runserver 0.0.0.0:8000'
     volumes:
       - ./src:/app
@@ -31,7 +31,7 @@ services:
       - db
       - redis
   worker:
-    image: ninjacn/opendeploy
+    image: ninjacn/opendeploy:latest
     command: 'celery -A opendeploy worker --concurrency=5 -l info'
     volumes:
       - ./src:/app
@@ -53,7 +53,7 @@ services:
       - redis
       - rabbit
   beat:
-    image: ninjacn/opendeploy
+    image: ninjacn/opendeploy:latest
     command: 'celery -A opendeploy beat -l info'
     volumes:
       - ./src:/app
@@ -99,7 +99,7 @@ services:
       ports:
           - 10083:6379
   adminer:
-    image: adminer
+    image: adminer:latest
     restart: always
     ports:
       - 10081:8080
