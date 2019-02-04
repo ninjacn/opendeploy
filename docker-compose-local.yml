@@ -72,11 +72,10 @@ services:
       - db
       - rabbit
   db:
-    image: mysql:5.6
+    image: ninjacn/opendeploy_mysql:latest
     restart: always
     command: ['mysqld']
     volumes:
-      - ./conf/mysql/mysqld.cnf:/etc/mysql/conf.d/docker.cnf
       - ./data/db:/var/lib/mysql
     environment:
       MYSQL_DATABASE: opendeploy

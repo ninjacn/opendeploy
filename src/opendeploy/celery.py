@@ -5,7 +5,8 @@ from celery import Celery
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'opendeploy.settings')
 
-app = Celery('opendeploy', broker='amqp://guest:guest@' + os.getenv['RABBIT_HOST'] + ':5672//')
+broker_url = 'amqp://guest:guest@' + os.getenv('RABBIT_HOST') + ':5672//'
+app = Celery('opendeploy', broker=broker_url)
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
