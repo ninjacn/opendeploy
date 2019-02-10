@@ -2,75 +2,20 @@ version: '3'
 services:
   nginx:
     image: ninjacn/opendeploy_nginx:latest
-    volumes:
-      - ./src:/app
-      - ./logs/nginx:/var/log/nginx
-    ports:
-      - 10080:80
-    links:
-      - web
-    depends_on:
-      - web
   web:
     image: ninjacn/opendeploy:latest
     command: 'gunicorn opendeploy.wsgi:application --bind 0.0.0.0:8000'
-    volumes:
-      - ./src:/app
-      - ./logs/app:/app/storage/logs
-      - ./logs/release_log:/app/storage/release_log
-      - ./data/exclude_file:/app/storage/exclude_file
-      - ./data/files:/app/storage/files
-      - ./data/hooks:/app/storage/hooks
-      - ./data/privary_key:/app/storage/privary_key
     env_file: 
       - .env.prod
-    links:
-      - db
-      - redis
-    depends_on:
-      - db
-      - redis
   worker:
     image: ninjacn/opendeploy:latest
     command: 'celery -A opendeploy worker --concurrency=5 -l info'
-    volumes:
-      - ./src:/app
-      - ./logs/app:/app/storage/logs
-      - ./logs/release_log:/app/storage/release_log
-      - ./data/exclude_file:/app/storage/exclude_file
-      - ./data/files:/app/storage/files
-      - ./data/hooks:/app/storage/hooks
-      - ./data/privary_key:/app/storage/privary_key
-      - ./data/workspace:/root/.opendeploy/workspace
     env_file: 
       - .env.prod
-    links:
-      - db
-      - redis
-      - rabbit
-    depends_on:
-      - db
-      - redis
-      - rabbit
   beat:
     image: ninjacn/opendeploy:latest
-    command: 'celery -A opendeploy beat -l info'
-    volumes:
-      - ./src:/app
-      - ./logs/app:/app/storage/logs
-      - ./logs/release_log:/app/storage/release_log
-      - ./data/exclude_file:/app/storage/exclude_file
-      - ./data/files:/app/storage/files
-      - ./data/hooks:/app/storage/hooks
-      - ./data/privary_key:/app/storage/privary_key
     env_file: 
       - .env.prod
-    links:
-      - db
-      - rabbit
-    depends_on:
-      - db
-      - rabbit
   db:
     environment:
       MYSQL_DATABASE: opendeploy
@@ -83,6 +28,3 @@ services:
       image: redis:5
   adminer:
     image: adminer:latest
-    restart: always
-    ports:
-      - 10081:8080
