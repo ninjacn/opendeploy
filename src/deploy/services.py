@@ -392,11 +392,14 @@ class TaskService(object):
                 return True
 
     # 退出任务
-    def exit_task(self, rollback=False):
+    def exit_task(self, rollback=False, percent_key=None):
         if rollback:
             self.task.status_rollback=Task.STATUS_ROLLBACK_FINISH_ERR
         else:
             self.task.status=Task.STATUS_RELEASE_FINISH_ERR
+
+        if percent_key:
+            cache.set(percent_key, 100)
         self.task.save()
 
     # 完成任务
@@ -423,11 +426,13 @@ class DeployService():
                 raise RuntimeError('任务已发布，退出.')
             # 状态标记
             self.task.status = Task.STATUS_RELEASE_START
+            self.percent_key = 'opendeploy:percent:' + str(self.task.id)
         elif self.action == Task.ACTION_ROLLBACK:
             if self.task.status_rollback in [Task.STATUS_ROLLBACK_FINISH, Task.STATUS_ROLLBACK_FINISH_ERR]:
                 raise RuntimeError('任务已回滚，退出.')
             # 状态标记
             self.task.status_rollback = Task.STATUS_ROLLBACK_START
+            self.percent_key = 'opendeploy:percent:rollback:' + str(self.task.id)
         self.task.save()
 
         self.myLoggingService = MyLoggingService(self.tid, action)
@@ -447,7 +452,7 @@ class DeployService():
         self.config = self.project_obj.get_config(self.env_id)
         if self.deploy_mode not in [Project.DEPLOY_MODE_ALL, Project.DEPLOY_MODE_INCREMENT] :
             self.myLoggingService.info('模式不可用, 请检查项目配置')
-            self.taskService.exit_task()
+            self.taskService.exit_task(percent_key=self.percent_key)
             raise RuntimeError('模式不可用, 请检查项目配置')
         self.myLoggingService.info('项目名:' + self.project.name)
         self.myLoggingService.info('仓库地址:' + self.project.repository_url)
@@ -464,7 +469,7 @@ class DeployService():
         self.all_host = self.project_obj.get_all_host(self.env_id)
         if not self.all_host:
             self.myLoggingService.error('主机列表为空, 请在后台进行配置')
-            self.taskService.exit_task()
+            self.taskService.exit_task(percent_key=self.percent_key)
             raise RuntimeError('主机列表为空, 请在后台进行配置')
             
         self.myLoggingService.info('主机列表:' + (','.join(self.all_host)))
@@ -516,15 +521,14 @@ class DeployService():
             self.myLoggingService.info('开始检出仓库')
             if self.vcs.checkout() is not True:
                 self.myLoggingService.error(self.vcs.checkout_errmsg)
-                self.taskService.exit_task()
+                self.taskService.exit_task(percent_key=self.percent_key)
                 raise RuntimeError(self.vcs.checkout_errmsg)
             self.myLoggingService.info('检出仓库完成')
             self.task.version = self.vcs.get_commit()
             self.task.version_message = self.vcs.get_commit_message()
             self.task.save()
 
-            percent_key = 'opendeploy:percent:' + str(self.task.id)
-            cache.set(percent_key, 50)
+            cache.set(self.percent_key, 50)
 
             # before hook
             res_hook_befor = self.taskService.exec_hook_before_release()
@@ -532,7 +536,7 @@ class DeployService():
                 self.myLoggingService.info('发布前调用钩子成功')
             elif res_hook_befor == False:
                 self.myLoggingService.error('发布前调用钩子失败')
-                self.taskService.exit_task()
+                self.taskService.exit_task(percent_key=self.percent_key)
                 raise RuntimeError('发布前调用钩子失败')
             else:
                 self.myLoggingService.info('未检测到发布前钩子')
@@ -540,10 +544,9 @@ class DeployService():
             self.release()
         # rollback
         elif self.action == Task.ACTION_ROLLBACK:
-            percent_key = 'opendeploy:percent:rollback:' + str(self.task.id)
-            cache.set(percent_key, 50)
+            cache.set(self.percent_key, 50)
             self.rollback()
-        cache.set(percent_key, 100)
+        cache.set(self.percent_key, 100)
 
 
     def release(self):

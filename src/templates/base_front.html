@@ -121,7 +121,7 @@
       <section class="content">
         {% if messages %}
             {% for message in messages %}
-                <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}success{% endif %}">
+                <div class="callout callout-{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}danger{% else %}info{% endif %}">
                     <p>{{ message }}</p>
                 </div>
             {% endfor %}
