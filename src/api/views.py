@@ -39,7 +39,7 @@ def check_api_token(func):
                 return func(request, *args, **kwargs)
         except:
             pass
-        return JsonResponse(res, safe=False)
+        return JsonResponse(res, safe=False, status=500)
     return func_wrapper
 
 @csrf_exempt
