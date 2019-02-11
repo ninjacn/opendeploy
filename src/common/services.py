@@ -203,7 +203,7 @@ class WebhookRequestBodyOfGithubService(WebhookRequestBody):
     def get_comment(self):
         try:
             return self.body['head_commit']['author']['name'] + ' ' + \
-                    self.body['head_commit']['sha'] + ' ' + self.body['head_commit']['message']
+                    self.body['head_commit']['id'] + ' ' + self.body['head_commit']['message']
         except:
             return ''
 
