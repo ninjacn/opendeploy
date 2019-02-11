@@ -34,11 +34,11 @@ def check_api_token(func):
             'msg': '非法请求, 请求方法必须为POST，或token不正确',
         }
         try:
-            token = Token.objects.get(token=request.GET.get('token'))
+            Token.objects.get(token=request.GET.get('token'))
+            if request.method == 'POST':
+                return func(request, *args, **kwargs)
         except:
             pass
-        if request.method == 'POST':
-            return func(request, *args, **kwargs)
         return JsonResponse(res, safe=False)
     return func_wrapper
 
@@ -64,6 +64,8 @@ def webhook_gitlab(request, pid, env_id):
         project = Project.objects.get(id=pid)
     except:
         return HttpResponseNotFound('项目没找到')
+    if project.repository_url not in githubService.get_urls():
+        return HttpResponseNotFound('项目Url不匹配')
     try:
         env = Env.objects.get(id=env_id)
     except:
@@ -113,6 +115,8 @@ def webhook_github(request, pid, env_id):
         project = Project.objects.get(id=pid)
     except:
         return HttpResponseNotFound('项目没找到')
+    if project.repository_url not in githubService.get_urls():
+        return HttpResponseNotFound('项目Url不匹配')
     try:
         env = Env.objects.get(id=env_id)
     except:

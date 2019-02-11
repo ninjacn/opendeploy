@@ -156,6 +156,9 @@ class WebhookRequestBody():
     def get_body(self):
         return self.body
 
+    def get_urls(self):
+        return []
+
 
 
 class WebhookRequestBodyOfGitlabService(WebhookRequestBody):
@@ -183,6 +186,9 @@ class WebhookRequestBodyOfGitlabService(WebhookRequestBody):
         except:
             return ''
 
+    def get_urls(self):
+        return [self.body['repository']['git_ssh_url'], self.body['repository']['git_http_url']]
+
 
 
 class WebhookRequestBodyOfGithubService(WebhookRequestBody):
@@ -206,6 +212,9 @@ class WebhookRequestBodyOfGithubService(WebhookRequestBody):
                     self.body['head_commit']['id'] + ' ' + self.body['head_commit']['message']
         except:
             return ''
+
+    def get_urls(self):
+        return [self.body['repository']['ssh_url'], self.body['repository']['url']]
 
 
 class MailService():

@@ -401,6 +401,7 @@ class TaskService(object):
         if percent_key:
             cache.set(percent_key, 100)
         self.task.save()
+        send_notify(self.task.id)
 
     # 完成任务
     def finish_task(self, rollback=False):
@@ -627,7 +628,7 @@ class DeployService():
             taskHostRela.save()
         if errno > 0:
             self.task.status=Task.STATUS_RELEASE_FINISH_ERR
-            self.myLoggingService.info('发布结束，有异常情况')
+            self.myLoggingService.info('发布失败，有异常情况')
         else:
             self.task.status=Task.STATUS_RELEASE_FINISH
             self.myLoggingService.info('发布成功')
