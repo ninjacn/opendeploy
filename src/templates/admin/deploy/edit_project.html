@@ -161,15 +161,15 @@
                     <div class="form-group">
                         <label for="">WEBHOOK - Gitlab</label>
                         <i data-clipboard-text="{{ general_info.site_url }}{% url 'api:webhook_gitlab' project.id env.id %}" data-toggle="tooltip" title="复制webhook路径" class="btn fa fa-paste"></i>
-                        <input type="text" readonly class="form-control" value="{{ general_info.site_url }}{% url 'api:webhook_gitlab' project.id env.id %}">
-                        <span class="help-block">将该URL复制到gitlab集成后台可实现自动部署</span>
+                        <input type="text" readonly class="form-control" value="{{ general_info.site_url }}{% url 'api:webhook_gitlab' project.id env.id %}?token={token}">
+                        <span class="help-block">将该URL复制到gitlab集成后台可实现自动部署, 生成token进入[<a href="{% url 'admin:api.token' %}">Api Token管理</a>]</span>
                     </div>
 
                     <div class="form-group">
                         <label for="">WEBHOOK - Github</label>
                         <i data-clipboard-text="{{ general_info.site_url }}{% url 'api:webhook_github' project.id env.id %}" data-toggle="tooltip" title="复制webhook路径" class="btn fa fa-paste"></i>
-                        <input type="text" readonly class="form-control" value="{{ general_info.site_url }}{% url 'api:webhook_github' project.id env.id %}">
-                        <span class="help-block">将该URL复制到gitlab集成后台可实现自动部署</span>
+                        <input type="text" readonly class="form-control" value="{{ general_info.site_url }}{% url 'api:webhook_github' project.id env.id %}?token={token}">
+                        <span class="help-block">将该URL复制到github集成后台可实现自动部署, 生成token进入[<a href="{% url 'admin:api.token' %}">Api Token管理</a>]</span>
                     </div>
 
 
