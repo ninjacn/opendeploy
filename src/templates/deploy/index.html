@@ -22,6 +22,7 @@
                 <div class="form-group">
                     <label>选择项目</label>
                     <select name="project" id="project" class="form-control select2" style="width: 100%;">
+                        <option value="">请选择项目</>
                         {% for project in projects %}
                         <option value="{{ project.id }}">{{ project }} - {{ project.repository_url }}</option>
                         {% endfor %}

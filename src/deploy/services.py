@@ -29,7 +29,7 @@ from cmdb.models import Host
 from deploy.models import TaskHostRela, Task
 from opendeploy import settings
 from setting.services import SettingService
-from common.services import CommandService, DingdingService
+from common.services import CommandService, DingdingService, MailService
 
 
 RSYNC_PREFIX = 'rsync -e "ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -o passwordauthentication=no" -rlptDv '
@@ -40,7 +40,8 @@ def send_notify(tid, rollback=False):
     try:
         task = Task.objects.get(id=tid)
         if task.project.enable_mail_notify:
-            send_mail(tid, rollback)
+            mailService = MailService()
+            mailService.send_mail(tid, rollback)
     except:
         pass
 

@@ -9,7 +9,7 @@ services:
       - .env.local
   worker:
     image: ninjacn/opendeploy:latest
-    command: 'celery -A opendeploy worker --concurrency=1 -l info'
+    command: 'celery -A opendeploy worker --concurrency=2 -l info'
     env_file: 
       - .env.local
   beat:

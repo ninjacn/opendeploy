@@ -13,6 +13,8 @@ import requests
 import subprocess
 import pexpect
 import json
+import smtplib
+import logging
 
 from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import EmailMultiAlternatives
@@ -281,7 +283,14 @@ class MailService():
             for item in attach:
                 msg.attach('详情日志.log', item['body'], 'text/plain')
         try:
-            return msg.send()
+            msg.send()
+        except smtplib.SMTPAuthenticationError as e:
+            self.err_msg = e
+        except smtplib.SMTPException as e:
+            self.err_msg = e
         except:
-            return False
+            self.err_msg = '未知错误'
+        if self.err_msg:
+            print('邮件发送失败:' + str(self.err_msg))
+        return False
 
