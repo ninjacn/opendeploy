@@ -23,6 +23,7 @@ from api.models import Token
 from deploy.models import Project, Env, ProjectEnvConfig
 from deploy.services import ProjectService
 from common.services import WebhookRequestBodyOfGitlabService, WebhookRequestBodyOfGithubService
+from deploy.tasks import release as task_release 
 
 logger = logging.getLogger('webhook')
 
@@ -83,6 +84,7 @@ def webhook_gitlab(request, pid, env_id):
         projectService = ProjectService(pid)
         creater = User.objects.get(username='git_robot')
         task = projectService.create_task(env_id, creater, comment)
+        task_release.delay(task.id)
         return HttpResponse('创建成功, url:' + reverse('deploy:detail', args=[task.id]))
     except (RuntimeError, ObjectDoesNotExist) as e:
         return HttpResponse(str(e), status=500)
@@ -128,6 +130,7 @@ def webhook_github(request, pid, env_id):
         projectService = ProjectService(pid)
         creater = User.objects.get(username='git_robot')
         task = projectService.create_task(env_id, creater, comment)
+        task_release.delay(task.id)
         return HttpResponse('创建成功, url:' + reverse('deploy:detail', args=[task.id]))
     except (RuntimeError, ObjectDoesNotExist) as e:
         return HttpResponse(str(e), status=500)
