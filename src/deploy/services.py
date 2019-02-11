@@ -87,7 +87,7 @@ class GitService(VcsServiceBase):
         # git version >= 2.3
         git_ssh_cmd = 'ssh'
         if self.auth_type == Credentials.TYPE_USER_PRIVATE_KEY:
-            git_ssh_cmd = 'ssh -i %s' % self.private_key_path
+            git_ssh_cmd = 'ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null -i %s' % self.private_key_path
 
         if os.path.isdir(self.working_dir):
             self.myLoggingService.info('工作区已存在，开始更新...')
@@ -319,77 +319,89 @@ class TaskService(object):
         elif self.project.deploy_mode == Project.DEPLOY_MODE_INCREMENT:
             return self.project.dest_path + '_rollback_' + str(self.id)
 
-    def exec_hook_before_release(self):
-        before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(self.projectEnvConfig.id))
-        if os.path.exists(before_hook_path):
-            commandService = CommandService(before_hook_path)
-            self.myLoggingService.info('检测到发布前Hook, 准备执行:')
-            self.myLoggingService.info('command:' + before_hook_path)
-            with open(before_hook_path) as f:
-                for line in f:
-                    self.myLoggingService.info(line.strip())
-            self.myLoggingService.info('exit_code:' + str(commandService.returncode))
-            if commandService.returncode > 0:
-                self.myLoggingService.error('发布前hook执行异常')
-                if len(commandService.stdout) > 0:
-                    self.myLoggingService.info('脚本输出:')
-                    for line in commandService.stdout_as_list:
-                        self.myLoggingService.error(line)
-                if len(commandService.stderr) > 0:
-                    self.myLoggingService.error('脚本错误:')
-                    for line in commandService.stderr_as_list:
-                        self.myLoggingService.error(line)
-                return False
-            else:
-                self.myLoggingService.info('发布前hook执行正常')
-                if len(commandService.stdout_as_list) > 0:
-                    self.myLoggingService.info('脚本输出:')
-                    for line in commandService.stdout_as_list:
-                        self.myLoggingService.info(line)
-                return True
+    def exec_hook_before_release(self, working_dir=None):
+        try:
+            before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(self.projectEnvConfig.id))
+            if os.path.exists(before_hook_path):
+                if working_dir is None:
+                    working_dir = '/app'
+                commandService = CommandService('cd ' + working_dir + ' && ' + before_hook_path)
+                self.myLoggingService.info('检测到发布前Hook, 准备执行:')
+                self.myLoggingService.info('command:' + before_hook_path)
+                with open(before_hook_path) as f:
+                    for line in f:
+                        self.myLoggingService.info(line.strip())
+                self.myLoggingService.info('exit_code:' + str(commandService.returncode))
+                if commandService.returncode > 0:
+                    self.myLoggingService.error('发布前hook执行异常')
+                    if len(commandService.stdout) > 0:
+                        self.myLoggingService.info('脚本输出:')
+                        for line in commandService.stdout_as_list:
+                            self.myLoggingService.error(line)
+                    if len(commandService.stderr) > 0:
+                        self.myLoggingService.error('脚本错误:')
+                        for line in commandService.stderr_as_list:
+                            self.myLoggingService.error(line)
+                    return False
+                else:
+                    self.myLoggingService.info('发布前hook执行正常')
+                    if len(commandService.stdout_as_list) > 0:
+                        self.myLoggingService.info('脚本输出:')
+                        for line in commandService.stdout_as_list:
+                            self.myLoggingService.info(line)
+                    return True
+        except:
+            return False
 
     def exec_hook_after_release(self, host):
-        after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(self.projectEnvConfig.id))
-        if os.path.exists(after_hook_path):
-            self.myLoggingService.info('检测到发布后Hook, 准备执行:')
-            with open(after_hook_path) as f:
-                for line in f:
-                    self.myLoggingService.info(line.strip())
-            # 推送脚本
-            filename = 'opendeploy_hook_after_' + str(self.id) + '_' + get_random_string(30)
-            remote_path = '/tmp/' + filename;
-            command = RSYNC_PREFIX + after_hook_path + ' ' + host + ':' + remote_path
-            self.myLoggingService.info(command)
-            commandService = CommandService(command)
-            if commandService.returncode > 0:
-                self.myLoggingService.error('推送脚本异常')
-                return False
-            # @TODO
-            self.myLoggingService.info('开始执行...')
-            # command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && sudo OPENDEPLOY_ID=' + str(self.id) + ' ' \
-            command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && ' \
-                     + remote_path + ' && ' + 'rm -f ' + remote_path + ' 2>&1"'
-            self.myLoggingService.info(command)
-            commandService = CommandService(command)
-            self.myLoggingService.info('exit_code:' + str(commandService.returncode))
-            if commandService.returncode > 0:
-                self.myLoggingService.error('发布后hook执行异常')
-                if len(commandService.stdout) > 0:
-                    self.myLoggingService.info('脚本输出:')
-                    for line in commandService.stdout_as_list:
-                        self.myLoggingService.error(line)
-                if len(commandService.stderr) > 0:
-                    self.myLoggingService.error('脚本错误:')
-                    for line in commandService.stderr_as_list:
-                        self.myLoggingService.error(line)
-                return False
-            else:
-                self.myLoggingService.info('发布后hook执行正常')
-                if len(commandService.stdout_as_list) > 0:
-                    self.myLoggingService.info('脚本输出:')
-                    for line in commandService.stdout_as_list:
-                        self.myLoggingService.info(line)
-                return True
+        try:
+            after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(self.projectEnvConfig.id))
+            if os.path.exists(after_hook_path):
+                self.myLoggingService.info('检测到发布后Hook, 准备执行:')
+                with open(after_hook_path) as f:
+                    for line in f:
+                        self.myLoggingService.info(line.strip())
+                # 推送脚本
+                filename = 'opendeploy_hook_after_' + str(self.id) + '_' + get_random_string(30)
+                remote_path = '/tmp/' + filename;
+                command = RSYNC_PREFIX + after_hook_path + ' ' + host + ':' + remote_path
+                self.myLoggingService.info(command)
+                commandService = CommandService(command)
+                if commandService.returncode > 0:
+                    self.myLoggingService.error('推送脚本异常')
+                    return False
+                # @TODO
+                self.myLoggingService.info('开始执行...')
+                release_path = self.get_release_path()
+                if release_path:
+                    command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && cd ' \
+                         + release_path + ' && ' + remote_path + ' && ' + 'rm -f ' + remote_path + ' 2>&1"'
+                else:
+                    command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && ' \
+                         + remote_path + ' && ' + 'rm -f ' + remote_path + ' 2>&1"'
+                self.myLoggingService.info(command)
+                commandService = CommandService(command)
+                self.myLoggingService.info('exit_code:' + str(commandService.returncode))
+                if commandService.returncode > 0:
+                    self.myLoggingService.error('发布后hook执行异常')
+                    if len(commandService.stdout) > 0:
+                        self.myLoggingService.info('脚本输出:')
+                        for line in commandService.stdout_as_list:
+                            self.myLoggingService.error(line)
+                    if len(commandService.stderr) > 0:
+                        self.myLoggingService.error('脚本错误:')
+                        for line in commandService.stderr_as_list:
+                            self.myLoggingService.error(line)
+                    return False
+                else:
+                    self.myLoggingService.info('发布后hook执行正常')
+                    if len(commandService.stdout_as_list) > 0:
+                        self.myLoggingService.info('脚本输出:')
+                        for line in commandService.stdout_as_list:
+                            self.myLoggingService.info(line)
+                    return True
+        except:
+            return False
 
     # 退出任务
     def exit_task(self, rollback=False, percent_key=None):
@@ -532,10 +544,10 @@ class DeployService():
             cache.set(self.percent_key, 50)
 
             # before hook
-            res_hook_befor = self.taskService.exec_hook_before_release()
-            if res_hook_befor:
+            res_hook_before = self.taskService.exec_hook_before_release(self.working_dir)
+            if res_hook_before:
                 self.myLoggingService.info('发布前调用钩子成功')
-            elif res_hook_befor == False:
+            elif res_hook_before == False:
                 self.myLoggingService.error('发布前调用钩子失败')
                 self.taskService.exit_task(percent_key=self.percent_key)
                 raise RuntimeError('发布前调用钩子失败')

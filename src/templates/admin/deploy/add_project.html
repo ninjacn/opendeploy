@@ -143,13 +143,13 @@
 
                     <div class="form-group">
                         <label for="before_hook">发布前钩子(在发布机执行)</label>
-                        <textarea class="form-control" rows="5" name="before_hook_{{ env.id }}" placeholder="可以是任意脚本语言，只要发布机支持。比如bash shell, php,python等"></textarea>
+                        <textarea class="form-control" rows="5" name="before_hook_{{ env.id }}" placeholder="可以是任意脚本语言，只要发布机支持。比如bash shell, php,python等;&#10;当前工作目录为工作区路径;"></textarea>
                         <span class="help-block"></span>
                     </div>
 
                     <div class="form-group">
                         <label for="after_hook">发布后钩子(在目标机器执行)</label>
-                        <textarea class="form-control" rows="5" name="after_hook_{{ env.id }}" placeholder="可以是任意脚本语言，只要目标机器支持。比如bash shell, php,python等"></textarea>
+                        <textarea class="form-control" rows="5" name="after_hook_{{ env.id }}" placeholder="可以是任意脚本语言，只要目标机器支持。比如bash shell, php,python等;&#10;当前工作目录为目标机器部署路径;"></textarea>
                         <span class="help-block"></span>
                     </div>
 
