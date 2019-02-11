@@ -86,7 +86,7 @@
                                       {% if task.status == 0 %}
                                         <small class="text-muted">{{ task.get_status_display }}</small>
                                       {% elif task.status == 1 %}
-                                        <small class="text-muted">{{ task.get_status_display }}</small>
+                                        <small class="label bg-blue">{{ task.get_status_display }}</small>
                                       {% elif task.status == 2 %}
                                         <small class="label bg-green">{{ task.get_status_display }}</small>
                                       {% elif task.status == 3 %}

@@ -103,9 +103,13 @@ def rollback(request, id):
 def history(request):
     tasks = Task.objects.all().order_by('-id')
 
-    param_status = request.GET.get('status')
-    if param_status:
+    try:
+        param_status = int(request.GET.get('status'))
+        print(param_status)
         tasks = tasks.filter(status=param_status)
+    except:
+        param_status = None
+
 
     try:
         param_project = int(request.GET.get('project'))
