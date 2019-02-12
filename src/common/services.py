@@ -180,7 +180,7 @@ class WebhookRequestBodyOfGitlabService(WebhookRequestBody):
     def get_comment(self):
         try:
             if self.get_event_name() == 'push':
-                return self.body['user_name'] + ' ' + self.body['checkout_sha'] + ' ' + self.body['commits'][0]['message']
+                return self.body['commits'][0]['message'] + ' ' + self.body['user_name'] + ' ' + self.body['checkout_sha']
             elif (self.get_event_name() == 'merge_request') and (self.body['object_attributes']['state'] == 'merged'):
                 return self.body['object_attributes']['last_commit']['author']['name'] + ' ' + \
                         self.body['object_attributes']['last_commit']['id'] + ' ' + \
@@ -210,8 +210,8 @@ class WebhookRequestBodyOfGithubService(WebhookRequestBody):
 
     def get_comment(self):
         try:
-            return self.body['head_commit']['author']['name'] + ' ' + \
-                    self.body['head_commit']['id'] + ' ' + self.body['head_commit']['message']
+            return self.body['head_commit']['message'] + ' ' + self.body['head_commit']['author']['name'] + ' ' + \
+                    self.body['head_commit']['id']
         except:
             return ''
 
