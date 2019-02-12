@@ -457,7 +457,7 @@ class DeployService():
         if os.path.exists(self.workspace_path) == False:
             os.makedirs(self.workspace_path)
         self.myLoggingService.info('初始化工作区完成')
-        cache.set(percent_key, 10)
+        cache.set(self.percent_key, 10)
 
         self.pid = self.task.project.id
         self.env_id = self.task.env.id
