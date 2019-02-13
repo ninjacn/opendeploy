@@ -32,6 +32,7 @@ else:
 
 ALLOWED_HOSTS = ['*']
 
+VERSION = '1.0'
 
 # Application definition
 
