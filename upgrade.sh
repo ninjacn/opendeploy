@@ -5,6 +5,7 @@ git clean -df &&
     git reset --hard HEAD &&
     git pull origin master &&
     docker-compose down;
+    docker-compose pull;
     docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d && 
     docker-compose exec web python manage.py migrate --noinput
 
