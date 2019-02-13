@@ -10,6 +10,7 @@
 import os
 import logging
 import json
+import time
 
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
@@ -21,6 +22,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from django.core.cache import cache
 
+from opendeploy.celery import app
 from deploy.models import Project, Task, Env, TaskHostRela
 from opendeploy import settings
 from deploy.services import GitService, SvnService, DeployService, \
@@ -49,9 +51,7 @@ def index(request):
     })
 
 def test(request):
-    # d = DeployService(20)
-    # d = DeployService(20, action=Task.ACTION_ROLLBACK)
-    # d.run()
+    #queue = task_release.delay(20)
     return HttpResponse('hello world')
 
 
@@ -83,7 +83,9 @@ def release(request):
                 projectService = ProjectService(pid)
                 task = projectService.create_task(env_id, request.user, comment)
 
-                task_release.delay(task.id)
+                queue = task_release.delay(task.id)
+                task.celery_task_id = queue.id
+                task.save()
                 messages.info(request, '任务提交成功，准备发布...')
                 return redirect('deploy:progress', task.id)
             except RuntimeError as e:

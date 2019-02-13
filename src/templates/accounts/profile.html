@@ -29,13 +29,13 @@
 
                 <div class="form-group">
                     <label>邮箱</label>
-                    <input type="email" readonly name="email" class="form-control" placeholder="" value="{{ user.email }}" >
+                    <input type="email" {% if can_edit == False %} readonly {% endif %} name="email" class="form-control" placeholder="" value="{{ user.email }}" >
                     <span class="help-block"></span>
                 </div>
 
                 <div class="form-group">
                     <label>姓名或昵称</label>
-                    <input type="text" readonly name="first_name" class="form-control" placeholder="" value="{{ user.first_name }}" >
+                    <input type="text" {% if can_edit == False %} readonly {% endif %} name="first_name" class="form-control" placeholder="" value="{{ user.first_name }}" >
                     <span class="help-block"></span>
                 </div>
 
@@ -43,7 +43,7 @@
           <!-- /.box-body -->
 
           <div class="box-footer">
-            <button type="button" class="btn btn-primary disabled">确认</button>
+            <button type="submit" class="btn btn-primary" {% if can_edit == False %} disabled {% endif %}>确认</button>
           </div>
     </form>
 </div>

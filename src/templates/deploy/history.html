@@ -104,7 +104,11 @@
                                           {% endif %}
                                       {% endif %}
                                     </td>
-                                    <td>{{ task.id }}</td>
+                                    <td>
+                                        <a href="{% url 'deploy:detail' task.id %}">
+                                        {{ task.id }}
+                                        </a>
+                                    </td>
                                     <td>{{ task.project }}</td>
                                     <td>{{ task.env }}</td>
                                     <td>{% if task.creater.first_name %} {{ task.creater.first_name }}{% else %}{{ task.creater }}{% endif %}</td>

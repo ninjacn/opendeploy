@@ -108,7 +108,9 @@ class ForgetPasswordResetForm(forms.Form):
             self.add_error('password2', '密码两次不匹配')
 
 class ChangeProfileForm(forms.Form):
-    email = forms.EmailField()
+    username = forms.CharField()
+    email = forms.EmailField(required=False)
+    first_name = forms.CharField()
     # mobile = forms.CharField(required=False, min_length=11, max_length=11)
     # dingding = forms.CharField(required=False)
 

@@ -132,8 +132,17 @@ def change_password(request):
             messages.error(request, '提交密码验证不通过')
     else:
         form = ChangePasswordForm()
+    try:
+        user_detail = UserDetail.objects.get(username=request.user)
+        if user_detail.type == UserDetail.TYPE_LDAP:
+            can_edit = False
+        else:
+            can_edit = True
+    except:
+        can_edit = True
     return render(request, 'accounts/change_password.html', {
-        'form': form
+        'form': form,
+        'can_edit': can_edit
         })
 
 @login_required
@@ -141,9 +150,30 @@ def change_password(request):
 def profile(request):
     if request.method == 'POST':
         form = ChangeProfileForm(request.POST)
-        pass
+        if form.is_valid():
+            username = request.user.username
+            try:
+                user = User.objects.get(username=username)
+                user.first_name = form.cleaned_data.get('first_name')
+                user.email = form.cleaned_data.get('email')
+                user.save()
+                messages.info(request, '修改个人信息成功')
+                return redirect('accounts:profile')
+            except:
+                messages.error(request, '修改个人信息失败')
+        else:
+            messages.error(request, '提交信息异常')
     else:
         form = ChangeProfileForm()
+    try:
+        user_detail = UserDetail.objects.get(username=request.user)
+        if user_detail.type == UserDetail.TYPE_LDAP:
+            can_edit = False
+        else:
+            can_edit = True
+    except:
+        can_edit = True
     return render(request, 'accounts/profile.html', {
-        'form': form
+        'form': form,
+        'can_edit': can_edit
         })

@@ -150,6 +150,7 @@ class Task(TimeStampedModel):
     version = models.CharField('版本', max_length=255, default='')
     version_message = models.CharField('版本注释', max_length=255, default='')
     comment = models.CharField('备注', max_length=255, default='')
+    celery_task_id = models.CharField('Celery Task id', max_length=255, default='')
 
     def __str__(self):
         return str(self.id)
