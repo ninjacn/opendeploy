@@ -1,7 +1,6 @@
 #!/bin/bash
 # 升级服务
 
-cd ..
 git clean -df &&
     git reset --hard HEAD &&
     git pull origin master &&
