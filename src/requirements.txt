@@ -1,0 +1,15 @@
+django ~= 1.11
+django-redis
+mysqlclient == 1.3.14
+gunicorn ~= 19.9
+requests ~= 2.21
+celery ~= 4.2
+django-celery-results == 1.0.4
+gitpython == 2.1.11
+svn
+tencentcloud-sdk-python
+aliyun-python-sdk-core-v3 == 2.11.1
+sphinx
+mkdocs
+python-ldap
+pexpect

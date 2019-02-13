@@ -11,10 +11,9 @@ RUN pip3 install pipenv
 
 WORKDIR /app
 
-RUN pip install -U pipenv
-RUN pip install pipenv
-COPY ./Pipfile /app/Pipfile
-RUN pipenv install --system --skip-lock
+COPY ./requirements.txt /app/requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 RUN mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
     ssh-keyscan bitbucket.org > /root/.ssh/known_hosts && \
