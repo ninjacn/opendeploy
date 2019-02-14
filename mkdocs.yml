@@ -5,4 +5,5 @@ copyright: null
 lang: ['en']
 theme: readthedocs
 nav:
-  - 'Introduction': 'index.md'
+  - '简介': 'index.md'
+  - '关于': 'about.md'
