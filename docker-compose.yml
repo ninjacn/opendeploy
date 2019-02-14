@@ -64,6 +64,11 @@ services:
     depends_on:
       - db
       - rabbit
+  docs:
+    image: ninjacn/opendeploy:latest
+    command: 'mkdocs serve -a 0.0.0.0:8000'
+    volumes:
+      - .:/app
   db:
     image: ninjacn/opendeploy_mysql:latest
     restart: always

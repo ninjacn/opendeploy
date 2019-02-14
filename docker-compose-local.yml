@@ -16,6 +16,10 @@ services:
     image: ninjacn/opendeploy:latest
     env_file: 
       - .env.local
+  docs:
+    image: ninjacn/opendeploy:latest
+    ports:
+      - 10084:8000
   db:
     environment:
       MYSQL_DATABASE: opendeploy
