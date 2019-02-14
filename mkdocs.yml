@@ -1,6 +1,6 @@
 site_name: Opendeploy
 repo_url: https://github.com/ninjacn/opendeploy
-site_author: 姚鹏鸣<x@ninjacn.com>
+site_author: Pengming Yao<x@ninjacn.com>
 copyright: null
 lang: ['en']
 theme: readthedocs
