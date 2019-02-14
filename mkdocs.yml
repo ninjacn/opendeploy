@@ -4,5 +4,5 @@ site_author: Pengming Yao<x@ninjacn.com>
 copyright: null
 theme: readthedocs
 nav:
-- '简介': 'index.md'
-- '关于': 'about.md'
+  - 简介: index.md
+  - 关于: about.md
