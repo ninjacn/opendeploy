@@ -5,4 +5,4 @@ copyright: null
 lang: ['en']
 theme: readthedocs
 nav:
-  - '简介': 'index.md'
+  - 'Introduction': 'index.md'
