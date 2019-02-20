@@ -2,6 +2,9 @@
 
 详细文档参考: [https://opendeploy.readthedocs.io/](https://opendeploy.readthedocs.io/)
 
+## 架构图
+![Opendeploy相关组件说明](docs/images/architecture01.png)
+
 ## 部分截图
 ![前台](docs/images/frontend01.png)
 ![前台](docs/images/frontend02.png)
