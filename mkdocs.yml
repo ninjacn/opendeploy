@@ -8,4 +8,5 @@ nav:
   - 安装及升级: 安装.md
   - 常规操作: 常规操作.md
   - Webhook: webhook.md
+  - 钩子: hook.md
   - 消息通知: 消息通知.md
