@@ -1,8 +1,11 @@
-site_name: Mkdocs
+site_name: Opendeploy
 repo_url: https://github.com/ninjacn/opendeploy
-site_author: Pengming Yao<x@ninjacn.com>
+site_author: 姚鹏鸣<x@ninjacn.com>
 copyright: null
 theme: readthedocs
 nav:
-  - 简介: index.md
-  - 关于: about.md
+  - 概述: index.md
+  - 安装及升级: 安装.md
+  - 常规操作: 常规操作.md
+  - Webhook: webhook.md
+  - 消息通知: 消息通知.md
