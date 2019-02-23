@@ -37,6 +37,7 @@
           <ul class="nav navbar-nav">
               <li class="{% if request.path == '/' %} active {% endif %}"><a href="{% url 'deploy:homepage' %}">发布</a></li>
               <li class="{% if request.path|startswith:'/task/history' %} active {% endif %}"><a href="{% url 'deploy:history' %}">任务列表</a></li>
+              <li><a target="_blank" href="https://opendeploy.readthedocs.io">文档</a></li>
             <li class="dropdown hide">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
