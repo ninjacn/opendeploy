@@ -4,6 +4,7 @@
 
 ## 架构图
 ![Opendeploy相关组件说明](docs/images/architecture01.png)
+![Opendeploy原理](docs/images/architecture02.png)
 
 ## 部分截图
 ![前台](docs/images/frontend01.png)
