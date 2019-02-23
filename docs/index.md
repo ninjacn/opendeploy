@@ -20,6 +20,7 @@ Opendeploy是简单、易用的代码部署系统, 适用于部署PHP、Python�
 ## 架构图
 
 ![Opendeploy相关组件说明](images/architecture01.png)
+![Opendeploy原理](images/architecture02.png)
 
 ## 概念
 
