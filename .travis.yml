@@ -13,7 +13,7 @@ before_install:
 
 script:
   - ls -lah
-  - docker-compose -f docker-compose.yml -f docker-compose-prod.yml up
+  - docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d
   - docker-compose ps
   - docker-compose down
   - docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d
