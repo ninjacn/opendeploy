@@ -19,3 +19,4 @@ script:
   - docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d
   - docker-compose exec web python manage.py migrate --noinput
   - docker-compose ps
+  - docker-compose exec web python manage.py test deploy

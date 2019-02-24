@@ -19,7 +19,9 @@ class LdapService():
     def __init__(self):
         settingService = SettingService()
         self.ldap_info = settingService.get_ldap_info()
-        self.ldap_url = 'ldap://' + self.ldap_info.host + ':' + self.ldap_info.port
+        self.ldap_url = ''
+        if self.ldap_info:
+            self.ldap_url = 'ldap://' + self.ldap_info.host + ':' + self.ldap_info.port
         self.error_msg = None
         self.con = None
 
