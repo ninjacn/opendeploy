@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+env:
+  - COMPOSE_FILE=docker-compose.yml:docker-compose-local.yml
+
+before_install:
+ - curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+ - chmod +x docker-compose
+ - sudo mv docker-compose /usr/local/bin
+
+script:
+  - ls -lah
+  - docker-compose up -d
+  - docker-compose exec web python manage.py migrate --noinput
+  - docker-compose ps
+
+notifications:
+  email:
+    - x@ninjacn.com
