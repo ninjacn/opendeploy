@@ -3,6 +3,7 @@ services:
   - docker
 
 env:
+  - DOCKER_COMPOSE_VERSION=1.4.2
   - COMPOSE_FILE=docker-compose.yml:docker-compose-local.yml
 
 before_install:
