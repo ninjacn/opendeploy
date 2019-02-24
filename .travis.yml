@@ -14,10 +14,9 @@ before_install:
 
 script:
   - ls -lah
+  - docker-compose up
+  - docker-compose ps
+  - docker-compose down
   - docker-compose up -d
   - docker-compose exec web python manage.py migrate --noinput
   - docker-compose ps
-
-notifications:
-  email:
-    - x@ninjacn.com
