@@ -615,6 +615,7 @@ class DeployService():
                         self.myLoggingService.info('切换软链接出错')
                         for line in commandService.stdout_as_list:
                             self.myLoggingService.info(line)
+                        errno+=1
                         taskHostRela = TaskHostRela()
                         taskHostRela.host=host
                         taskHostRela.task=self.task
@@ -631,6 +632,7 @@ class DeployService():
                 elif res_hook_after == False:
                     status_release=TaskHostRela.STATUS_RELEASE_ERROR
                     self.myLoggingService.error('发布后调用钩子失败')
+                    errno+=1
                 else:
                     self.myLoggingService.info('未检测到发布后钩子')
 
