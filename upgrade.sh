@@ -1,6 +1,9 @@
 #!/bin/bash
 # 升级服务
 
+docker pull ninjacn/opendeploy
+docker pull ninjacn/opendeploy_nginx
+
 git clean -df &&
     git reset --hard HEAD &&
     git pull origin master &&

@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^task/progress/(?P<id>\d+)', views.progress, name='progress'),
     url(r'^task/history$', views.history, name='history'),
     url(r'^task/detail/(?P<id>\d+)$', views.detail, name='detail'),
+    url(r'^task/diff/(?P<id>\d+)$', views.diff, name='diff'),
     url(r'^task/release-log/(?P<id>\d+)', views.release_log, name='release_log'),
     url(r'^task/get-release-status/(?P<id>\d+)', views.release_status, name='release_status'),
     url(r'^task/$', views.history),

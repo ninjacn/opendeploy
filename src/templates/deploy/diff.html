@@ -1,0 +1,68 @@
+{% extends 'base_front.html' %}
+
+{% block content-header %}
+<h1>
+    #{{ task.id }} <span style="margin-left:10px;">{{ task.project }}</span>
+    <span class="badge badge-secondary">{{ task.env }}</span>
+    <small>{{ task.project.repository_url }}</small>
+</h1>
+<ol class="breadcrumb">
+    <li><a href="{% url 'deploy:homepage' %}"><i class="fa fa-home"></i>首页</a></li>
+    <li class="active">Diff</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Diff</h3>
+
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                {% if diff_errmsg %}
+                <div class="callout callout-warning">
+                    {% for msg in  diff_errmsg %}
+                    <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if diff_okmsg %}
+                <div class="callout callout-success">
+                    {% for msg in  diff_okmsg %}
+                    <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="col-md-12" id="diff">
+                </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+      </div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+    $(function () {
+        $('.select2').select2()
+        var strInput = Base64.decode("{{ diffString }}")
+        var diff2htmlUi = new Diff2HtmlUI({diff: strInput});
+        diff2htmlUi.draw('#diff', {
+            inputFormat: 'diff', 
+            showFiles: true, 
+            matching: 'lines', 
+            outputFormat: 'side-by-side',
+            synchronisedScroll: true 
+        });
+        diff2htmlUi.highlightCode('#diff');
+        diff2htmlUi.fileListCloseable('#diff', false);
+    });
+</script>
+{% endblock %}

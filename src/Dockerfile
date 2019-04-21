@@ -5,9 +5,11 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update
 
-RUN apt-get install -y libsasl2-dev libldap2-dev rsync vim git dos2unix
+RUN apt-get install -y libsasl2-dev libldap2-dev rsync vim git dos2unix subversion
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y locales
 
 RUN pip3 install pipenv
+RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -21,3 +23,9 @@ RUN mkdir -p /root/.ssh && \
 ADD conf/ssh_key/opendeploy /root/.ssh/id_rsa
 ADD conf/ssh_key/opendeploy.pub /root/.ssh/id_rsa.pub
 RUN chmod 600 /root/.ssh/id_rsa
+
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8

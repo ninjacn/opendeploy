@@ -17,11 +17,11 @@ from deploy.services import DeployService
 
 
 @app.task
-def release(tid, rollback=False):
+def release(tid, rollback=False, hosts_list=[]):
     if rollback:
-        deployService = DeployService(tid, action=Task.ACTION_ROLLBACK)
+        deployService = DeployService(tid, action=Task.ACTION_ROLLBACK, hosts_list=hosts_list)
     else:
-        deployService = DeployService(tid)
+        deployService = DeployService(tid, hosts_list=hosts_list)
     deployService.run()
 
 @app.task

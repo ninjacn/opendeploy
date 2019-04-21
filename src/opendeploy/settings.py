@@ -211,6 +211,9 @@ WORKSPACE_PATH = "~/.opendeploy/workspace"
 # 发布日志路径
 RELEASE_LOG_PATH = os.path.join(BASE_DIR, "storage/release_log"),
 
+# 回滚路径 - 按文件发布
+ROLLBACK_PATH = os.path.join(BASE_DIR, "storage/rollback"),
+
 LOGIN_REDIRECT_URL = '/accounts/login'
 
 PAGE_SIZE = 10

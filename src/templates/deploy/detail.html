@@ -42,6 +42,9 @@
               <h3 class="box-title">任务详情</h3>
 
               <div class="box-tools">
+                <a href="{% url 'deploy:diff' task.id %}">
+                  <button type="button" class="btn btn-primary btn-sm" ><i class="fa fa-code"></i>Diff</button>
+                </a>
                   {% if can_rollback %}
                   <button type="button" data-href="{% url 'deploy:rollback' task.id %}" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-default" ><i class="fa fa-undo"></i>执行回滚</button>
                   {% endif %}
@@ -77,6 +80,26 @@
                     {% endif %}
                       </td>
                     </tr>
+                    <tr>
+                      <th>发布范围</th>
+                      <td>
+                          {{ task.get_scope_display }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>发布版本</th>
+                      <td>
+                          {{ task.version }}
+                      </td>
+                    </tr>
+                    {% if task.scope %}
+                    <tr>
+                      <th>文件路径列表</th>
+                      <td>
+                          {{ task.files_list|linebreaksbr }}
+                      </td>
+                    </tr>
+                    {% endif %}
                     <tr>
                       <th>发布人</th>
                       <td>
@@ -142,7 +165,7 @@
                 </a>
             </h4>
             <div class="form-group">
-                <textarea style="background-color: #002b36; color: #586e75" class="form-control" rows="25">{{ release_log }}</textarea>
+                <textarea style="background-color: #002b36; color: #586e75" class="form-control" rows="25">{% if release_log %}{{ release_log }}{% endif %}</textarea>
             </div>
         </div>
     </div> <!-- end row -->
@@ -157,7 +180,7 @@
                 </a>
             </h4>
             <div class="form-group">
-                <textarea style="background-color: #002b36; color: #586e75" class="form-control" rows="25">{{ rollback_log }}</textarea>
+                <textarea style="background-color: #002b36; color: #586e75" class="form-control" rows="25">{% if rollback_log %}{{ rollback_log }}{% endif %}</textarea>
             </div>
         </div>
     </div> <!-- end row -->

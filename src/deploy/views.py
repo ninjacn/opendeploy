@@ -11,10 +11,13 @@ import os
 import logging
 import json
 import time
+import base64
+import subprocess
 
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.db import transaction
 from django.template.response import TemplateResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -23,11 +26,11 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 
 from opendeploy.celery import app
-from deploy.models import Project, Task, Env, TaskHostRela
+from deploy.models import Project, Task, Env, TaskHostRela, ProjectEnvConfig
 from opendeploy import settings
 from deploy.services import GitService, SvnService, DeployService, \
         ProjectService, EnvService, SettingService, MyLoggingService
-from common.services import MailService
+from common.services import MailService, CommandService
 from deploy.forms import ReleaseForm
 from cmdb.services import QcloudService, AliyunService
 from deploy.tasks import release as task_release 
@@ -40,22 +43,27 @@ logging.basicConfig(
 logger = logging.getLogger('app')
 
 @login_required
+@transaction.atomic
 def index(request):
     envService = EnvService()
     envs = envService.get_all()
     projectService = ProjectService()
     projects = projectService.get_valid_all()
+    f = ReleaseForm()
     return TemplateResponse(request, 'deploy/index.html', {
+        'form': f,
         'envs': envs,
         'projects': projects,
     })
 
 def test(request):
-    #queue = task_release.delay(20)
+    hosts_list = ['192.168.1.111', '192.168.1.112']
+    queue = task_release.delay(141, rollback=False, hosts_list=hosts_list)
     return HttpResponse('hello world')
 
 
 @login_required
+@transaction.atomic
 def release_log(request, id):
     rollback=request.GET.get('rollback')
     if rollback:
@@ -71,6 +79,7 @@ def release_log(request, id):
     return HttpResponse(log_body, content_type='text/plain; charset=utf-8')
 
 @login_required
+@transaction.atomic
 def release(request):
     if request.method == 'POST':
         f = ReleaseForm(request.POST)
@@ -79,9 +88,11 @@ def release(request):
             pid = cleaned_data['project']
             env_id = cleaned_data['env']
             comment = cleaned_data['comment']
+            scope = cleaned_data['scope']
+            files_list = cleaned_data['files_list']
             try:
                 projectService = ProjectService(pid)
-                task = projectService.create_task(env_id, request.user, comment)
+                task = projectService.create_task(env_id, request.user, comment, scope, files_list)
 
                 queue = task_release.delay(task.id)
                 task.celery_task_id = queue.id
@@ -93,15 +104,27 @@ def release(request):
                 return redirect('deploy:homepage')
         else:
             messages.error(request, '任务申请校验失败, 请重新提交!')
+            print(f.errors)
+            envService = EnvService()
+            envs = envService.get_all()
+            projectService = ProjectService()
+            projects = projectService.get_valid_all()
+            return TemplateResponse(request, 'deploy/index.html', {
+                'form': f,
+                'envs': envs,
+                'projects': projects,
+            })
     else:
         return redirect('deploy:homepage')
 
 @login_required
+@transaction.atomic
 def rollback(request, id):
     task_release.delay(id, rollback=True)
     return redirect(reverse('deploy:progress', args=[id]) + '?rollback=1')
 
 @login_required
+@transaction.atomic
 def history(request):
     tasks = Task.objects.all().order_by('-id')
 
@@ -170,6 +193,7 @@ def history(request):
     })
 
 @login_required
+@transaction.atomic
 def detail(request, id):
     try:
         task = Task.objects.get(id=id)
@@ -207,6 +231,7 @@ def detail(request, id):
 
 
 @login_required
+@transaction.atomic
 def progress(request, id):
     rollback = request.GET.get('rollback')
     try:
@@ -244,3 +269,74 @@ def release_status(request, id):
     else:
         data['percent_value'] = 0
     return JsonResponse(data)
+
+@login_required
+@transaction.atomic
+def diff(request, id):
+    diff = ''
+    diff_errmsg = []
+    diff_okmsg = []
+    try:
+        task = Task.objects.get(id=id)
+        pre_task = Task.objects.filter(project=task.project, env=task.env, id__lt=task.id) \
+                .exclude(version__exact='') \
+                .order_by('-id').first()
+        projectEnvConfig = ProjectEnvConfig.objects.get(project=task.project, env=task.env)
+    except:
+        return HttpResponseNotFound('<h1>Page not found</h1>')
+
+    if task and pre_task and task.version and pre_task.version:
+        if task.project.vcs_type == 'svn':
+            if task.scope == Task.SCOPE_BY_FILE:
+                for item in task.files_list.splitlines():
+                    command = 'cd ' + settings.WORKSPACE_PATH + '/' + str(task.project.id) + \
+                            ' && svn --non-interactive --username=' + task.project.credentials.username + \
+                            ' --password=' + task.project.credentials.password + ' diff --git  -r ' + pre_task.version + ':' + task.version + \
+                            ' ' + item
+                    completed = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if completed.returncode > 0:
+                        diff_errmsg.append(completed.stderr)
+                    else:
+                        if len(completed.stdout) <= 0:
+                            diff_okmsg.append(item + ' 文件内容比对相同.')
+                        diff += completed.stdout.decode('utf-8')
+            else:
+                command = 'cd ' + settings.WORKSPACE_PATH + '/' + str(task.project.id) + \
+                        ' && svn --non-interactive --username=' + task.project.credentials.username + \
+                        ' --password=' + task.project.credentials.password + ' diff --git  -r ' + pre_task.version + ':' + task.version
+                completed = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if completed.returncode > 0:
+                    diff_errmsg.append(completed.stderr)
+                else:
+                    diff += completed.stdout.decode('utf-8')
+        else:
+            if task.scope == Task.SCOPE_BY_FILE:
+                for item in task.files_list.splitlines():
+                    command = 'cd ' + settings.WORKSPACE_PATH + '/' + str(task.project.id) + '_' + \
+                            projectEnvConfig.branch + ' && git diff '  + pre_task.version + ':' + item + ' ' + \
+                            task.version + ':' + item
+                    completed = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if completed.returncode > 0:
+                        diff_errmsg.append(completed.stderr)
+                    else:
+                        if len(completed.stdout) <= 0:
+                            diff_okmsg.append(item + ' 文件内容比对相同.')
+                        diff += completed.stdout.decode('utf-8')
+            else:
+                command = 'cd ' + settings.WORKSPACE_PATH + '/' + str(task.project.id) + '_' + \
+                    projectEnvConfig.branch + ' && git diff '  + pre_task.version + ' ' + task.version
+                completed = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if completed.returncode > 0:
+                    diff_errmsg.append(completed.stderr)
+                else:
+                    diff += completed.stdout.decode('utf-8')
+    else:
+        return HttpResponseNotFound('<h1>版本信息未找到，无法diff</h1>')
+    print(diff_errmsg)
+    print(diff)
+    return TemplateResponse(request, 'deploy/diff.html', {
+        'task': task,
+        'diff_errmsg': diff_errmsg,
+        'diff_okmsg': diff_okmsg,
+        'diffString': base64.b64encode(diff.encode('utf-8')).decode('utf-8'),
+    })

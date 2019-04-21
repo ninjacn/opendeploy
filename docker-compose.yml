@@ -22,6 +22,7 @@ services:
       - ./data/files:/app/storage/files
       - ./data/hooks:/app/storage/hooks
       - ./data/privary_key:/app/storage/privary_key
+      - ./data/workspace:/root/.opendeploy/workspace
     links:
       - db
       - redis

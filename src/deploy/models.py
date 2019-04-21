@@ -141,6 +141,12 @@ class Task(TimeStampedModel):
         (STATUS_ROLLBACK_FINISH, '回滚成功'),
         (STATUS_ROLLBACK_FINISH_ERR, '回滚失败'),
     )
+    SCOPE_BY_FILE = 1
+    SCOPE_ALL = 0
+    SCOPE_CHOICES = (
+        (SCOPE_BY_FILE, '按文件列表发布'),
+        (SCOPE_ALL, '全量发布'),
+    )
 
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='project', null=True )
     creater = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='user', null=True )
@@ -150,6 +156,8 @@ class Task(TimeStampedModel):
     version = models.CharField('版本', max_length=255, default='')
     version_message = models.CharField('版本注释', max_length=255, default='')
     comment = models.CharField('备注', max_length=255, default='')
+    scope = models.IntegerField('发布范围', default=SCOPE_ALL, choices=SCOPE_CHOICES)
+    files_list = models.TextField('文件路径列表', max_length=255, default='', help_text='')
     celery_task_id = models.CharField('Celery Task id', max_length=255, default='')
 
     def __str__(self):
