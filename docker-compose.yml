@@ -50,7 +50,7 @@ services:
       - rabbit
   beat:
     image: ninjacn/opendeploy:latest
-    command: 'celery -A opendeploy beat -l info --pidfile=/tmp/celeryd.pid'
+    command: 'bash -c "rm -f /tmp/celeryd.pid; celery -A opendeploy beat -l info --pidfile=/tmp/celeryd.pid"'
     volumes:
       - ./src:/app
       - ./logs/app:/app/storage/logs

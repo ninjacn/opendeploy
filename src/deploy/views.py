@@ -332,8 +332,8 @@ def diff(request, id):
                     diff += completed.stdout.decode('utf-8')
     else:
         return HttpResponseNotFound('<h1>版本信息未找到，无法diff</h1>')
-    print(diff_errmsg)
-    print(diff)
+    if len(diff_errmsg) <= 0 and len(diff) <= 0:
+        diff_okmsg.append('所有文件内容比对相同.')
     return TemplateResponse(request, 'deploy/diff.html', {
         'task': task,
         'diff_errmsg': diff_errmsg,

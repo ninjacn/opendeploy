@@ -85,9 +85,8 @@ def project_add(request):
                 project.save()
                 exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(project.id))
                 if len(project.exclude_file) > 0:
-                    f = open(exclude_file_path, 'wb+')
-                    f.write(project.exclude_file)
-                    f.close()
+                    with open(exclude_file_path, 'w') as f:
+                        f.write(project.exclude_file)
 
                 # 增加环境关联值
                 envs = request.POST.getlist('env')
@@ -111,15 +110,13 @@ def project_add(request):
 
                         before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
                         if len(projectEnvConfig.before_hook) > 0:
-                            f = open(before_hook_path, 'wb+')
-                            f.write(projectEnvConfig.before_hook)
-                            f.close()
+                            with open(before_hook_path, 'w') as f:
+                                f.write(projectEnvConfig.before_hook)
 
                         after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
                         if len(projectEnvConfig.after_hook) > 0:
-                            f = open(after_hook_path, 'wb+')
-                            f.write(projectEnvConfig.after_hook)
-                            f.close()
+                            with open(after_hook_path, 'w') as f:
+                                f.write(projectEnvConfig.after_hook)
 
                         if os.path.exists(before_hook_path):
                             os.chmod(before_hook_path, stat.S_IRWXU)
@@ -167,9 +164,8 @@ def project_edit(request, id):
                 f.save()
                 exclude_file_path = os.path.join(settings.BASE_DIR, 'storage/exclude_file/' + str(id))
                 if len(cleaned_data['exclude_file']) > 0:
-                    f = open(exclude_file_path, 'wb+')
-                    f.write(cleaned_data['exclude_file'].encode())
-                    f.close()
+                    with open(exclude_file_path, 'w') as f:
+                        f.write(cleaned_data['exclude_file'].encode())
                 else:
                     if os.path.exists(exclude_file_path):
                         os.unlink(exclude_file_path)
@@ -192,18 +188,16 @@ def project_edit(request, id):
 
                             before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(config.id))
                             if len(config.before_hook)>0:
-                                f = open(before_hook_path, 'w')
-                                f.write(config.before_hook)
-                                f.close()
+                                with open(before_hook_path, 'w') as f:
+                                    f.write(config.before_hook)
                             else:
                                 if os.path.exists(before_hook_path):
                                     os.unlink(before_hook_path)
 
                             after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(config.id))
                             if len(config.after_hook)>0:
-                                f = open(after_hook_path, 'w')
-                                f.write(config.after_hook)
-                                f.close()
+                                with open(after_hook_path, 'w') as f:
+                                    f.write(config.after_hook)
                             else:
                                 if os.path.exists(after_hook_path):
                                     os.unlink(after_hook_path)
@@ -233,14 +227,12 @@ def project_edit(request, id):
                             projectEnvConfig.save()
 
                             before_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/before_hook_' + str(projectEnvConfig.id))
-                            f = open(before_hook_path, 'w')
-                            f.write(projectEnvConfig.before_hook)
-                            f.close()
+                            with open(before_hook_path, 'w') as f:
+                                f.write(projectEnvConfig.before_hook)
 
                             after_hook_path = os.path.join(settings.BASE_DIR, 'storage/hooks/after_hook_' + str(projectEnvConfig.id))
-                            f = open(after_hook_path, 'w')
-                            f.write(projectEnvConfig.after_hook)
-                            f.close()
+                            with open(after_hook_path, 'w') as f:
+                                f.write(projectEnvConfig.after_hook)
 
                             if os.path.exists(before_hook_path):
                                 os.chmod(before_hook_path, stat.S_IRWXU)
@@ -378,11 +370,10 @@ def credential_add(request):
                 credential.save()
 
                 if auth_type != Credentials.TYPE_USER_PWD:
-                    key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + credential.id)
+                    key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(credential.id))
                     if len(credential.private_key) > 0:
-                        f = open(key_path, 'w+')
-                        f.write(credential.private_key)
-                        f.close()
+                        with open(key_path, 'w') as f:
+                            f.write(credential.private_key)
                         os.chmod(key_path, stat.S_IRWXU)
                 messages.info(request, '修改成功')
             except:
@@ -421,9 +412,8 @@ def credential_edit(request, id):
                 if auth_type != Credentials.TYPE_USER_PWD:
                     key_path = os.path.join(settings.BASE_DIR, 'storage/privary_key/' + str(credential.id))
                     if len(credential.private_key) > 0:
-                        f = open(key_path, 'w')
-                        f.write(credential.private_key.rstrip() + '\n')
-                        f.close()
+                        with open(key_path, 'w') as f:
+                            f.write(credential.private_key.rstrip() + '\n')
                         command = 'dos2unix ' + key_path
                         CommandService(command)
                         os.chmod(key_path, stat.S_IRWXU)

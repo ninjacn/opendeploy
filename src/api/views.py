@@ -14,6 +14,7 @@ from pprint import pprint, pformat
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.urls import reverse
+from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse, HttpResponseServerError
@@ -140,3 +141,14 @@ def webhook_github(request, pid, env_id):
         return HttpResponse(str(e), status=500)
     except:
         return HttpResponse('创建失败，未知异常', status=500)
+
+@csrf_exempt
+@login_required
+@transaction.atomic
+def get_hosts(request, pid, env_id):
+    try:
+        projectService = ProjectService(pid)
+        all_host = projectService.get_all_host_with_extra(env_id)
+    except:
+        all_host = []
+    return JsonResponse(all_host, safe=False, status=200)

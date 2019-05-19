@@ -236,8 +236,12 @@ class ProjectService(object):
             task.env = env
             task.creater = creater
             task.comment = comment
-            task.scope = scope
-            task.files_list = files_list
+            if scope == '1':
+                task.scope = Task.SCOPE_BY_FILE
+            else:
+                task.scope = Task.SCOPE_ALL
+            if files_list:
+                task.files_list = files_list
             task.save()
             return task
         except:
@@ -250,17 +254,30 @@ class ProjectService(object):
         return self.project
 
     def get_all_host(self, env_id=None, type='ip'):
+        hosts = []
         try:
             env = Env.objects.get(id=env_id)
             config = self.get_config(env_id)
-            hosts = []
             for item in config.host_group.host.filter(status=Host.STATUS_ENABLED):
-                if type == 'ip':
-                    hosts.append(item.ipaddr)
-                elif type == 'hostname':
+                if type == 'hostname':
                     hosts.append(item.hostname)
                 else:
                     hosts.append(item.ipaddr)
+            return hosts
+        except:
+            return []
+
+    # 获取主机信息，包含额外信息
+    def get_all_host_with_extra(self, env_id=None):
+        hosts = []
+        try:
+            env = Env.objects.get(id=env_id)
+            config = self.get_config(env_id)
+            for item in config.host_group.host.filter(status=Host.STATUS_ENABLED):
+                tmp = {}
+                tmp['ipaddr'] = item.ipaddr
+                tmp['hostname'] = item.hostname
+                hosts.append(tmp)
             return hosts
         except:
             return []
@@ -713,6 +730,7 @@ class DeployService():
                 errno+=1
                 single_errno+=1
             else:
+                status_release=TaskHostRela.STATUS_RELEASE_SUCCESS
                 self.myLoggingService.info('未检测到发布后钩子')
 
             #标记主机状态
