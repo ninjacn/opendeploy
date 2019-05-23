@@ -14,7 +14,7 @@
     "html5shiv": "^3.7.3",
     "icheck": "^1.0.2",
     "ionicons": "^4.4.*",
-    "jquery": "^3.3.*",
+    "jquery": "^3.4.*",
     "js-base64": "^2.5.1",
     "respond": "^0.9.0",
     "select2": "^4.0.5"
