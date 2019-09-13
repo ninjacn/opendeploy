@@ -398,10 +398,10 @@ class TaskService(object):
                 self.myLoggingService.info('开始执行...')
                 release_path = self.get_release_path()
                 if release_path:
-                    command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && cd ' \
+                    command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && export OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && cd ' \
                          + release_path + ' && ' + remote_path + ' && ' + 'rm -f ' + remote_path + ' 2>&1"'
                 else:
-                    command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && ' \
+                    command = SSH_PREFIX + host + ' "chmod 777 ' + remote_path + ' && export OPENDEPLOY_ID=' + str(self.id) + ' && source /etc/profile && ' \
                          + remote_path + ' && ' + 'rm -f ' + remote_path + ' 2>&1"'
                 self.myLoggingService.info(command)
                 commandService = CommandService(command)
