@@ -13,6 +13,7 @@ import json
 import time
 import base64
 import subprocess
+import base64
 
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
@@ -210,6 +211,7 @@ def detail(request, id):
             release_log = f.readlines()
     except:
         pass
+    print(base64.b64encode(''.join(release_log).encode()))
 
     rollback_log = []
     try:

@@ -246,6 +246,8 @@ def get_region_list(request):
     provider = request.GET.get('provider')
     settingService = SettingService()
     auth_info = settingService.get_public_cloud_info()
+    if auth_info is None:
+        return JsonResponse([], safe=False)
     res = []
     if provider == ALIYUN:
         aliyun = AliyunService(auth_info.aliyun_access_key_id, auth_info.aliyun_access_key_secret)

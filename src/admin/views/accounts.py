@@ -154,3 +154,4 @@ def user_del(request, uid):
     except:
         messages.error(request, '用户不存在')
     return redirect('admin:accounts.all_users')
+

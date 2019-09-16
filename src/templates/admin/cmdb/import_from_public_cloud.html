@@ -15,8 +15,7 @@
 {% block content %}
 <div class="alert alert-info alert-dismissible">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-    <h4><i class="icon fa fa-info"></i> 提示!</h4>
-    该功能需要在设置页面填写公有云接口认证信息.
+    <i class="icon fa fa-info-circle"></i>该功能需要在设置页面填写公有云接口认证信息.
 </div>
 
 <div class="row">
@@ -33,6 +32,7 @@
                     <div class="form-group {% if form.provider.errors %} has-error {% endif %}">
                         <label for="provider">服务商</label>
                         <select class="form-control" name="provider" id="provider">
+                            <option value="">选择公有云厂商</option>
                             {% for item in public_cloud_choices %}
                             <option value="{{ item.0 }}">{{ item.1 }}</option>
                             {% endfor %}

@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 from django.contrib import admin
 from .models import (Env, Project, Task)
 
-# Register your models here.
 
 @admin.register(Env)
 class EnvAdmin(admin.ModelAdmin):

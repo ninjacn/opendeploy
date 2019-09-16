@@ -44,11 +44,15 @@
 
               <div class="box-tools">
                   <form action="">
-                    <div class="input-group input-group-sm" style="width: 200px;">
+                    <div class="input-group input-group-sm" style="width: 300px;">
                         <input type="text" name="q" class="form-control pull-right" placeholder="搜索IP或主机名" value="{% if q %}{{ q }}{% endif %}">
-
                         <div class="input-group-btn">
                             <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="input-group-btn">
+                          <a href="/admin/cmdb/host/add">
+                            <button type="button" class="btn btn-default btn-sm"><i class="fa fa-plus"></i>添加</button>
+                          </a>
                         </div>
                     </div>
                   </form>

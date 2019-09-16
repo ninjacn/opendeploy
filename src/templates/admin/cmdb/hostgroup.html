@@ -67,7 +67,11 @@
                     <td>
                         {% if item.host.all %}
                             {% for host in item.host.all %}
-                            {{ host.ipaddr }}({{ host.hostname }}) <br>
+                            {% if host.hostname %}
+                                {{ host.ipaddr }}({{ host.hostname }}) <br>
+                            {% else %}
+                                {{ host.ipaddr }}<br>
+                            {% endif %}
                             {% endfor %}
                         {% else %}
                         无关联主机
